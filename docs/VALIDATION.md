@@ -8,7 +8,7 @@
 
 ## 已执行结果
 
-- 本地 Node 测试：50 项通过，包括原基线、树/布局/组件、递归 Patch/锁定/原子回滚、资源边界、存档及 CLI 防覆盖。
+- 本地 Node 测试：53 项通过，包括原基线、树/布局/组件、递归 Patch/锁定/原子回滚、资源边界、存档及 CLI 防覆盖。
 - `npm run validate / audit / export`：原 Orbit 通过结构校验、静态审计返回 0 finding、3 页 HTML 导出成功。静态结果不等同浏览器验收。
 - 十个 M1 示例均执行 JSON 往返及结构验证、HTML 渲染；原示例一起共 11 份。
 - `npm run format:check`：已加入可重复格式检查；技能 frontmatter 使用 skill-creator 的 quick_validate.py 通过。
@@ -27,3 +27,11 @@
 覆盖：树/画布/Inspector 同步、文本编辑、撤销重做、存档回读、Flex/Grid 计算样式、多选组合/解组/复制、重设父级、折叠、实例变体和解除关联、主题持久化、M0 导出 ZIP、本地损坏恢复、1024px 编辑器、Studio 390/768/1440px 与九个其他示例、受限 SVG 导入、鼠标拖动。
 
 缺口：Firefox/WebKit/真机、完整键鼠矩阵、触屏、实际自定义字体的多平台解码、像素 golden image Diff、复杂任意项目的溢出/碰撞/截断、完整 WCAG。人工截图复核不能替代这些缺口。
+
+## 后续校验强化
+
+新增跨主题样式类型/范围检查、非法原始存档保留及保留失败不覆盖的测试；Node 套件现为 53 项。浏览器新增原始存档下载修复用例，现共 26 项。
+
+实际 HTTP smoke 检查：工作台和 core.mjs 返回 200；点目录、node_modules、编码路径穿越、指向根外文件的符号链接均返回 404。
+
+两次后续运行停留在 `playwright install --with-deps chromium` 外部安装阶段，因此不能将其写成浏览器通过。CI 改用 runner 预装 Chrome 执行原套件并记录 `google-chrome --version`；本地默认仍使用 Playwright Chromium，也可设置 `DESIGNFORGE_BROWSER_CHANNEL=chrome` 复用已安装 Chrome。来源：[Playwright 官方 channel 文档](https://playwright.dev/docs/browsers)、[GitHub runner 软件清单](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md)。这是执行环境调整，没有删除任何断言。

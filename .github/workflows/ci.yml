@@ -28,6 +28,9 @@ jobs:
         run: npm run export
   browser:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DESIGNFORGE_BROWSER_CHANNEL: chrome
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,8 +39,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run format:check
-      - run: npx playwright install --with-deps chromium
+      - name: Verify runner Chrome installation
+        run: google-chrome --version
       - run: npm run test:browser
+      - name: Record actual browser version
+        if: always()
+        run: google-chrome --version > browser-version.txt
       - name: Preserve real browser screenshots and traces
         if: always()
         uses: actions/upload-artifact@v4
@@ -46,4 +53,5 @@ jobs:
           path: |
             test-results/
             playwright-report/
+            browser-version.txt
           retention-days: 14
