@@ -40,6 +40,12 @@ CI 分开运行 Node 测试和真实 Chrome（Chromium 引擎）测试，浏览�
 
 浏览器断言不是视觉差异基准，也不是 WCAG 认证；Firefox、Safari、真实触屏设备尚未验收。
 
+## 真实浏览器截图
+
+![深色设计工作台](docs/screenshots/editor-dark.png)
+
+[1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
+
 ## 使用 Agent
 
 选中元素 → Agent 面板填写要求 → 复制指令并提供最新 JSON → 导入 Patch → 查看差异摘要 → 人工批准。没有内置模型调用。仓库附带跨 Agent 的 `skills/designforge/SKILL.md`。

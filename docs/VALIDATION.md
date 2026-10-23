@@ -14,7 +14,7 @@
 - `npm run format:check`：已加入可重复格式检查；技能 frontmatter 使用 skill-creator 的 quick_validate.py 通过。
 - [首轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39983513888)：40 Node + 21 Chromium 全部通过。测试真实操作 UI、读取实际浏览器 CSS/几何并截图，非格式校验或 --list。
 - [第二轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39984734670)：49 Node 通过；Chromium 22/23 通过。失败用例在鼠标操作前读取到初次打开尚未持久化的存档；现已修复为首次加载即保存。不可把该轮记作全绿。
-- [第三轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39986223929)：50 Node + 24 Chromium 全部通过，包含鼠标拖动、纵向边界和实例文字覆盖。后续增加颜色取色器/Token 双入口回归，套件共 25 项；最终运行结果待实际完成后追加。
+- [第三轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39986223929)：50 Node + 24 Chromium 全部通过，包含鼠标拖动、纵向边界和实例文字覆盖。后续增加颜色取色器/Token 双入口回归，套件共 25 项；最终结果见下方验收记录。
 
 ## 截图复核与修复
 
@@ -38,3 +38,20 @@
 
 
 [Chrome 执行轮次](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39988049824) 在 `773e16d` 上通过 53 Node + 26 浏览器测试（Chrome 155.0.8059.39）。实际下载并查看截图后发现 runner 无 CJK 字体，中文显示方框，因此该轮仅计功能通过，视觉未通过。随后为 CI 添加有界超时的 fonts-unifont 安装及字体清单输出，再跑原套件和截图。这不修改产品字体或上传任何第三方字体到工程。
+
+
+## 最终验收记录
+
+- 代码与环境基线：`1310e3ba91f5ac8538b4d13c03658c63b69f4733`。
+- [最终验收 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39988482554)：verify 和 browser 均 success；53 项 Node、26 项真实 Chrome 测试全部通过。
+- 实际浏览器：Google Chrome **155.0.8059.39**；26 项用例使用两个 worker，约 24 秒。CI 安装 fonts-unifont，并输出中文字体清单。
+- 实际下载 artifact `12517345508`，查看 dark editor、1024px editor、390px 导出截图：中文方框已消除，Inspector 文本可读，移动内容包含 checklist 和 footer，不再被固定高度截断。
+- 下列 PNG 直接复制自该次真实浏览器输出，未重新绘制、替换或加工。此次截图只证明所列视图，不代表整体视觉回归或全 M1 完成。
+
+| 截图 | 覆盖范围 |
+|---|---|
+| [深色工作台](screenshots/editor-dark.png) | 双画板、层级树、中文工作台、暗色 Inspector |
+| [1024px 编辑器](screenshots/editor-1024.png) | 左右侧栏、根容器属性、取色器及 Token 文本并存 |
+| [390px 响应式页面](screenshots/studio-mobile.png) | 三列变单列、内容撑开、完整 checklist/footer |
+
+最终文档/截图提交没有继续修改产品逻辑。后续 commit 的 CI 结果仍须以其 Actions 为准。
