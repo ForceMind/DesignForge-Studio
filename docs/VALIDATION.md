@@ -1,0 +1,29 @@
+# M1 验证记录
+
+## 基线与范围
+
+远程 M0 基线：`56a189bf929d09eb8b092a24674b717faba6e0cd`。原始 Orbit 文件保持 3 画板、170 节点、hash `21a89182`；16 个原测试及原 Patch 均保留。
+
+本轮在 `codex/m1-editor-foundation` 开发，[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。测试工程均为仓库原创示例，不包含用户商业设计或密钥。
+
+## 已执行结果
+
+- 本地 Node 测试：50 项通过，包括原基线、树/布局/组件、递归 Patch/锁定/原子回滚、资源边界、存档及 CLI 防覆盖。
+- `npm run validate / audit / export`：原 Orbit 通过结构校验、静态审计返回 0 finding、3 页 HTML 导出成功。静态结果不等同浏览器验收。
+- 十个 M1 示例均执行 JSON 往返及结构验证、HTML 渲染；原示例一起共 11 份。
+- `npm run format:check`：已加入可重复格式检查；技能 frontmatter 使用 skill-creator 的 quick_validate.py 通过。
+- [首轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39983513888)：40 Node + 21 Chromium 全部通过。测试真实操作 UI、读取实际浏览器 CSS/几何并截图，非格式校验或 --list。
+- [第二轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39984734670)：49 Node 通过；Chromium 22/23 通过。失败用例在鼠标操作前读取到初次打开尚未持久化的存档；现已修复为首次加载即保存。不可把该轮记作全绿。
+- 当前新增实例文字覆盖用例后，浏览器套件共 24 项。最终 head 的运行链接和结果将在实际完成后追加；尚未以猜测填入。
+
+## 截图复核与修复
+
+从 Actions 下载首轮截图并实际查看了 dark editor、1024px editor 和 390px Studio。发现窄屏设计在固定 1000px 画板高度处截断，虽然横向断言通过。随后增加 autoHeight、编辑器真实高度同步和纵向边界断言，第二轮已通过三个宽度的完整 Studio 边界检查。暗色 Inspector 文本对比度也已调整，待最终截图再核对。
+
+## 浏览器执行条件
+
+本地工作容器没有 Chromium；两次 Playwright 下载分别返回无效归档，系统包安装受权限限制。没有绕过权限限制；使用仓库 GitHub Actions 的 Ubuntu + Node 22 + Playwright Chromium 真实运行。CI 保留截图与失败 trace 14 天，需从具体 run 的 `browser-evidence` 获取。
+
+覆盖：树/画布/Inspector 同步、文本编辑、撤销重做、存档回读、Flex/Grid 计算样式、多选组合/解组/复制、重设父级、折叠、实例变体和解除关联、主题持久化、M0 导出 ZIP、本地损坏恢复、1024px 编辑器、Studio 390/768/1440px 与九个其他示例、受限 SVG 导入、鼠标拖动。
+
+缺口：Firefox/WebKit/真机、完整键鼠矩阵、触屏、实际自定义字体的多平台解码、像素 golden image Diff、复杂任意项目的溢出/碰撞/截断、完整 WCAG。人工截图复核不能替代这些缺口。

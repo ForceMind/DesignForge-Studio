@@ -71,3 +71,17 @@ Skill 规则：理解 → 选定风格与设计系统 → 排版 → 可编辑�
 ## 6. 面向游戏研发的专有竞争力
 
 DesignForge 长期不止要“输出漂亮页面”。要建立从 **设计系统 → UI 状态 / 流程 → 游戏 HUD / 按钮 / 弹窗 / 任务系统 → 国际化长文本测试 → 手势与小屏审计 → H5 运行代码 → Visual QA → PR** 的闭环。游戏产品还应有安全区、横竖屏、动态内容、状态机、局部可访问性审计与低端机渲染预算，这些领域能力可能形成不同于通用设计产品的壁垒。
+
+## 7. M1 实施前的官方机制复核
+
+本轮仅研究公开产品/文档机制，没有引入第三方编辑器源码或品牌资产。部分搜索索引对 BaoCut 的历史许可摘要互相冲突；以当前根许可及 README 为准，本项目继续独立实现。
+
+| 来源 | 公开机制 | 本项目的工程选择 |
+|---|---|---|
+| [Penpot flexible layouts](https://help.penpot.app/user-guide/designing/flexible-layouts/) / [Design tokens](https://help.penpot.app/user-guide/design-systems/design-tokens/) | Flex/Grid 与共享 Token 可一起表达自适应设计 | 使用原生 CSS Flex/Grid，编辑器与导出共用渲染；spacing 可引用数值 Token |
+| [Figma Auto Layout](https://help.figma.com/hc/en-us/articles/360040451373-Guide-to-auto-layout-in-Figma) / [Variants](https://help.figma.com/hc/en-us/articles/360056440594-Create-and-use-variants) | 容器布局、组件实例及变体降低重复编辑成本 | 显式组件定义/变体/实例覆盖，不把渲染子元素伪装成独立持久化节点 |
+| [Framer breakpoints](https://www.framer.com/academy/lessons/framer-fundamentals-breakpoints) | 主布局继承与断点覆盖一起处理不同屏宽 | 同一树上保存受限字段覆盖，用画板 container queries 实际验证 |
+| [Claude Design launch](https://www.anthropic.com/news/claude-design-anthropic-labs) / [Getting started](https://support.claude.com/en/articles/14604416-get-started-with-claude-design) | 对话、直接编辑、行内反馈及交付结合 | 先保持项目/标注/Patch/审批闭环；BYOK 和内置模型留给 M2，不宣称已实现 |
+| [BaoCut](https://github.com/JimLiu/baocut) / [第三方声明](https://github.com/JimLiu/baocut/blob/main/THIRD_PARTY_NOTICES.md) / [baoyu-design](https://github.com/JimLiu/baoyu-design) | 宿主能力与 Agent Skill 相互补充；许可需分项目核对 | 保留独立 AST、受限协议和本项目原创实现；不复制 BaoCut runtime |
+
+上表最后一列为本项目的设计决策，不是竞品实测性能结论。尚未进行同任务、同模型、同硬件的优劣基准测试。

@@ -57,3 +57,43 @@ CLI 的 `apply` 必须指定一个新输出路径，不支持直接覆盖原文�
 当前差异确认是系统确认框和摘要，并不是图形化逐节点红绿对照。高级审批界面计划后续完成。
 
 可直接运行的补丁示例：`examples/Rename-revenue.patch.json`（基于本版 `Orbit.project.json`）。更新或重新生成样例后，必须重新读取项目哈希才能使用该示例。
+
+## M1 compatible extension profile
+
+Project 和 Patch 的版本号仍为 1；原 M0 文件和示例 Patch 保持不变。M1 客户端递归定位画板里的子孙节点，ID 在整块画板唯一，x/y 相对直接父容器。旧 M0 客户端不能处理新增节点类型。
+
+### 新增及扩展的操作
+
+| kind | 新字段 | 行为 |
+|---|---|---|
+| `add-node` | 可选 `parentId` | 省略/null 时加入根层；否则追加到 Frame/Group/Component 的 children |
+| `move-node` | `boardId`, `nodeId`, `parentId`, 可选 `index` | 移入指定容器或根层，index 为目标数组的插入位置；保留父相对坐标，不转换视觉位置，禁止移动进自身/后代 |
+| `set-node` | `changes.layout/sizing/constraints/responsive/hidden/variantId/overrides/assetId` | 设置合法布局、已有组件变体/覆盖或已导入资源引用 |
+| `remove-node` | 不变 | 删除整棵子树，并清理所有后代批注锚点 |
+| `set-token` | key 可为当前项目已存在的自定义 Token | 校验别名/类型；不能通过 Patch 创建任意新 Token 或写入密钥 |
+
+`layout`、`style`、`sizing`、`constraints` 合并到既有字段，保留未指定的子字段；`responsive` 数组和 `overrides` 映射整体替换，Agent 必须先读取并保留已有条目。changes 仍禁止 children、id、type、componentId 以及任意脚本。新增组件定义、主题、资源必须使用编辑器，不开放 Agent 的库/资产创建操作。
+
+布局字段：
+
+- `layout.mode`: `absolute/flex/grid`；direction: `row/column`；gap/padding: 0–500 或数值 Token；align: `start/center/end/stretch`；justify: `start/center/end/space-between`；columns: 1–24；wrap: boolean。
+- `sizing.w/h`: `fixed/fill/hug`。Flow 子项的 x/y 不生效；用 move-node.index 排序。
+- `constraints.horizontal/vertical`: `start/end/center/stretch/scale`，可携带正数 `referenceW/referenceH`。
+- `responsive`: 最多 8 项 `{maxWidth: 280..2400, changes: {w,h,layout,sizing,style,hidden}}`，按画板容器宽度生效。
+- `overrides`: `{sourceNodeId: {text,style}}`，只能引用选定组件变体内存在的源节点，style 仍为原白名单。
+
+节点或祖先锁定时拒绝修改/移动；删除包含锁定后代的容器也拒绝。只有直接锁定且无锁定祖先的节点，允许单独执行 `{changes:{locked:false}}`；Agent 不得为绕过用户锁定而自行生成此操作。所有操作的未知顶层字段也被拒绝。
+
+示意（ID/哈希须从真实工程读取）：
+
+```json
+{
+  "format":"designforge.patch", "version":1, "baseHash":"00000000",
+  "ops":[
+    {"kind":"set-node","boardId":"desktop","nodeId":"cards","changes":{"layout":{"mode":"grid","columns":2,"gap":"$spacing"}}},
+    {"kind":"move-node","boardId":"desktop","nodeId":"heading","parentId":"content","index":0}
+  ]
+}
+```
+
+Diff 新增后代、父级 `$parent`、同父顺序 `$order`、布局/断点/实例覆盖、画板尺寸和项目设计系统字段。它不能证明语义影响只限于目标节点：Token、主题或库定义会影响引用对象。人工审批仍必须查看影响范围；本版没有截图级并排审批。

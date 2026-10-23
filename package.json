@@ -11,13 +11,16 @@
     "audit": "node tools/forge.mjs audit examples/Orbit.project.json",
     "export": "node tools/forge.mjs export examples/Orbit.project.json ./output",
     "test:browser": "playwright test",
-    "examples": "node tools/make-m1-examples.mjs"
+    "examples": "node tools/make-m1-examples.mjs",
+    "format:check": "prettier --check src tools tests index.html playwright.config.mjs",
+    "format": "prettier --write src tools tests index.html playwright.config.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.64.1"
+    "@playwright/test": "^1.64.1",
+    "prettier": "^3.9.10"
   }
 }
