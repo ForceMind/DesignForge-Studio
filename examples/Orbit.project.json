@@ -1,0 +1,2605 @@
+{
+  "format": "designforge.project",
+  "version": 1,
+  "id": "orbit-demo",
+  "title": "Orbit — Product Analytics",
+  "tokens": {
+    "primary": "#5C4ACF",
+    "primarySoft": "#EEEAFE",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#F7F8FB",
+    "canvas": "#F3F5F9",
+    "ink": "#202238",
+    "muted": "#848A9E",
+    "border": "#E4E7F0",
+    "success": "#13734F",
+    "warning": "#F4B754",
+    "danger": "#E16C70",
+    "radius": 14,
+    "fontFamily": "system-ui"
+  },
+  "boards": [
+    {
+      "id": "desktop",
+      "name": "Analytics / Desktop",
+      "x": 0,
+      "y": 80,
+      "w": 1280,
+      "h": 800,
+      "bg": "#F6F7FB",
+      "nodes": [
+        {
+          "id": "el1",
+          "name": "Shape",
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 234,
+          "h": 800,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 0,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el2",
+          "name": "Divider",
+          "type": "line",
+          "x": 233,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el3",
+          "name": "Shape",
+          "type": "rect",
+          "x": 25,
+          "y": 28,
+          "w": 40,
+          "h": 40,
+          "text": "",
+          "style": {
+            "fill": "$primary",
+            "radius": 14,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el4",
+          "name": "Icon sparkle",
+          "type": "icon",
+          "x": 35,
+          "y": 38,
+          "w": 20,
+          "h": 20,
+          "icon": "sparkle",
+          "text": "",
+          "style": {
+            "color": "#FFFFFF"
+          }
+        },
+        {
+          "id": "el5",
+          "name": "orbit.",
+          "type": "text",
+          "x": 76,
+          "y": 29,
+          "w": 136,
+          "h": 34,
+          "text": "orbit.",
+          "style": {
+            "fontSize": 25,
+            "color": "$ink",
+            "fontWeight": 750
+          }
+        },
+        {
+          "id": "el6",
+          "name": "WORKSPACE",
+          "type": "text",
+          "x": 29,
+          "y": 110,
+          "w": 160,
+          "h": 22,
+          "text": "WORKSPACE",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 750,
+            "letterSpacing": 1.5
+          }
+        },
+        {
+          "id": "el7",
+          "name": "Shape",
+          "type": "rect",
+          "x": 16,
+          "y": 151,
+          "w": 204,
+          "h": 43,
+          "text": "",
+          "style": {
+            "fill": "$primarySoft",
+            "radius": 12,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el8",
+          "name": "Icon grid",
+          "type": "icon",
+          "x": 32,
+          "y": 163,
+          "w": 20,
+          "h": 20,
+          "icon": "grid",
+          "text": "",
+          "style": {
+            "color": "$primary"
+          }
+        },
+        {
+          "id": "el9",
+          "name": "Overview",
+          "type": "text",
+          "x": 65,
+          "y": 161,
+          "w": 130,
+          "h": 24,
+          "text": "Overview",
+          "style": {
+            "fontSize": 14,
+            "color": "$primary",
+            "fontWeight": 700
+          }
+        },
+        {
+          "id": "el10",
+          "name": "Icon chart",
+          "type": "icon",
+          "x": 32,
+          "y": 214,
+          "w": 20,
+          "h": 20,
+          "icon": "chart",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el11",
+          "name": "Analytics",
+          "type": "text",
+          "x": 65,
+          "y": 212,
+          "w": 130,
+          "h": 24,
+          "text": "Analytics",
+          "style": {
+            "fontSize": 14,
+            "color": "$muted",
+            "fontWeight": 560
+          }
+        },
+        {
+          "id": "el12",
+          "name": "Icon layers",
+          "type": "icon",
+          "x": 32,
+          "y": 265,
+          "w": 20,
+          "h": 20,
+          "icon": "layers",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el13",
+          "name": "Projects",
+          "type": "text",
+          "x": 65,
+          "y": 263,
+          "w": 130,
+          "h": 24,
+          "text": "Projects",
+          "style": {
+            "fontSize": 14,
+            "color": "$muted",
+            "fontWeight": 560
+          }
+        },
+        {
+          "id": "el14",
+          "name": "Icon wallet",
+          "type": "icon",
+          "x": 32,
+          "y": 316,
+          "w": 20,
+          "h": 20,
+          "icon": "wallet",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el15",
+          "name": "Billing",
+          "type": "text",
+          "x": 65,
+          "y": 314,
+          "w": 130,
+          "h": 24,
+          "text": "Billing",
+          "style": {
+            "fontSize": 14,
+            "color": "$muted",
+            "fontWeight": 560
+          }
+        },
+        {
+          "id": "el16",
+          "name": "Icon calendar",
+          "type": "icon",
+          "x": 32,
+          "y": 367,
+          "w": 20,
+          "h": 20,
+          "icon": "calendar",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el17",
+          "name": "Schedule",
+          "type": "text",
+          "x": 65,
+          "y": 365,
+          "w": 130,
+          "h": 24,
+          "text": "Schedule",
+          "style": {
+            "fontSize": 14,
+            "color": "$muted",
+            "fontWeight": 560
+          }
+        },
+        {
+          "id": "el18",
+          "name": "Divider",
+          "type": "line",
+          "x": 24,
+          "y": 478,
+          "w": 184,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el19",
+          "name": "PREFERENCES",
+          "type": "text",
+          "x": 28,
+          "y": 502,
+          "w": 170,
+          "h": 20,
+          "text": "PREFERENCES",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 750,
+            "letterSpacing": 1.5
+          }
+        },
+        {
+          "id": "el20",
+          "name": "Icon settings",
+          "type": "icon",
+          "x": 31,
+          "y": 542,
+          "w": 20,
+          "h": 20,
+          "icon": "settings",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el21",
+          "name": "Settings",
+          "type": "text",
+          "x": 65,
+          "y": 541,
+          "w": 140,
+          "h": 23,
+          "text": "Settings",
+          "style": {
+            "fontSize": 14,
+            "color": "$muted",
+            "fontWeight": 560
+          }
+        },
+        {
+          "id": "el22",
+          "name": "Shape",
+          "type": "rect",
+          "x": 18,
+          "y": 687,
+          "w": 200,
+          "h": 92,
+          "text": "",
+          "style": {
+            "fill": "$surfaceAlt",
+            "radius": 14,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el23",
+          "name": "Ellipse",
+          "type": "circle",
+          "x": 34,
+          "y": 704,
+          "w": 34,
+          "h": 34,
+          "text": "",
+          "style": {
+            "fill": "$primarySoft"
+          }
+        },
+        {
+          "id": "el24",
+          "name": "Icon user",
+          "type": "icon",
+          "x": 43,
+          "y": 712,
+          "w": 16,
+          "h": 16,
+          "icon": "user",
+          "text": "",
+          "style": {
+            "color": "$primary"
+          }
+        },
+        {
+          "id": "el25",
+          "name": "Alex Morgan",
+          "type": "text",
+          "x": 80,
+          "y": 705,
+          "w": 129,
+          "h": 21,
+          "text": "Alex Morgan",
+          "style": {
+            "fontSize": 13,
+            "color": "$ink",
+            "fontWeight": 690
+          }
+        },
+        {
+          "id": "el26",
+          "name": "Pro workspace",
+          "type": "text",
+          "x": 80,
+          "y": 727,
+          "w": 122,
+          "h": 19,
+          "text": "Pro workspace",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 550
+          }
+        },
+        {
+          "id": "el27",
+          "name": "PRO ACCOUNT",
+          "type": "pill",
+          "x": 33,
+          "y": 753,
+          "w": 164,
+          "h": 20,
+          "text": "PRO ACCOUNT",
+          "style": {
+            "fill": "$primarySoft",
+            "color": "$primary",
+            "radius": 100,
+            "fontSize": 12,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el28",
+          "name": "Shape",
+          "type": "rect",
+          "x": 234,
+          "y": 0,
+          "w": 1046,
+          "h": 78,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 0,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el29",
+          "name": "Divider",
+          "type": "line",
+          "x": 234,
+          "y": 77,
+          "w": 1046,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el30",
+          "name": "Icon search",
+          "type": "icon",
+          "x": 270,
+          "y": 28,
+          "w": 19,
+          "h": 19,
+          "icon": "search",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el31",
+          "name": "Search across your workspace...",
+          "type": "text",
+          "x": 303,
+          "y": 25,
+          "w": 420,
+          "h": 26,
+          "text": "Search across your workspace...",
+          "style": {
+            "fontSize": 14,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el32",
+          "name": "Icon calendar",
+          "type": "icon",
+          "x": 1080,
+          "y": 28,
+          "w": 20,
+          "h": 20,
+          "icon": "calendar",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el33",
+          "name": "Icon bell",
+          "type": "icon",
+          "x": 1137,
+          "y": 28,
+          "w": 20,
+          "h": 20,
+          "icon": "bell",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el34",
+          "name": "Ellipse",
+          "type": "circle",
+          "x": 1190,
+          "y": 19,
+          "w": 39,
+          "h": 39,
+          "text": "",
+          "style": {
+            "fill": "$primarySoft"
+          }
+        },
+        {
+          "id": "el35",
+          "name": "AM",
+          "type": "text",
+          "x": 1197,
+          "y": 26,
+          "w": 31,
+          "h": 24,
+          "text": "AM",
+          "style": {
+            "fontSize": 12,
+            "color": "$primary",
+            "fontWeight": 750
+          }
+        },
+        {
+          "id": "el36",
+          "name": "Good morning, Alex ✳",
+          "type": "text",
+          "x": 274,
+          "y": 119,
+          "w": 470,
+          "h": 48,
+          "text": "Good morning, Alex ✳",
+          "style": {
+            "fontSize": 29,
+            "color": "$ink",
+            "fontWeight": 760
+          }
+        },
+        {
+          "id": "el37",
+          "name": "Here’s what’s happening with your pr",
+          "type": "text",
+          "x": 274,
+          "y": 169,
+          "w": 480,
+          "h": 22,
+          "text": "Here’s what’s happening with your products.",
+          "style": {
+            "fontSize": 14,
+            "color": "$muted",
+            "fontWeight": 450
+          }
+        },
+        {
+          "id": "el38",
+          "name": "+ New report",
+          "type": "button",
+          "x": 1068,
+          "y": 124,
+          "w": 166,
+          "h": 44,
+          "text": "+ New report",
+          "style": {
+            "fill": "$primary",
+            "color": "#ffffff",
+            "radius": 12,
+            "fontSize": 14,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el39",
+          "name": "Shape",
+          "type": "rect",
+          "x": 274,
+          "y": 226,
+          "w": 226,
+          "h": 151,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 18,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el40",
+          "name": "Shape",
+          "type": "rect",
+          "x": 292,
+          "y": 245,
+          "w": 37,
+          "h": 37,
+          "text": "",
+          "style": {
+            "fill": "$primarySoft",
+            "radius": 11,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el41",
+          "name": "Icon sparkle",
+          "type": "icon",
+          "x": 302,
+          "y": 254,
+          "w": 18,
+          "h": 18,
+          "icon": "sparkle",
+          "text": "",
+          "style": {
+            "color": "$primary"
+          }
+        },
+        {
+          "id": "el42",
+          "name": "TOTAL REVENUE",
+          "type": "text",
+          "x": 293,
+          "y": 298,
+          "w": 192,
+          "h": 20,
+          "text": "TOTAL REVENUE",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 710,
+            "letterSpacing": 0.5
+          }
+        },
+        {
+          "id": "el43",
+          "name": "$84,254",
+          "type": "text",
+          "x": 293,
+          "y": 319,
+          "w": 192,
+          "h": 37,
+          "text": "$84,254",
+          "style": {
+            "fontSize": 27,
+            "color": "$ink",
+            "fontWeight": 760
+          }
+        },
+        {
+          "id": "el44",
+          "name": "+ 12.8%",
+          "type": "pill",
+          "x": 414,
+          "y": 345,
+          "w": 66,
+          "h": 23,
+          "text": "+ 12.8%",
+          "style": {
+            "fill": "#EAF8F1",
+            "color": "$success",
+            "radius": 100,
+            "fontSize": 12,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el45",
+          "name": "Shape",
+          "type": "rect",
+          "x": 519,
+          "y": 226,
+          "w": 226,
+          "h": 151,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 18,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el46",
+          "name": "Shape",
+          "type": "rect",
+          "x": 537,
+          "y": 245,
+          "w": 37,
+          "h": 37,
+          "text": "",
+          "style": {
+            "fill": "#EAF8F1",
+            "radius": 11,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el47",
+          "name": "Icon user",
+          "type": "icon",
+          "x": 547,
+          "y": 254,
+          "w": 18,
+          "h": 18,
+          "icon": "user",
+          "text": "",
+          "style": {
+            "color": "$success"
+          }
+        },
+        {
+          "id": "el48",
+          "name": "ACTIVE USERS",
+          "type": "text",
+          "x": 538,
+          "y": 298,
+          "w": 192,
+          "h": 20,
+          "text": "ACTIVE USERS",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 710,
+            "letterSpacing": 0.5
+          }
+        },
+        {
+          "id": "el49",
+          "name": "24,892",
+          "type": "text",
+          "x": 538,
+          "y": 319,
+          "w": 192,
+          "h": 37,
+          "text": "24,892",
+          "style": {
+            "fontSize": 27,
+            "color": "$ink",
+            "fontWeight": 760
+          }
+        },
+        {
+          "id": "el50",
+          "name": "+ 8.2%",
+          "type": "pill",
+          "x": 659,
+          "y": 345,
+          "w": 66,
+          "h": 23,
+          "text": "+ 8.2%",
+          "style": {
+            "fill": "#EAF8F1",
+            "color": "$success",
+            "radius": 100,
+            "fontSize": 12,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el51",
+          "name": "Shape",
+          "type": "rect",
+          "x": 764,
+          "y": 226,
+          "w": 226,
+          "h": 151,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 18,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el52",
+          "name": "Shape",
+          "type": "rect",
+          "x": 782,
+          "y": 245,
+          "w": 37,
+          "h": 37,
+          "text": "",
+          "style": {
+            "fill": "#FFF6E3",
+            "radius": 11,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el53",
+          "name": "Icon chart",
+          "type": "icon",
+          "x": 792,
+          "y": 254,
+          "w": 18,
+          "h": 18,
+          "icon": "chart",
+          "text": "",
+          "style": {
+            "color": "#B68623"
+          }
+        },
+        {
+          "id": "el54",
+          "name": "CONVERSION RATE",
+          "type": "text",
+          "x": 783,
+          "y": 298,
+          "w": 192,
+          "h": 20,
+          "text": "CONVERSION RATE",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 710,
+            "letterSpacing": 0.5
+          }
+        },
+        {
+          "id": "el55",
+          "name": "3.68%",
+          "type": "text",
+          "x": 783,
+          "y": 319,
+          "w": 192,
+          "h": 37,
+          "text": "3.68%",
+          "style": {
+            "fontSize": 27,
+            "color": "$ink",
+            "fontWeight": 760
+          }
+        },
+        {
+          "id": "el56",
+          "name": "+ 2.4%",
+          "type": "pill",
+          "x": 904,
+          "y": 345,
+          "w": 66,
+          "h": 23,
+          "text": "+ 2.4%",
+          "style": {
+            "fill": "#EAF8F1",
+            "color": "$success",
+            "radius": 100,
+            "fontSize": 12,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el57",
+          "name": "Shape",
+          "type": "rect",
+          "x": 1009,
+          "y": 226,
+          "w": 226,
+          "h": 151,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 18,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el58",
+          "name": "Shape",
+          "type": "rect",
+          "x": 1027,
+          "y": 245,
+          "w": 37,
+          "h": 37,
+          "text": "",
+          "style": {
+            "fill": "#EAF3FF",
+            "radius": 11,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el59",
+          "name": "Icon bolt",
+          "type": "icon",
+          "x": 1037,
+          "y": 254,
+          "w": 18,
+          "h": 18,
+          "icon": "bolt",
+          "text": "",
+          "style": {
+            "color": "#4A81DC"
+          }
+        },
+        {
+          "id": "el60",
+          "name": "AVG. SESSION",
+          "type": "text",
+          "x": 1028,
+          "y": 298,
+          "w": 192,
+          "h": 20,
+          "text": "AVG. SESSION",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 710,
+            "letterSpacing": 0.5
+          }
+        },
+        {
+          "id": "el61",
+          "name": "8m 42s",
+          "type": "text",
+          "x": 1028,
+          "y": 319,
+          "w": 192,
+          "h": 37,
+          "text": "8m 42s",
+          "style": {
+            "fontSize": 27,
+            "color": "$ink",
+            "fontWeight": 760
+          }
+        },
+        {
+          "id": "el62",
+          "name": "+ 6.1%",
+          "type": "pill",
+          "x": 1149,
+          "y": 345,
+          "w": 66,
+          "h": 23,
+          "text": "+ 6.1%",
+          "style": {
+            "fill": "#EAF8F1",
+            "color": "$success",
+            "radius": 100,
+            "fontSize": 12,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el63",
+          "name": "Shape",
+          "type": "rect",
+          "x": 274,
+          "y": 405,
+          "w": 608,
+          "h": 315,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 18,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el64",
+          "name": "Revenue over time",
+          "type": "text",
+          "x": 298,
+          "y": 426,
+          "w": 310,
+          "h": 27,
+          "text": "Revenue over time",
+          "style": {
+            "fontSize": 18,
+            "color": "$ink",
+            "fontWeight": 720
+          }
+        },
+        {
+          "id": "el65",
+          "name": "Your earnings across the last 7 days",
+          "type": "text",
+          "x": 298,
+          "y": 456,
+          "w": 370,
+          "h": 20,
+          "text": "Your earnings across the last 7 days",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 490
+          }
+        },
+        {
+          "id": "el66",
+          "name": "This week",
+          "type": "pill",
+          "x": 773,
+          "y": 425,
+          "w": 85,
+          "h": 31,
+          "text": "This week",
+          "style": {
+            "fill": "$surfaceAlt",
+            "color": "$ink",
+            "radius": 100,
+            "fontSize": 12,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el67",
+          "name": "Divider",
+          "type": "line",
+          "x": 329,
+          "y": 520,
+          "w": 520,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "#EDEFF5",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el68",
+          "name": "Divider",
+          "type": "line",
+          "x": 329,
+          "y": 564,
+          "w": 520,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "#EDEFF5",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el69",
+          "name": "Divider",
+          "type": "line",
+          "x": 329,
+          "y": 608,
+          "w": 520,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "#EDEFF5",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el70",
+          "name": "Divider",
+          "type": "line",
+          "x": 329,
+          "y": 652,
+          "w": 520,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "#EDEFF5",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el71",
+          "name": "$0",
+          "type": "text",
+          "x": 298,
+          "y": 643,
+          "w": 42,
+          "h": 20,
+          "text": "$0",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el72",
+          "name": "$5k",
+          "type": "text",
+          "x": 298,
+          "y": 599,
+          "w": 42,
+          "h": 20,
+          "text": "$5k",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el73",
+          "name": "$10k",
+          "type": "text",
+          "x": 298,
+          "y": 555,
+          "w": 42,
+          "h": 20,
+          "text": "$10k",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el74",
+          "name": "$15k",
+          "type": "text",
+          "x": 298,
+          "y": 511,
+          "w": 42,
+          "h": 20,
+          "text": "$15k",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el75",
+          "name": "Shape",
+          "type": "rect",
+          "x": 355,
+          "y": 618,
+          "w": 35,
+          "h": 45,
+          "text": "",
+          "style": {
+            "fill": "#CFCBF9",
+            "radius": 7,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el76",
+          "name": "Mon",
+          "type": "text",
+          "x": 359,
+          "y": 678,
+          "w": 42,
+          "h": 19,
+          "text": "Mon",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 570
+          }
+        },
+        {
+          "id": "el77",
+          "name": "Shape",
+          "type": "rect",
+          "x": 422,
+          "y": 589,
+          "w": 35,
+          "h": 74,
+          "text": "",
+          "style": {
+            "fill": "#CFCBF9",
+            "radius": 7,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el78",
+          "name": "Tue",
+          "type": "text",
+          "x": 426,
+          "y": 678,
+          "w": 42,
+          "h": 19,
+          "text": "Tue",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 570
+          }
+        },
+        {
+          "id": "el79",
+          "name": "Shape",
+          "type": "rect",
+          "x": 489,
+          "y": 603,
+          "w": 35,
+          "h": 60,
+          "text": "",
+          "style": {
+            "fill": "#CFCBF9",
+            "radius": 7,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el80",
+          "name": "Wed",
+          "type": "text",
+          "x": 493,
+          "y": 678,
+          "w": 42,
+          "h": 19,
+          "text": "Wed",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 570
+          }
+        },
+        {
+          "id": "el81",
+          "name": "Shape",
+          "type": "rect",
+          "x": 556,
+          "y": 552,
+          "w": 35,
+          "h": 111,
+          "text": "",
+          "style": {
+            "fill": "#CFCBF9",
+            "radius": 7,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el82",
+          "name": "Thu",
+          "type": "text",
+          "x": 560,
+          "y": 678,
+          "w": 42,
+          "h": 19,
+          "text": "Thu",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 570
+          }
+        },
+        {
+          "id": "el83",
+          "name": "Shape",
+          "type": "rect",
+          "x": 623,
+          "y": 575,
+          "w": 35,
+          "h": 88,
+          "text": "",
+          "style": {
+            "fill": "#CFCBF9",
+            "radius": 7,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el84",
+          "name": "Fri",
+          "type": "text",
+          "x": 627,
+          "y": 678,
+          "w": 42,
+          "h": 19,
+          "text": "Fri",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 570
+          }
+        },
+        {
+          "id": "el85",
+          "name": "Shape",
+          "type": "rect",
+          "x": 690,
+          "y": 530,
+          "w": 35,
+          "h": 133,
+          "text": "",
+          "style": {
+            "fill": "$primary",
+            "radius": 7,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el86",
+          "name": "Sat",
+          "type": "text",
+          "x": 694,
+          "y": 678,
+          "w": 42,
+          "h": 19,
+          "text": "Sat",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 570
+          }
+        },
+        {
+          "id": "el87",
+          "name": "Shape",
+          "type": "rect",
+          "x": 757,
+          "y": 548,
+          "w": 35,
+          "h": 115,
+          "text": "",
+          "style": {
+            "fill": "#CFCBF9",
+            "radius": 7,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el88",
+          "name": "Sun",
+          "type": "text",
+          "x": 761,
+          "y": 678,
+          "w": 42,
+          "h": 19,
+          "text": "Sun",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 570
+          }
+        },
+        {
+          "id": "el89",
+          "name": "Shape",
+          "type": "rect",
+          "x": 902,
+          "y": 405,
+          "w": 332,
+          "h": 315,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 18,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el90",
+          "name": "Recent activity",
+          "type": "text",
+          "x": 924,
+          "y": 427,
+          "w": 280,
+          "h": 28,
+          "text": "Recent activity",
+          "style": {
+            "fontSize": 18,
+            "color": "$ink",
+            "fontWeight": 720
+          }
+        },
+        {
+          "id": "el91",
+          "name": "Latest updates from your team",
+          "type": "text",
+          "x": 924,
+          "y": 459,
+          "w": 250,
+          "h": 18,
+          "text": "Latest updates from your team",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el92",
+          "name": "Ellipse",
+          "type": "circle",
+          "x": 924,
+          "y": 503,
+          "w": 37,
+          "h": 37,
+          "text": "",
+          "style": {
+            "fill": "$primarySoft"
+          }
+        },
+        {
+          "id": "el93",
+          "name": "Icon sparkle",
+          "type": "icon",
+          "x": 934,
+          "y": 512,
+          "w": 18,
+          "h": 18,
+          "icon": "sparkle",
+          "text": "",
+          "style": {
+            "color": "$primary"
+          }
+        },
+        {
+          "id": "el94",
+          "name": "New dashboard created",
+          "type": "text",
+          "x": 976,
+          "y": 502,
+          "w": 227,
+          "h": 23,
+          "text": "New dashboard created",
+          "style": {
+            "fontSize": 13,
+            "color": "$ink",
+            "fontWeight": 650
+          }
+        },
+        {
+          "id": "el95",
+          "name": "Today · 09:42 AM",
+          "type": "text",
+          "x": 976,
+          "y": 523,
+          "w": 210,
+          "h": 20,
+          "text": "Today · 09:42 AM",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el96",
+          "name": "Divider",
+          "type": "line",
+          "x": 976,
+          "y": 554,
+          "w": 220,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el97",
+          "name": "Ellipse",
+          "type": "circle",
+          "x": 924,
+          "y": 568,
+          "w": 37,
+          "h": 37,
+          "text": "",
+          "style": {
+            "fill": "#EAF8F1"
+          }
+        },
+        {
+          "id": "el98",
+          "name": "Icon user",
+          "type": "icon",
+          "x": 934,
+          "y": 577,
+          "w": 18,
+          "h": 18,
+          "icon": "user",
+          "text": "",
+          "style": {
+            "color": "$success"
+          }
+        },
+        {
+          "id": "el99",
+          "name": "New team member invited",
+          "type": "text",
+          "x": 976,
+          "y": 567,
+          "w": 227,
+          "h": 23,
+          "text": "New team member invited",
+          "style": {
+            "fontSize": 13,
+            "color": "$ink",
+            "fontWeight": 650
+          }
+        },
+        {
+          "id": "el100",
+          "name": "Today · 08:16 AM",
+          "type": "text",
+          "x": 976,
+          "y": 588,
+          "w": 210,
+          "h": 20,
+          "text": "Today · 08:16 AM",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el101",
+          "name": "Divider",
+          "type": "line",
+          "x": 976,
+          "y": 619,
+          "w": 220,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el102",
+          "name": "Ellipse",
+          "type": "circle",
+          "x": 924,
+          "y": 633,
+          "w": 37,
+          "h": 37,
+          "text": "",
+          "style": {
+            "fill": "#EAF3FF"
+          }
+        },
+        {
+          "id": "el103",
+          "name": "Icon chart",
+          "type": "icon",
+          "x": 934,
+          "y": 642,
+          "w": 18,
+          "h": 18,
+          "icon": "chart",
+          "text": "",
+          "style": {
+            "color": "#4A81DC"
+          }
+        },
+        {
+          "id": "el104",
+          "name": "Weekly report is ready",
+          "type": "text",
+          "x": 976,
+          "y": 632,
+          "w": 227,
+          "h": 23,
+          "text": "Weekly report is ready",
+          "style": {
+            "fontSize": 13,
+            "color": "$ink",
+            "fontWeight": 650
+          }
+        },
+        {
+          "id": "el105",
+          "name": "Yesterday · 05:30 PM",
+          "type": "text",
+          "x": 976,
+          "y": 653,
+          "w": 210,
+          "h": 20,
+          "text": "Yesterday · 05:30 PM",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el106",
+          "name": "Shape",
+          "type": "rect",
+          "x": 274,
+          "y": 742,
+          "w": 960,
+          "h": 38,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 10,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el107",
+          "name": "✦  Your workspace is growing. Keep e",
+          "type": "text",
+          "x": 290,
+          "y": 750,
+          "w": 680,
+          "h": 21,
+          "text": "✦  Your workspace is growing. Keep exploring what works.",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 540
+          }
+        },
+        {
+          "id": "el108",
+          "name": "View all  →",
+          "type": "text",
+          "x": 1132,
+          "y": 750,
+          "w": 88,
+          "h": 20,
+          "text": "View all  →",
+          "style": {
+            "fontSize": 12,
+            "color": "$primary",
+            "fontWeight": 680
+          }
+        }
+      ]
+    },
+    {
+      "id": "mobile",
+      "name": "Analytics / Mobile",
+      "x": 1370,
+      "y": 80,
+      "w": 390,
+      "h": 844,
+      "bg": "#F7F8FC",
+      "nodes": [
+        {
+          "id": "el109",
+          "name": "Shape",
+          "type": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 94,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 0,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el110",
+          "name": "orbit.",
+          "type": "text",
+          "x": 24,
+          "y": 29,
+          "w": 220,
+          "h": 33,
+          "text": "orbit.",
+          "style": {
+            "fontSize": 27,
+            "color": "$ink",
+            "fontWeight": 760
+          }
+        },
+        {
+          "id": "el111",
+          "name": "Ellipse",
+          "type": "circle",
+          "x": 323,
+          "y": 25,
+          "w": 43,
+          "h": 43,
+          "text": "",
+          "style": {
+            "fill": "$primarySoft"
+          }
+        },
+        {
+          "id": "el112",
+          "name": "AM",
+          "type": "text",
+          "x": 335,
+          "y": 34,
+          "w": 26,
+          "h": 22,
+          "text": "AM",
+          "style": {
+            "fontSize": 12,
+            "color": "$primary",
+            "fontWeight": 750
+          }
+        },
+        {
+          "id": "el113",
+          "name": "Today’s overview",
+          "type": "text",
+          "x": 24,
+          "y": 118,
+          "w": 335,
+          "h": 32,
+          "text": "Today’s overview",
+          "style": {
+            "fontSize": 24,
+            "color": "$ink",
+            "fontWeight": 750
+          }
+        },
+        {
+          "id": "el114",
+          "name": "Wednesday, October 23",
+          "type": "text",
+          "x": 24,
+          "y": 154,
+          "w": 300,
+          "h": 21,
+          "text": "Wednesday, October 23",
+          "style": {
+            "fontSize": 13,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el115",
+          "name": "Shape",
+          "type": "rect",
+          "x": 21,
+          "y": 197,
+          "w": 348,
+          "h": 182,
+          "text": "",
+          "style": {
+            "fill": "#5147D6",
+            "radius": 24,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el116",
+          "name": "Ellipse",
+          "type": "circle",
+          "x": 256,
+          "y": 204,
+          "w": 118,
+          "h": 118,
+          "text": "",
+          "style": {
+            "fill": "#6158DB"
+          }
+        },
+        {
+          "id": "el117",
+          "name": "Ellipse",
+          "type": "circle",
+          "x": 313,
+          "y": 263,
+          "w": 51,
+          "h": 51,
+          "text": "",
+          "style": {
+            "fill": "#736AE5"
+          }
+        },
+        {
+          "id": "el118",
+          "name": "TOTAL REVENUE",
+          "type": "text",
+          "x": 45,
+          "y": 224,
+          "w": 270,
+          "h": 20,
+          "text": "TOTAL REVENUE",
+          "style": {
+            "fontSize": 12,
+            "color": "#D5D0FC",
+            "fontWeight": 750,
+            "letterSpacing": 1.6
+          }
+        },
+        {
+          "id": "el119",
+          "name": "$84,254",
+          "type": "text",
+          "x": 43,
+          "y": 254,
+          "w": 297,
+          "h": 49,
+          "text": "$84,254",
+          "style": {
+            "fontSize": 39,
+            "color": "#FFFFFF",
+            "fontWeight": 750
+          }
+        },
+        {
+          "id": "el120",
+          "name": "↗ 12.8%",
+          "type": "pill",
+          "x": 43,
+          "y": 323,
+          "w": 109,
+          "h": 29,
+          "text": "↗ 12.8%",
+          "style": {
+            "fill": "#FFFFFF",
+            "color": "#5147D6",
+            "radius": 100,
+            "fontSize": 13,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el121",
+          "name": "vs. last period",
+          "type": "text",
+          "x": 164,
+          "y": 329,
+          "w": 168,
+          "h": 20,
+          "text": "vs. last period",
+          "style": {
+            "fontSize": 12,
+            "color": "#E3DFFD",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el122",
+          "name": "Key metrics",
+          "type": "text",
+          "x": 24,
+          "y": 410,
+          "w": 255,
+          "h": 30,
+          "text": "Key metrics",
+          "style": {
+            "fontSize": 18,
+            "color": "$ink",
+            "fontWeight": 730
+          }
+        },
+        {
+          "id": "el123",
+          "name": "See all",
+          "type": "text",
+          "x": 321,
+          "y": 412,
+          "w": 55,
+          "h": 20,
+          "text": "See all",
+          "style": {
+            "fontSize": 12,
+            "color": "$primary",
+            "fontWeight": 670
+          }
+        },
+        {
+          "id": "el124",
+          "name": "Shape",
+          "type": "rect",
+          "x": 20,
+          "y": 450,
+          "w": 167,
+          "h": 132,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 18,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el125",
+          "name": "Shape",
+          "type": "rect",
+          "x": 204,
+          "y": 450,
+          "w": 166,
+          "h": 132,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 18,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el126",
+          "name": "Icon user",
+          "type": "icon",
+          "x": 40,
+          "y": 471,
+          "w": 22,
+          "h": 22,
+          "icon": "user",
+          "text": "",
+          "style": {
+            "color": "$primary"
+          }
+        },
+        {
+          "id": "el127",
+          "name": "Icon chart",
+          "type": "icon",
+          "x": 222,
+          "y": 471,
+          "w": 22,
+          "h": 22,
+          "icon": "chart",
+          "text": "",
+          "style": {
+            "color": "$success"
+          }
+        },
+        {
+          "id": "el128",
+          "name": "24.8k",
+          "type": "text",
+          "x": 40,
+          "y": 508,
+          "w": 137,
+          "h": 34,
+          "text": "24.8k",
+          "style": {
+            "fontSize": 25,
+            "color": "$ink",
+            "fontWeight": 750
+          }
+        },
+        {
+          "id": "el129",
+          "name": "3.68%",
+          "type": "text",
+          "x": 221,
+          "y": 508,
+          "w": 136,
+          "h": 34,
+          "text": "3.68%",
+          "style": {
+            "fontSize": 25,
+            "color": "$ink",
+            "fontWeight": 750
+          }
+        },
+        {
+          "id": "el130",
+          "name": "Active users",
+          "type": "text",
+          "x": 40,
+          "y": 548,
+          "w": 141,
+          "h": 20,
+          "text": "Active users",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el131",
+          "name": "Conversion rate",
+          "type": "text",
+          "x": 221,
+          "y": 548,
+          "w": 137,
+          "h": 20,
+          "text": "Conversion rate",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el132",
+          "name": "Quick actions",
+          "type": "text",
+          "x": 24,
+          "y": 612,
+          "w": 225,
+          "h": 30,
+          "text": "Quick actions",
+          "style": {
+            "fontSize": 18,
+            "color": "$ink",
+            "fontWeight": 730
+          }
+        },
+        {
+          "id": "el133",
+          "name": "Shape",
+          "type": "rect",
+          "x": 20,
+          "y": 650,
+          "w": 350,
+          "h": 76,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 16,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el134",
+          "name": "Shape",
+          "type": "rect",
+          "x": 36,
+          "y": 664,
+          "w": 48,
+          "h": 48,
+          "text": "",
+          "style": {
+            "fill": "$primarySoft",
+            "radius": 13,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el135",
+          "name": "Icon send",
+          "type": "icon",
+          "x": 50,
+          "y": 678,
+          "w": 20,
+          "h": 20,
+          "icon": "send",
+          "text": "",
+          "style": {
+            "color": "$primary"
+          }
+        },
+        {
+          "id": "el136",
+          "name": "Share a report",
+          "type": "text",
+          "x": 101,
+          "y": 663,
+          "w": 229,
+          "h": 24,
+          "text": "Share a report",
+          "style": {
+            "fontSize": 14,
+            "color": "$ink",
+            "fontWeight": 690
+          }
+        },
+        {
+          "id": "el137",
+          "name": "Keep your team in the loop",
+          "type": "text",
+          "x": 101,
+          "y": 687,
+          "w": 228,
+          "h": 21,
+          "text": "Keep your team in the loop",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el138",
+          "name": "Icon chevron",
+          "type": "icon",
+          "x": 339,
+          "y": 680,
+          "w": 17,
+          "h": 17,
+          "icon": "chevron",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el139",
+          "name": "Shape",
+          "type": "rect",
+          "x": 0,
+          "y": 764,
+          "w": 390,
+          "h": 80,
+          "text": "",
+          "style": {
+            "fill": "#FFFFFF",
+            "radius": 0,
+            "stroke": "none"
+          }
+        },
+        {
+          "id": "el140",
+          "name": "Divider",
+          "type": "line",
+          "x": 0,
+          "y": 764,
+          "w": 390,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el141",
+          "name": "Icon grid",
+          "type": "icon",
+          "x": 43,
+          "y": 782,
+          "w": 23,
+          "h": 23,
+          "icon": "grid",
+          "text": "",
+          "style": {
+            "color": "$primary"
+          }
+        },
+        {
+          "id": "el142",
+          "name": "Home",
+          "type": "text",
+          "x": 27,
+          "y": 813,
+          "w": 58,
+          "h": 17,
+          "text": "Home",
+          "style": {
+            "fontSize": 12,
+            "color": "$primary",
+            "fontWeight": 700
+          }
+        },
+        {
+          "id": "el143",
+          "name": "Icon chart",
+          "type": "icon",
+          "x": 142,
+          "y": 782,
+          "w": 23,
+          "h": 23,
+          "icon": "chart",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el144",
+          "name": "Reports",
+          "type": "text",
+          "x": 130,
+          "y": 813,
+          "w": 63,
+          "h": 17,
+          "text": "Reports",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el145",
+          "name": "Icon layers",
+          "type": "icon",
+          "x": 244,
+          "y": 782,
+          "w": 23,
+          "h": 23,
+          "icon": "layers",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el146",
+          "name": "Projects",
+          "type": "text",
+          "x": 231,
+          "y": 813,
+          "w": 66,
+          "h": 17,
+          "text": "Projects",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el147",
+          "name": "Icon user",
+          "type": "icon",
+          "x": 340,
+          "y": 782,
+          "w": 23,
+          "h": 23,
+          "icon": "user",
+          "text": "",
+          "style": {
+            "color": "$muted"
+          }
+        },
+        {
+          "id": "el148",
+          "name": "Profile",
+          "type": "text",
+          "x": 329,
+          "y": 813,
+          "w": 60,
+          "h": 17,
+          "text": "Profile",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        }
+      ]
+    },
+    {
+      "id": "components",
+      "name": "Elements / Design System",
+      "x": 1850,
+      "y": 80,
+      "w": 640,
+      "h": 660,
+      "bg": "#FFFFFF",
+      "nodes": [
+        {
+          "id": "el149",
+          "name": "A system that stays consistent.",
+          "type": "text",
+          "x": 42,
+          "y": 40,
+          "w": 555,
+          "h": 45,
+          "text": "A system that stays consistent.",
+          "style": {
+            "fontSize": 29,
+            "color": "$ink",
+            "fontWeight": 760
+          }
+        },
+        {
+          "id": "el150",
+          "name": "Color, type, buttons and surface tok",
+          "type": "text",
+          "x": 42,
+          "y": 90,
+          "w": 520,
+          "h": 23,
+          "text": "Color, type, buttons and surface tokens.",
+          "style": {
+            "fontSize": 14,
+            "color": "$muted",
+            "fontWeight": 500
+          }
+        },
+        {
+          "id": "el151",
+          "name": "Divider",
+          "type": "line",
+          "x": 42,
+          "y": 137,
+          "w": 556,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el152",
+          "name": "Colors",
+          "type": "text",
+          "x": 42,
+          "y": 160,
+          "w": 520,
+          "h": 28,
+          "text": "Colors",
+          "style": {
+            "fontSize": 18,
+            "color": "$ink",
+            "fontWeight": 700
+          }
+        },
+        {
+          "id": "el153",
+          "name": "Shape",
+          "type": "rect",
+          "x": 42,
+          "y": 203,
+          "w": 92,
+          "h": 84,
+          "text": "",
+          "style": {
+            "fill": "$primary",
+            "radius": 16,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el154",
+          "name": "Primary",
+          "type": "text",
+          "x": 42,
+          "y": 295,
+          "w": 100,
+          "h": 20,
+          "text": "Primary",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 600
+          }
+        },
+        {
+          "id": "el155",
+          "name": "Shape",
+          "type": "rect",
+          "x": 153,
+          "y": 203,
+          "w": 92,
+          "h": 84,
+          "text": "",
+          "style": {
+            "fill": "$primarySoft",
+            "radius": 16,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el156",
+          "name": "Soft",
+          "type": "text",
+          "x": 153,
+          "y": 295,
+          "w": 100,
+          "h": 20,
+          "text": "Soft",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 600
+          }
+        },
+        {
+          "id": "el157",
+          "name": "Shape",
+          "type": "rect",
+          "x": 264,
+          "y": 203,
+          "w": 92,
+          "h": 84,
+          "text": "",
+          "style": {
+            "fill": "$surfaceAlt",
+            "radius": 16,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el158",
+          "name": "Surface",
+          "type": "text",
+          "x": 264,
+          "y": 295,
+          "w": 100,
+          "h": 20,
+          "text": "Surface",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 600
+          }
+        },
+        {
+          "id": "el159",
+          "name": "Shape",
+          "type": "rect",
+          "x": 375,
+          "y": 203,
+          "w": 92,
+          "h": 84,
+          "text": "",
+          "style": {
+            "fill": "$success",
+            "radius": 16,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el160",
+          "name": "Success",
+          "type": "text",
+          "x": 375,
+          "y": 295,
+          "w": 100,
+          "h": 20,
+          "text": "Success",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 600
+          }
+        },
+        {
+          "id": "el161",
+          "name": "Shape",
+          "type": "rect",
+          "x": 486,
+          "y": 203,
+          "w": 92,
+          "h": 84,
+          "text": "",
+          "style": {
+            "fill": "$warning",
+            "radius": 16,
+            "stroke": "$border"
+          }
+        },
+        {
+          "id": "el162",
+          "name": "Warning",
+          "type": "text",
+          "x": 486,
+          "y": 295,
+          "w": 100,
+          "h": 20,
+          "text": "Warning",
+          "style": {
+            "fontSize": 12,
+            "color": "$muted",
+            "fontWeight": 600
+          }
+        },
+        {
+          "id": "el163",
+          "name": "Typography",
+          "type": "text",
+          "x": 42,
+          "y": 351,
+          "w": 520,
+          "h": 28,
+          "text": "Typography",
+          "style": {
+            "fontSize": 18,
+            "color": "$ink",
+            "fontWeight": 700
+          }
+        },
+        {
+          "id": "el164",
+          "name": "The quick brown fox",
+          "type": "text",
+          "x": 42,
+          "y": 393,
+          "w": 530,
+          "h": 42,
+          "text": "The quick brown fox",
+          "style": {
+            "fontSize": 29,
+            "color": "$ink",
+            "fontWeight": 750
+          }
+        },
+        {
+          "id": "el165",
+          "name": "Body regular — clear, functional, ac",
+          "type": "text",
+          "x": 42,
+          "y": 443,
+          "w": 500,
+          "h": 25,
+          "text": "Body regular — clear, functional, accessible.",
+          "style": {
+            "fontSize": 15,
+            "color": "$muted",
+            "fontWeight": 450
+          }
+        },
+        {
+          "id": "el166",
+          "name": "Divider",
+          "type": "line",
+          "x": 42,
+          "y": 490,
+          "w": 556,
+          "h": 1,
+          "text": "",
+          "style": {
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el167",
+          "name": "Components",
+          "type": "text",
+          "x": 42,
+          "y": 507,
+          "w": 520,
+          "h": 27,
+          "text": "Components",
+          "style": {
+            "fontSize": 18,
+            "color": "$ink",
+            "fontWeight": 700
+          }
+        },
+        {
+          "id": "el168",
+          "name": "Primary action",
+          "type": "button",
+          "x": 42,
+          "y": 551,
+          "w": 169,
+          "h": 47,
+          "text": "Primary action",
+          "style": {
+            "fill": "$primary",
+            "color": "#ffffff",
+            "radius": 12,
+            "fontSize": 14,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        },
+        {
+          "id": "el169",
+          "name": "Secondary",
+          "type": "button",
+          "x": 222,
+          "y": 551,
+          "w": 171,
+          "h": 47,
+          "text": "Secondary",
+          "style": {
+            "fill": "#FFFFFF",
+            "color": "$primary",
+            "radius": 12,
+            "fontSize": 14,
+            "fontWeight": 650,
+            "align": "center",
+            "stroke": "$border",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "id": "el170",
+          "name": "Success state",
+          "type": "pill",
+          "x": 413,
+          "y": 555,
+          "w": 173,
+          "h": 36,
+          "text": "Success state",
+          "style": {
+            "fill": "#EAF8F1",
+            "color": "$success",
+            "radius": 100,
+            "fontSize": 13,
+            "fontWeight": 650,
+            "align": "center"
+          }
+        }
+      ]
+    }
+  ],
+  "comments": [
+    {
+      "id": "comment1",
+      "boardId": "desktop",
+      "nodeId": "el64",
+      "text": "Consider a monthly comparison toggle for power users.",
+      "resolved": false,
+      "createdAt": "2026-10-23T00:00:00.000Z"
+    }
+  ],
+  "updatedAt": "2026-10-23T00:00:00.000Z"
+}

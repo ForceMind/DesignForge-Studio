@@ -1,0 +1,13 @@
+{
+  "format": "designforge.patch",
+  "version": 1,
+  "baseHash": "21a89182",
+  "ops": [
+    {
+      "kind": "set-node",
+      "boardId": "desktop",
+      "nodeId": "el64",
+      "changes": {"text": "Revenue by market", "style": {"color": "$primary"}}
+    }
+  ]
+}

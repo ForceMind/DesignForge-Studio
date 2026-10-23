@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>DesignForge — AI-native Design Workspace</title>
+  <link rel="stylesheet" href="./src/app.css" />
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="m12 2 3.2 6.8L22 12l-6.8 3.2L12 22l-3.2-6.8L2 12l6.8-3.2L12 2Z" fill="currentColor"/><path d="m12 8 1.3 2.7L16 12l-2.7 1.3L12 16l-1.3-2.7L8 12l2.7-1.3L12 8Z" fill="white"/></svg>
+      </span>
+      <div><strong>DesignForge</strong><small>STUDIO</small></div>
+    </div>
+    <div class="top-project">
+      <span class="crumb-muted">Workspace</span>
+      <span class="crumb-chevron">›</span>
+      <span id="project-title" class="crumb-current">Orbit — Product Analytics</span>
+      <span class="top-pill"><span class="pulse-dot"></span> Local project</span>
+    </div>
+    <div class="top-actions">
+      <label class="top-button subtle" for="upload-json" title="打开本地项目"> <span class="topicon">↥</span> 导入</label>
+      <input id="upload-json" type="file" accept=".json,application/json" hidden />
+      <input id="upload-patch" type="file" accept=".json,application/json" hidden />
+      <button type="button" id="save-project" class="top-button subtle"><span class="topicon">↓</span> 保存项目</button>
+      <button type="button" id="export-project" class="top-button primary"><span class="topicon">⇥</span> 导出 HTML <span class="keycap">ZIP</span></button>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="leftbar" aria-label="项目与图层">
+      <div class="sidebar-scroll">
+        <div class="panel-header"><span>工作区</span><button class="icon-button" id="rename-project" title="重命名项目" aria-label="重命名项目">✎</button></div>
+        <div class="project-box">
+          <span class="project-visual">O</span>
+          <div><b id="project-short-name">Orbit Workspace</b><small>Design project · v0.1</small></div>
+          <span class="project-ellipsis">⋯</span>
+        </div>
+        <div class="pane-tabs" id="left-tabs"><button class="active" data-lefttab="layers">图层</button><button data-lefttab="comments">标注 <span id="comment-count" class="count">1</span></button></div>
+        <div id="layers-pane">
+          <div class="section-head"><span>画板 <span id="board-count" class="subcount">3</span></span><button id="new-board" class="small-action" title="新增画板">＋</button></div>
+          <div id="board-list" class="board-list"></div>
+          <div class="section-head with-line"><span>元素图层</span><span class="light-tip" id="layer-count">0</span></div>
+          <div id="layer-list" class="layer-list"></div>
+        </div>
+        <div id="comments-pane" hidden>
+          <div class="section-head"><span>评审批注</span><button class="small-action" id="add-comment" title="对当前画板或元素添加标注">＋</button></div>
+          <div id="comment-list" class="comments-list"></div>
+        </div>
+      </div>
+      <div class="left-bottom">
+        <div class="knowledge-icon">✦</div>
+        <div><strong>为 AI 而设计</strong><p>改动可追踪 · 精准局部补丁<br>不再一改就重做整个界面</p></div>
+        <button id="open-agent" aria-label="打开智能体协作面板">↗</button>
+      </div>
+    </aside>
+    <main class="workspace" aria-label="画布编辑区域">
+      <div class="tools-row">
+        <div class="toolgroup">
+          <button id="tool-select" class="tool-button selected" title="选择 / 拖动元素 (V)" aria-label="选择">↖</button>
+          <button id="tool-hand" class="tool-button" title="平移画布 (H 或空格)" aria-label="平移">✋</button>
+          <span class="tool-separator"></span>
+          <button id="add-text" class="tool-button" title="添加文字">T</button>
+          <button id="add-rect" class="tool-button" title="添加矩形">▭</button>
+          <button id="add-button" class="tool-button" title="添加按钮">▣</button>
+          <button id="add-icon" class="tool-button" title="添加图标">◇</button>
+          <span class="tool-separator"></span>
+          <button id="duplicate-node" class="tool-button" title="复制选中图层 (⌘D)">⧉</button>
+          <button id="delete-node" class="tool-button" title="删除选中图层 (Delete)">⌫</button>
+        </div>
+        <div class="toolbar-center"><span class="mini-round violet">✦</span> <span>自由画布</span> <span class="muted-dot">·</span> <span id="board-viewport-label">3 个画板</span></div>
+        <div class="toolgroup zoom-controls">
+          <button id="undo" class="tool-button" title="撤销 (⌘Z)">↶</button>
+          <button id="redo" class="tool-button" title="重做 (⌘⇧Z)">↷</button>
+          <span class="tool-separator"></span>
+          <button id="zoom-out" class="tool-button" title="缩小">−</button>
+          <span class="zoom-value" id="zoom-label">60%</span>
+          <button id="zoom-in" class="tool-button" title="放大">＋</button>
+          <button id="fit-all" class="fit-button">适应</button>
+        </div>
+      </div>
+      <div class="viewport" id="viewport" tabindex="0" aria-label="可缩放设计画布">
+        <div class="world" id="world"></div>
+        <div class="canvas-help"><span class="kbd">Space</span> 拖动画布 <span class="sep">·</span> <span class="kbd">⌘</span> + 滚轮缩放</div>
+        <div class="floating-coordinate" id="coordinate-hint">✦  多画板设计系统</div>
+      </div>
+      <div class="statusbar">
+        <div><span class="status-dot"></span><span id="save-status">本地自动保存已开启</span></div>
+        <div><span id="selection-path">无选中对象</span> <span class="status-divider">│</span> <span id="view-status">1280 × 800</span></div>
+      </div>
+    </main>
+    <aside class="rightbar" aria-label="设计检查与属性">
+      <div class="right-tabs" id="right-tabs">
+        <button data-righttab="properties" class="active">属性</button>
+        <button data-righttab="tokens">Tokens</button>
+        <button data-righttab="audit">检查</button>
+        <button data-righttab="agent">Agent <span class="purple-spark">✦</span></button>
+      </div>
+      <div class="right-content" id="right-content"></div>
+      <div class="right-footer"><div class="footer-shield">✓</div> 文件优先 · 无云端依赖 · 可审阅修改</div>
+    </aside>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script type="module" src="./src/app.mjs"></script>
+</body>
+</html>
