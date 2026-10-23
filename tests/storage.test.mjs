@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
   PROJECT_KEY,
+  RECOVERY_KEY,
   BACKUP_KEY,
   saveProject,
   loadProject,
@@ -63,4 +64,25 @@ test("malformed backups are ignored, current valid project still loads", () => {
   s.setItem(BACKUP_KEY, "null");
   assert.deepEqual(readBackups(s), []);
   assert.equal(loadProject(s).recovered, false);
+});
+
+test("invalid raw storage is retained before installing a valid recovery project", () => {
+  const s = memory(),
+    p = project();
+  s.setItem(PROJECT_KEY, "{incomplete");
+  saveProject(s, p);
+  assert.equal(s.getItem(RECOVERY_KEY), "{incomplete");
+  assert.equal(loadProject(s).project.title, p.title);
+});
+test("failed quarantine write cannot erase an invalid but repairable original", () => {
+  const s = memory(),
+    p = project();
+  s.setItem(PROJECT_KEY, "repair me");
+  const write = s.setItem;
+  s.setItem = (k, v) => {
+    if (k === RECOVERY_KEY) throw Error("QuotaExceeded");
+    write(k, v);
+  };
+  assert.throws(() => saveProject(s, p), /Quota/);
+  assert.equal(s.getItem(PROJECT_KEY), "repair me");
 });

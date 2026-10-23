@@ -15,6 +15,7 @@ import {
 } from "./tree.mjs";
 import {
   PROJECT_KEY,
+  RECOVERY_KEY,
   loadProject,
   saveProject,
   readBackups,
@@ -1158,6 +1159,16 @@ function toggleEditorTheme() {
   } catch {}
 }
 function recoverProject() {
+  const rejected = localStorage.getItem(RECOVERY_KEY);
+  if (
+    rejected &&
+    confirm(
+      "发现最近一份未通过校验的原始存档。是否下载它以便手动修复？取消可继续选择有效备份。",
+    )
+  ) {
+    download(rejected, "designforge-rejected-project.json", "application/json");
+    return;
+  }
   const backups = readBackups(localStorage);
   if (!backups.length) {
     toast("暂无本地备份");
@@ -1939,6 +1950,8 @@ async function init() {
   bindStatic();
   try {
     const saved = loadProject(localStorage);
+    if (!saved && localStorage.getItem(PROJECT_KEY))
+      toast("存档未通过校验；原始内容将保留，可点击恢复下载修复");
     if (saved) {
       project = saved.project;
       if (saved.recovered) toast("当前存档损坏，已从本地备份恢复");

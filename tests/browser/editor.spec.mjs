@@ -382,3 +382,28 @@ test("color picker remains available alongside editable token bindings", async (
     "$surfaceAlt",
   );
 });
+test("invalid original storage can be downloaded after recovery without rewriting its bytes", async ({
+  page,
+}) => {
+  await load(page);
+  const raw = "{repairable original";
+  await page.evaluate(({ key, raw }) => localStorage.setItem(key, raw), {
+    key,
+    raw,
+  });
+  await page.reload();
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("designforge.rejected.v1")),
+    )
+    .toBe(raw);
+  page.once("dialog", (dialog) => dialog.accept());
+  const download = page.waitForEvent("download");
+  await page.locator("#recover-project").click();
+  const file = await download;
+  expect(file.suggestedFilename()).toBe("designforge-rejected-project.json");
+  const stream = await file.createReadStream();
+  let content = "";
+  for await (const chunk of stream) content += chunk.toString();
+  expect(content).toBe(raw);
+});

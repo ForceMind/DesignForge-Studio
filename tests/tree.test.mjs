@@ -411,3 +411,36 @@ test("partial layout constraints edits preserve sibling settings and reject unkn
     /Unsafe operation fields/,
   );
 });
+
+test("invalid style values and unknown CSS keys are rejected atomically across themes", () => {
+  const p = project(),
+    b = p.boards[0],
+    n = b.nodes[0];
+  for (const style of [
+    { fill: "url(https://evil.test/)" },
+    { fontSize: 1000 },
+    { opacity: 2 },
+    { position: "fixed" },
+    { color: "$spacing" },
+  ])
+    assert.throws(
+      () =>
+        applyPatch(
+          p,
+          patch(p, [
+            {
+              kind: "set-node",
+              boardId: b.id,
+              nodeId: n.id,
+              changes: { style },
+            },
+          ]),
+        ),
+      /Unsafe style keys|validation/,
+    );
+  p.tokens.titleSize = 32;
+  n.style.fontSize = "$titleSize";
+  assert.deepEqual(validateProject(p), []);
+  p.themes.dark.titleSize = "#FFFFFF";
+  assert.ok(validateProject(p).some((i) => i.path.endsWith("fontSize")));
+});

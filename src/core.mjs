@@ -328,6 +328,7 @@ export function validateProject(project) {
       if (node.locked !== undefined && typeof node.locked !== "boolean")
         error(n + ".locked", "Expected boolean");
       if (!isObject(node.style)) error(n + ".style", "Style object required");
+      else checkStyle(node.style, n + ".style");
       if (typeof node.text !== "string" || node.text.length > 10000)
         error(n + ".text", "Expected text up to 10000 chars");
       if (node.children !== undefined) {
@@ -425,6 +426,8 @@ export function validateProject(project) {
             error(n + ".overrides", "Expected override map");
           else
             for (const [id, changes] of Object.entries(node.overrides)) {
+              if (isObject(changes?.style))
+                checkStyle(changes.style, n + ".overrides." + id + ".style");
               if (
                 !variant ||
                 !isObject(variant.root) ||
@@ -443,6 +446,46 @@ export function validateProject(project) {
               )
                 error(n + ".overrides", "Invalid instance override");
             }
+        }
+      }
+    }
+  }
+  function checkStyle(style, path) {
+    const palettes = [
+      project.tokens,
+      ...Object.values(isObject(project.themes) ? project.themes : {})
+        .filter(isObject)
+        .map((t) => ({ ...project.tokens, ...t })),
+    ];
+    const ranges = {
+      radius: [0, 200],
+      fontSize: [8, 180],
+      fontWeight: [100, 900],
+      opacity: [0, 1],
+      strokeWidth: [0, 20],
+      letterSpacing: [-3, 20],
+    };
+    for (const [key, value] of Object.entries(style)) {
+      if (!editStyleKeys.has(key)) {
+        error(path + "." + key, "Unsupported style field");
+        continue;
+      }
+      for (const tokens of palettes) {
+        const resolved = resolveToken(value, tokens || {});
+        if (["fill", "color", "stroke"].includes(key)) {
+          if (
+            value !== "" &&
+            !(key === "stroke" && value === "none") &&
+            !safeColor(resolved)
+          )
+            error(path + "." + key, "Expected hex color or color token");
+        } else if (key === "align") {
+          if (!["left", "center", "right"].includes(value))
+            error(path + ".align", "Unsupported text alignment");
+        } else if (ranges[key]) {
+          const [min, max] = ranges[key];
+          if (!Number.isFinite(resolved) || resolved < min || resolved > max)
+            error(path + "." + key, `Expected numeric token or ${min}–${max}`);
         }
       }
     }
@@ -581,7 +624,7 @@ export function auditProject(project) {
           "Interactive element smaller than 44×44 px",
         );
       if (["text", "pill", "button", "input"].includes(node.type)) {
-        const size = num(node.style?.fontSize, 16);
+        const size = scalar(node.style?.fontSize, effectiveTokens(project), 16);
         if (size < 12)
           problem("warning", board.id, node, "TEXT_SIZE", "Text is below 12px");
         // Comparison uses declared fill, not backdrop inferred from scene geometry.
@@ -783,7 +826,7 @@ function colorStyle(node, tokens, board, parent = board) {
     `width:${px(node.w)}`,
     `height:${px(node.h)}`,
     "box-sizing:border-box",
-    `opacity:${clamp(s.opacity ?? 1, 0, 1, 1)}`,
+    `opacity:${clamp(scalar(s.opacity, tokens, 1), 0, 1, 1)}`,
   ];
   const fill = s.fill ? cssColor(s.fill, tokens, "transparent") : "transparent";
   if (fill !== "transparent") parts.push(`background:${fill}`);
