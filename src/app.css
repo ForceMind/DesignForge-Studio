@@ -1694,3 +1694,21 @@ select:focus-visible {
   right: 0;
   height: 1px;
 }
+
+.color-field {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.color-field input[type="color"] {
+  width: 30px;
+  min-width: 30px;
+  padding: 2px;
+  height: 32px;
+}
+.color-field input[data-prop] {
+  min-width: 0;
+  width: 100%;
+  font-size: 11px;
+  padding: 6px;
+}

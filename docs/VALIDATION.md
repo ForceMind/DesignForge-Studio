@@ -14,7 +14,7 @@
 - `npm run format:check`：已加入可重复格式检查；技能 frontmatter 使用 skill-creator 的 quick_validate.py 通过。
 - [首轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39983513888)：40 Node + 21 Chromium 全部通过。测试真实操作 UI、读取实际浏览器 CSS/几何并截图，非格式校验或 --list。
 - [第二轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39984734670)：49 Node 通过；Chromium 22/23 通过。失败用例在鼠标操作前读取到初次打开尚未持久化的存档；现已修复为首次加载即保存。不可把该轮记作全绿。
-- 当前新增实例文字覆盖用例后，浏览器套件共 24 项。最终 head 的运行链接和结果将在实际完成后追加；尚未以猜测填入。
+- [第三轮 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39986223929)：50 Node + 24 Chromium 全部通过，包含鼠标拖动、纵向边界和实例文字覆盖。后续增加颜色取色器/Token 双入口回归，套件共 25 项；最终运行结果待实际完成后追加。
 
 ## 截图复核与修复
 

@@ -167,6 +167,7 @@ test("M0 remains editable, and exporting ZIP is a real download", async ({
   page,
 }) => {
   await page.goto("/");
+  await page.locator("#example-picker").selectOption("Orbit");
   await expect(page.locator(".df-node")).toHaveCount(170);
   await select(page, "el64");
   await expect(page.locator('[data-prop="text"]')).toHaveValue(
@@ -313,6 +314,7 @@ test("free-layer mouse drag snaps and is one undoable transaction", async ({
   page,
 }) => {
   await page.goto("/");
+  await page.locator("#example-picker").selectOption("Orbit");
   await page.locator('#board-list [data-board="mobile"]').click();
   // Use a fully visible free layer from the starter mobile board.
   const state = await stored(page),
@@ -361,4 +363,22 @@ test("instance text overrides stay local and undo restores inherited content", a
   ).toContainText("Create project");
   await page.locator("#undo").click();
   await expect(first).toContainText("Create project");
+});
+test("color picker remains available alongside editable token bindings", async ({
+  page,
+}) => {
+  await load(page);
+  await select(page, root.id);
+  const binding = page.locator('[data-prop="style.fill"]'),
+    picker = page.locator('[data-style-color="style.fill"]');
+  await expect(binding).toHaveValue("$surface");
+  await expect(picker).toHaveValue("#ffffff");
+  await picker.fill("#123456");
+  await picker.dispatchEvent("change");
+  expect((await stored(page)).boards[0].nodes[0].style.fill).toBe("#123456");
+  await binding.fill("$surfaceAlt");
+  await binding.press("Tab");
+  expect((await stored(page)).boards[0].nodes[0].style.fill).toBe(
+    "$surfaceAlt",
+  );
 });
