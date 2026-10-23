@@ -39,14 +39,14 @@
           <div><b id="project-short-name">Orbit Workspace</b><small>Design project · M1 preview</small></div>
           <span class="project-ellipsis">⋯</span>
         </div>
-        <div class="pane-tabs" id="left-tabs"><button class="active" data-lefttab="layers">图层</button><button data-lefttab="components">组件</button><button data-lefttab="comments">标注 <span id="comment-count" class="count">1</span></button></div>
+        <div class="pane-tabs" id="left-tabs"><button class="active" data-lefttab="layers">图层</button><button data-lefttab="components">组件</button><button data-lefttab="assets">资源</button><button data-lefttab="comments">标注 <span id="comment-count" class="count">1</span></button></div>
         <div id="layers-pane">
           <div class="section-head"><span>画板 <span id="board-count" class="subcount">3</span></span><button id="new-board" class="small-action" title="新增画板">＋</button></div>
           <div id="board-list" class="board-list"></div>
           <div class="section-head with-line"><span>元素图层</span><span class="light-tip" id="layer-count">0</span></div>
           <div id="layer-list" class="layer-list" role="tree" aria-label="元素图层树"></div>
         </div>
-        <div id="components-pane" hidden><div class="section-head">本地组件库</div><div id="component-list"></div></div><div id="comments-pane" hidden>
+        <div id="assets-pane" hidden><div class="section-head">本地资源<label class="btn-small" for="upload-asset">＋ 导入</label><input type="file" id="upload-asset" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,.woff,.woff2,.ttf" hidden></div><div id="asset-list"></div></div><div id="components-pane" hidden><div class="section-head">本地组件库</div><div id="component-list"></div></div><div id="comments-pane" hidden>
           <div class="section-head"><span>评审批注</span><button class="small-action" id="add-comment" title="对当前画板或元素添加标注">＋</button></div>
           <div id="comment-list" class="comments-list"></div>
         </div>
@@ -68,7 +68,7 @@
           <button id="add-button" class="tool-button" title="添加按钮">▣</button>
           <button id="add-icon" class="tool-button" title="添加图标">◇</button>
           <span class="tool-separator"></span>
-          <button id="duplicate-node" class="tool-button" title="复制选中图层 (⌘D)">⧉</button>
+          <label class="snap-toggle" title="8px 网格及边缘吸附；Alt 暂停"><input id="snap-toggle" type="checkbox" checked>吸附</label><button id="duplicate-node" class="tool-button" title="复制选中图层 (⌘D)">⧉</button>
           <button id="delete-node" class="tool-button" title="删除选中图层 (Delete)">⌫</button>
         </div>
         <div class="toolbar-center"><span class="mini-round violet">✦</span> <span>自由画布</span> <span class="muted-dot">·</span> <span id="board-viewport-label">3 个画板</span></div>

@@ -29,6 +29,7 @@
       "y": 80,
       "w": 390,
       "h": 1000,
+      "autoHeight": true,
       "bg": "#EEF1F6",
       "nodes": [
         {
@@ -155,7 +156,9 @@
                   "h": 148,
                   "text": "",
                   "style": {
-                    "fill": "$surface",
+                    "fill": "$surfaceAlt",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
                     "radius": "$radius"
                   },
                   "children": [
@@ -238,7 +241,9 @@
                   "h": 148,
                   "text": "",
                   "style": {
-                    "fill": "$surface",
+                    "fill": "$surfaceAlt",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
                     "radius": "$radius"
                   },
                   "children": [
@@ -321,7 +326,9 @@
                   "h": 148,
                   "text": "",
                   "style": {
-                    "fill": "$surface",
+                    "fill": "$surfaceAlt",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
                     "radius": "$radius"
                   },
                   "children": [

@@ -9,10 +9,11 @@ const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8',
 http.createServer(async (req,res)=>{
  try{
   let url=new URL(req.url,'http://localhost');let pathname=decodeURIComponent(url.pathname);
-  if(pathname.includes('\0'))throw Error('Invalid path');
+  if(pathname.split('/').some(part=>part.startsWith('.')||part==='node_modules')||pathname.includes('\0'))throw Error('Invalid path');
   const requested=path.resolve(root,'.'+pathname);
   if(requested!==root&&!requested.startsWith(root+path.sep))throw Error('Traversal rejected');
   let fp=requested;const st=await fs.stat(fp).catch(()=>null);if(st?.isDirectory())fp=path.join(fp,'index.html');
+  fp=await fs.realpath(fp);if(!fp.startsWith(root+path.sep))throw Error('Symlink escape rejected');
   const data=await fs.readFile(fp);res.writeHead(200,{'Content-Type':mime[path.extname(fp)]||'application/octet-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY'});res.end(data);
  }catch(e){res.writeHead(404,{'Content-Type':'text/plain'});res.end('Not found')}
 }).listen(port,'127.0.0.1',()=>console.log(`DesignForge Studio: http://127.0.0.1:${port}`));

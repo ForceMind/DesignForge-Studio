@@ -29,6 +29,7 @@
       "y": 80,
       "w": 1200,
       "h": 720,
+      "autoHeight": true,
       "bg": "#EEF1F6",
       "nodes": [
         {

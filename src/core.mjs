@@ -1,8 +1,9 @@
-import {CONTAINERS, flattenNodes, findNode, locateNode, subtreeIds, moveNode} from './tree.mjs';
+import {validateAssets} from './assets.mjs';
+import {CONTAINERS, flattenNodes, findNode, locateNode, subtreeIds, moveNode, isNodeLocked} from './tree.mjs';
 /** DesignForge's original, dependency-free project protocol / renderer. */
 export const FORMAT = 'designforge.project';
 export const VERSION = 1;
-export const NODE_TYPES = new Set(['rect', 'circle', 'text', 'button', 'pill', 'line', 'icon', 'input', 'frame', 'group', 'component', 'instance']);
+export const NODE_TYPES = new Set(['rect', 'circle', 'text', 'button', 'pill', 'line', 'icon', 'input', 'frame', 'group', 'component', 'instance', 'image']);
 export const TOKEN_KEYS = ['primary', 'primarySoft', 'surface', 'surfaceAlt', 'canvas', 'ink', 'muted', 'border', 'success', 'warning', 'danger'];
 export const ICONS = {
   sparkle: '<path d="m12 2 1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2Z"/><path d="m19 16 .65 2.35L22 19l-2.35.65L19 22l-.65-2.35L16 19l2.35-.65L19 16Z"/>',
@@ -66,7 +67,7 @@ export function validateProject(project){
     for(const [key,value] of Object.entries(tokens)) {
       if(!/^[a-zA-Z][a-zA-Z0-9]*$/.test(key) || ['constructor','prototype','__proto__'].includes(key))error(path+'.'+key,'Unsafe token name');
       const resolved=resolveToken(value,tokens);
-      if(key==='fontFamily') {if(!['system-ui','ui-sans-serif','Georgia','Verdana','Arial'].includes(resolved))error(path+'.fontFamily','Unsupported font stack');}
+      if(key==='fontFamily') {if(!['system-ui','ui-sans-serif','Georgia','Verdana','Arial'].includes(resolved)&&!(typeof resolved==='string'&&resolved.startsWith('asset:')&&Array.isArray(project.assets)&&project.assets.some(a=>a?.type==='font'&&a.id===resolved.slice(6))))error(path+'.fontFamily','Unsupported font stack');}
       else if(TOKEN_KEYS.includes(key)) {if(!safeColor(resolved))error(path+'.'+key,'Expected hex color or resolvable alias');}
       else if(!(safeColor(resolved) || Number.isFinite(resolved) && resolved>=0 && resolved<=3200))error(path+'.'+key,'Expected color, number or resolvable alias');
     }
@@ -75,6 +76,7 @@ export function validateProject(project){
     if(!Number.isFinite(radius)||radius<0||radius>100)error(path+'.radius','Must be between 0 and 100');
     if(!tokens.fontFamily)error(path+'.fontFamily','Font required');
   }
+  for(const reason of validateAssets(project.assets))error('assets',reason);
   checkTokens(project.tokens,'tokens');
   if(project.themes!==undefined) {
     if(!isObject(project.themes)||Object.keys(project.themes).length>12)error('themes','Expected up to 12 theme maps');
@@ -95,6 +97,7 @@ export function validateProject(project){
     if(!safeColor(board.bg))error(p+'.bg','Board background must be hex');
     if(!(Number.isFinite(board.w)&&board.w>=280&&board.w<=2400&&Number.isFinite(board.h)&&board.h>=280&&board.h<=3200))error(p+'.size','Board dimensions out of range');
     if(!Number.isFinite(board.x)||!Number.isFinite(board.y))error(p+'.position','Board position must be numeric');
+    if(board.autoHeight!==undefined&&typeof board.autoHeight!=='boolean')error(p+'.autoHeight','Auto height requires one root container');
     if(!Array.isArray(board.nodes)||board.nodes.length>500){error(p+'.nodes','Expected <= 500 nodes');continue;}
     validateNodes(board.nodes,p+'.nodes',new Set(),0,{count:0});
   }
@@ -143,6 +146,7 @@ export function validateProject(project){
           validateNodes([changed],n+'.responsive.changes',new Set(),depth+1,{count:0},definition);
         }
       }
+      if(node.type==='image'&&(!Array.isArray(project.assets)||!project.assets.some(a=>a?.id===node.assetId&&a.type==='image')))error(n+'.assetId','Unknown image asset');
       if(node.type==='instance'){
         if(definition){error(n,'Component definitions cannot contain instances');continue;}
         const c=Array.isArray(project.components)&&project.components.find(c=>c?.id===node.componentId);
@@ -184,10 +188,10 @@ export function auditProject(project){
   const problem=(severity,boardId,node,code,message)=>findings.push({severity,boardId,nodeId:node?.id||null,code,message});
   for(const board of project.boards||[]){
     for(const {node,parent} of flattenNodes(board.nodes||[])){
-      if(parent?.layout?.mode && parent.layout.mode!=='absolute')continue;
+      const flow=parent?.layout?.mode && parent.layout.mode!=='absolute';
       const bounds=parent||board;
       if(node.locked)continue;
-      if(node.x<0||node.y<0||node.x+node.w>bounds.w+1||node.y+node.h>bounds.h+1)problem('warning',board.id,node,'OVERFLOW','Element extends outside artboard');
+      if(!flow&&(node.x<0||node.y<0||node.x+node.w>bounds.w+1||node.y+node.h>bounds.h+1))problem('warning',board.id,node,'OVERFLOW','Element extends outside artboard');
       if(['button','input'].includes(node.type)&&(node.w<44||node.h<44))problem('warning',board.id,node,'TOUCH_TARGET','Interactive element smaller than 44×44 px');
       if(['text','pill','button','input'].includes(node.type)){
         const size=num(node.style?.fontSize,16);
@@ -208,7 +212,7 @@ export function hashProject(p){
   return (h>>>0).toString(16).padStart(8,'0');
 }
 function requireString(v,name){if(typeof v!=='string'||v.length>10000)throw Error(name+' must be a string');return v;}
-const editableKeys=new Set(['name','text','x','y','w','h','locked','icon','hidden','sizing','constraints','responsive','variantId','overrides']);
+const editableKeys=new Set(['name','text','x','y','w','h','locked','icon','hidden','sizing','constraints','responsive','variantId','overrides','assetId']);
 const editStyleKeys=new Set(['fill','color','stroke','strokeWidth','radius','fontSize','fontWeight','align','opacity','letterSpacing']);
 function getBoard(project,id){const b=project.boards.find(x=>x.id===id);if(!b)throw Error('Unknown board '+id);return b;}
 function getNode(board,id){const n=findNode(board,id);if(!n)throw Error('Unknown node '+id);return n;}
@@ -220,7 +224,8 @@ export function applyPatch(project,patch){
   for(const op of patch.ops){
     if(!isObject(op))throw Error('Patch operation must be an object');
     if(op.kind==='set-node'){
-      const n=getNode(getBoard(next,op.boardId),op.nodeId);
+      const board=getBoard(next,op.boardId),n=getNode(board,op.nodeId);
+      if(isNodeLocked(board,n.id) && !(op.changes?.locked===false&&Object.keys(op.changes).length===1&&!isNodeLocked(board,n.id,true)))throw Error('Locked layer');
       if(!isObject(op.changes))throw Error('changes object required');
       for(const [key,value] of Object.entries(op.changes)){
         if(key==='layout'){
@@ -235,12 +240,13 @@ export function applyPatch(project,patch){
       const b=getBoard(next,op.boardId);
       if(!isObject(op.node)||findNode(b,op.node.id))throw Error('Invalid/duplicate node');
       const parent=op.parentId?getNode(b,op.parentId):null;
+      if(parent&&isNodeLocked(b,parent.id))throw Error('Locked layer');
       if(parent&&!CONTAINERS.has(parent.type))throw Error('Parent must be container');
       (parent?(parent.children ||= []):b.nodes).push(clone(op.node));
     }else if(op.kind==='remove-node'){
       const b=getBoard(next,op.boardId);
       const entry=locateNode(b,op.nodeId);if(!entry)throw Error('Unknown node');
-      const removed=subtreeIds(entry.node);entry.siblings.splice(entry.siblings.indexOf(entry.node),1);
+      const removed=subtreeIds(entry.node);if(isNodeLocked(b,entry.node.id)||flattenNodes([entry.node]).some(e=>e.node.locked))throw Error('Locked layer');entry.siblings.splice(entry.siblings.indexOf(entry.node),1);
       next.comments=next.comments.filter(c=>c.boardId!==b.id||!removed.includes(c.nodeId));
     } else if(op.kind==='move-node'){
       moveNode(getBoard(next,op.boardId),op.nodeId,op.parentId,op.index);
@@ -268,9 +274,10 @@ function colorStyle(node,tokens,board,parent=board){
   if(node.type==='circle')parts.push('border-radius:50%');
   if(['text','button','pill','input'].includes(node.type)){
     parts.push(`color:${cssColor(s.color,tokens,'#202238')}`,
-      `font-size:${px(clamp(s.fontSize??16,8,180,16))}`,`font-weight:${clamp(s.fontWeight??500,100,900,500)}`,
-      `letter-spacing:${px(clamp(s.letterSpacing??0,-3,20,0))}`,`text-align:${['left','center','right'].includes(s.align)?s.align:'left'}`);
+      `font-size:${px(clamp(scalar(s.fontSize,tokens,16),8,180,16))}`,`font-weight:${clamp(scalar(s.fontWeight,tokens,500),100,900,500)}`,
+      `letter-spacing:${px(clamp(scalar(s.letterSpacing,tokens,0),-3,20,0))}`,`text-align:${['left','center','right'].includes(s.align)?s.align:'left'}`);
     parts.push(`font-family:${resolveToken(tokens.fontFamily,tokens)==='Georgia'?'Georgia,serif':tokens.fontFamily==='Verdana'?'Verdana,sans-serif':tokens.fontFamily==='Arial'?'Arial,sans-serif':'system-ui,-apple-system,BlinkMacSystemFont,sans-serif'}`);
+    if(typeof resolveToken(tokens.fontFamily,tokens)==='string'&&/^asset:asset[a-zA-Z0-9_-]{1,64}$/.test(resolveToken(tokens.fontFamily,tokens)))parts.push(`font-family:df-${resolveToken(tokens.fontFamily,tokens).slice(6)},system-ui,sans-serif`);
     parts.push('white-space:pre-wrap','overflow-wrap:anywhere');
   }
   parts.push(layoutStyle(node,tokens,parent));
@@ -279,6 +286,7 @@ function colorStyle(node,tokens,board,parent=board){
 /** CSS is generated exclusively from enumerations and bounded numbers. */
 function layoutStyle(node,tokens,parent) {
   const p=[], l=node.layout||{}, flow=parent.layout?.mode && parent.layout.mode!=='absolute';
+  if(parent.autoHeight&&parent.nodes?.length===1)p.push('position:relative');
   if(flow)p.push('position:relative','left:auto','top:auto','flex-shrink:0','min-width:0','min-height:0');
   if(node.sizing?.w==='fill')p.push('width:100%',flow&&parent.layout.direction==='row'&&parent.layout.mode==='flex'?'flex:1 1 0':'');
   if(node.sizing?.h==='fill')p.push('height:100%',flow&&parent.layout.mode==='flex'&&parent.layout.direction!=='row'?'flex:1 1 0':'');
@@ -323,10 +331,12 @@ function responsiveStyles(board,tokens) {
   return rules.length?`<style>${rules.join('')}</style>`:'';
 }
 export function renderNode(node,board,tokens,parent=board,project=null){
+  if(!NODE_TYPES.has(node.type))node={...node,type:'rect'};
   if(node.type==='instance' && project)node=materializeInstance(node,project);
   const st=escapeHtml(colorStyle(node,tokens,board,parent));
   const content=CONTAINERS.has(node.type)?(node.children||[]).map(n=>renderNode(n,board,tokens,node,project)).join(''):escapeHtml(node.text||'');
   const wrap = `<div class="df-node df-${node.type}" ${node.$sourceId?'data-source-id':'data-node-id'}="${escapeHtml(node.id)}" style="${st}">${content}</div>`;
+  if(node.type==='image'){const asset=validateAssets(project?.assets).length?null:project?.assets?.find(a=>a.id===node.assetId);return `<img class="df-node df-image" data-node-id="${escapeHtml(node.id)}" alt="${escapeHtml(node.text)}" src="${escapeHtml(asset?.data||'')}" style="${st};object-fit:contain" draggable="false" />`;}
   if(node.type==='button')return `<button type="button" class="df-node df-button" ${node.$sourceId?'data-source-id':'data-node-id'}="${escapeHtml(node.id)}" style="${st}">${content}</button>`;
   if(node.type==='input')return `<input class="df-node df-input" aria-label="${content}" ${node.$sourceId?'data-source-id':'data-node-id'}="${escapeHtml(node.id)}" style="${st}" placeholder="${content}" readonly />`;
   if(node.type==='icon')return `<div class="df-node df-icon" ${node.$sourceId?'data-source-id':'data-node-id'}="${escapeHtml(node.id)}" style="${st}"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="${cssColor(node.style?.color,tokens,'#202238')}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${Object.hasOwn(ICONS,node.icon)?ICONS[node.icon]:ICONS.grid}</svg></div>`;
@@ -335,7 +345,11 @@ export function renderNode(node,board,tokens,parent=board,project=null){
 }
 export const exportStyles=`*{box-sizing:border-box}body{margin:0}.df-board{position:relative;overflow:hidden;margin:0 auto}.df-node{margin:0;padding:0}.df-button,.df-pill{display:flex;align-items:center;justify-content:center;cursor:pointer;border:0}.df-input{padding:0 14px;outline:0}.df-icon{display:flex;align-items:center;justify-content:center}.df-icon svg{width:100%;height:100%}.df-text{line-height:1.35}.df-line{pointer-events:none}`;
 export function renderBoard(board,tokens,project=null){
-  return `<main class="df-board" data-board-id="${escapeHtml(board.id)}" style="container-type:inline-size;width:${px(board.w)};max-width:100%;height:${px(board.h)};background:${safeColor(board.bg)||'#FFFFFF'}">${board.nodes.map(n=>renderNode(n,board,tokens,board,project)).join('')}</main>${responsiveStyles(board,tokens)}`;
+  const auto=board.autoHeight&&board.nodes.length===1&&CONTAINERS.has(board.nodes[0].type);
+  const assets=validateAssets(project?.assets).length?[]:project?.assets||[];
+  if(project)project={...project,assets};
+  const fonts=assets.filter(a=>a.type==='font').map(a=>`@font-face{font-family:df-${a.id};src:url("${a.data}");font-display:swap}`).join('');
+  return `${fonts?`<style>${fonts}</style>`:''}<main class="df-board" data-board-id="${escapeHtml(board.id)}" style="container-type:inline-size;width:${px(board.w)};max-width:100%;height:${auto?'auto':px(board.h)};${auto?`min-height:${px(board.h)};padding-bottom:${px(Math.max(0,board.nodes[0]?.y||0)*2)};`:''}background:${safeColor(board.bg)||'#FFFFFF'}">${board.nodes.map(n=>renderNode(n,board,tokens,board,project)).join('')}</main>${responsiveStyles(board,tokens)}`;
 }
 export function standaloneHtml(board,project){
   const title=escapeHtml(`${board.name} – ${project.title}`);
@@ -347,7 +361,7 @@ export function diffProjects(before,after){
  const changes=[];
  const oldTokens=before.tokens||{},newTokens=after.tokens||{};
  for(const k of new Set([...Object.keys(oldTokens),...Object.keys(newTokens)]))if(JSON.stringify(oldTokens[k])!==JSON.stringify(newTokens[k]))changes.push({kind:'token',key:k,before:oldTokens[k],after:newTokens[k]});
- for(const key of ['themes','activeTheme','components'])if(JSON.stringify(before[key])!==JSON.stringify(after[key]))changes.push({kind:'system-changed',key,before:before[key],after:after[key]});
+ for(const key of ['themes','activeTheme','components','assets'])if(JSON.stringify(before[key])!==JSON.stringify(after[key]))changes.push({kind:'system-changed',key,before:before[key],after:after[key]});
  const oldBoards=new Map(before.boards.map(b=>[b.id,b]));
  const newBoards=new Map(after.boards.map(b=>[b.id,b]));
  for(const [id,board] of oldBoards)if(!newBoards.has(id))changes.push({kind:'board-removed',boardId:id,name:board.name});
@@ -355,10 +369,10 @@ export function diffProjects(before,after){
   const previous=oldBoards.get(id);
   if(!previous){changes.push({kind:'board-added',boardId:id,name:board.name});continue}
   if(previous.name!==board.name)changes.push({kind:'board-renamed',boardId:id,before:previous.name,after:board.name});
-  const olds=new Map(flattenNodes(previous.nodes).map(({node:n,parent},i)=>[n.id,{...n,children:undefined,$parent:parent?.id||null,$order:i}]));const news=new Map(flattenNodes(board.nodes).map(({node:n,parent},i)=>[n.id,{...n,children:undefined,$parent:parent?.id||null,$order:i}]));
+  const olds=new Map(flattenNodes(previous.nodes).map(({node:n,parent,siblings})=>[n.id,{...n,children:undefined,$parent:parent?.id||null,$order:siblings.indexOf(n)}]));const news=new Map(flattenNodes(board.nodes).map(({node:n,parent,siblings})=>[n.id,{...n,children:undefined,$parent:parent?.id||null,$order:siblings.indexOf(n)}]));
   for(const [nodeId,n] of olds)if(!news.has(nodeId))changes.push({kind:'node-removed',boardId:id,nodeId,name:n.name});
   for(const [nodeId,n] of news){const old=olds.get(nodeId);if(!old){changes.push({kind:'node-added',boardId:id,nodeId,name:n.name});continue}
-   const keys=['name','text','x','y','w','h','locked','icon','style','layout','sizing','constraints','responsive','componentId','variantId','overrides','hidden','$parent','$order'];for(const key of keys){if(JSON.stringify(old[key])!==JSON.stringify(n[key]))changes.push({kind:'node-changed',boardId:id,nodeId,name:n.name,field:key,before:old[key],after:n[key]})}
+   const keys=['name','text','x','y','w','h','locked','icon','style','layout','sizing','constraints','responsive','componentId','variantId','overrides','assetId','hidden','$parent','$order'];for(const key of keys){if(JSON.stringify(old[key])!==JSON.stringify(n[key]))changes.push({kind:'node-changed',boardId:id,nodeId,name:n.name,field:key,before:old[key],after:n[key]})}
   }
  }
  return changes;

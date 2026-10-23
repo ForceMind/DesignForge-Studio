@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {flattenNodes} from '../src/tree.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {newProject,clone,validateProject,auditProject,standaloneHtml,exportIndexHtml,applyPatch,hashProject} from '../src/core.mjs';
@@ -21,7 +22,7 @@ async function main(){
  }
  const project=await loadJSON(src);const issues=validateProject(project);
  if(issues.length){console.error('Project validation FAILED:');issues.forEach(i=>console.error(`  ${i.path}: ${i.reason}`));process.exitCode=1;return}
- if(cmd==='validate'){console.log(`VALID • ${project.title} • ${project.boards.length} boards • ${project.boards.reduce((n,b)=>n+b.nodes.length,0)} nodes • hash ${hashProject(project)}`);return}
+ if(cmd==='validate'){console.log(`VALID • ${project.title} • ${project.boards.length} boards • ${project.boards.reduce((n,b)=>n+flattenNodes(b.nodes).length,0)} nodes • hash ${hashProject(project)}`);return}
  if(cmd==='audit'){
   const findings=auditProject(project);
   console.log(JSON.stringify({project:project.title,hash:hashProject(project),findings},null,2));return;
@@ -34,7 +35,7 @@ async function main(){
  if(cmd==='apply'){
   if(!arg3)throw Error('apply requires patch file');if(arg4!=='--out'||!arg5)throw Error('apply must specify --out <new-file.json>; original not overwritten');
   const patch=await loadJSON(arg3);const revised=applyPatch(project,patch);
-  await fs.mkdir(path.dirname(path.resolve(arg5)),{recursive:true});await fs.writeFile(arg5,JSON.stringify(revised,null,2)+'\n');
+  await fs.mkdir(path.dirname(path.resolve(arg5)),{recursive:true});await fs.writeFile(arg5,JSON.stringify(revised,null,2)+'\n',{flag:'wx'});
   console.log(`PATCH APPLIED • ${patch.ops.length} ops • original ${hashProject(project)} → ${hashProject(revised)} • ${arg5}`);return;
  }
  throw Error('Unknown command: '+cmd);

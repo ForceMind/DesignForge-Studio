@@ -5,11 +5,11 @@ let seq=0;const id=()=>`m${++seq}`;
 const text=(name,content,size=16,h=28)=>({id:id(),type:'text',name,x:0,y:0,w:260,h,text:content,style:{fontSize:size,fontWeight:size>20?700:500,color:'$ink'},sizing:{w:'fill',h:'hug'}});
 const frame=(name,children,layout={},w=320,h=200)=>({id:id(),type:'frame',name,x:0,y:0,w,h,text:'',style:{fill:'$surface',radius:'$radius'},children,layout:{mode:'flex',direction:'column',gap:'$spacing',padding:20,...layout},sizing:{w:'fill',h:'hug'}});
 const button=(label)=>({id:id(),type:'button',name:label,x:0,y:0,w:140,h:44,text:label,style:{fill:'$primary',color:'#FFFFFF',fontSize:14,fontWeight:650,radius:10},sizing:{w:'fill'}});
-const metric=(name,value)=>frame(name,[text(name,name,14,24),text('Value',value,30,42),text('Context','Demo data · this month',12,20)],{},260,148);
+const metric=(name,value)=>({...frame(name,[text(name,name,14,24),text('Value',value,30,42),text('Context','Demo data · this month',12,20)],{},260,148),style:{fill:'$surfaceAlt',stroke:'$border',strokeWidth:1,radius:'$radius'}});
 const list=(title,items)=>frame(title,[text('Section heading',title,20,32),...items.map((label,i)=>frame(label,[text('Label',label,15,24),text('Detail',['Ready for review','In progress','Updated just now'][i%3],12,20)],{gap:4,padding:12},260,72))],{},320,360);
 const base=title=>{const p=newProject(title);p.id=title.toLowerCase().replace(/[^a-z]/g,'').slice(0,50);p.updatedAt='2026-10-23T00:00:00.000Z';Object.assign(p.tokens,{accent:'#2563EB',primary:'$accent',spacing:12,spaceLarge:24,muted:'#667085'});p.themes={dark:{surface:'#202938',surfaceAlt:'#151D2B',ink:'#F2F4F8',muted:'#BCC7DA',border:'#3A4659',primarySoft:'#263D62',accent:'#3B82F6'}};p.components=[];return p;};
 const board=(name,children,w=1200,h=1000)=>{
- const root=frame('Page frame',children,{padding:'$spaceLarge',gap:20},w-64,h-64);root.x=32;root.y=32;root.sizing={h:'hug'};root.constraints={horizontal:'stretch',referenceW:w};return {id:id(),name,x:0,y:80,w,h,bg:'#EEF1F6',nodes:[root]};
+ const root=frame('Page frame',children,{padding:'$spaceLarge',gap:20},w-64,h-64);root.x=32;root.y=32;root.sizing={h:'hug'};root.constraints={horizontal:'stretch',referenceW:w};return {id:id(),name,x:0,y:80,w,h,autoHeight:true,bg:'#EEF1F6',nodes:[root]};
 };
 const header=title=>frame('Header',[text('Product name',title,22,36),button('New project')],{direction:'row',align:'center',justify:'space-between',padding:0},1000,48);
 const p=base('Studio — Responsive workspace');

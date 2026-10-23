@@ -102,3 +102,9 @@ test('container deletion removes all descendants and preserves other boards',()=
 test('audits traverse absolute descendants and annotate immediate-parent overflow',()=>{
  const p=project(),n=p.boards[0].nodes[0];n.layout={mode:'absolute'};n.children[0].x=n.w+10;assert.ok(auditProject(p).some(i=>i.nodeId===n.children[0].id&&i.code==='OVERFLOW'));
 });
+test('locked descendants cannot be patched, moved or removed by deleting an ancestor',()=>{
+ const p=project(),b=p.boards[0],root=b.nodes[0],child=root.children[1];child.locked=true;
+ for(const op of [{kind:'set-node',boardId:b.id,nodeId:child.id,changes:{text:'No'}},{kind:'move-node',boardId:b.id,nodeId:child.id,parentId:null},{kind:'remove-node',boardId:b.id,nodeId:root.id}])assert.throws(()=>applyPatch(p,patch(p,[op])),/Locked/);
+ const next=applyPatch(p,patch(p,[{kind:'set-node',boardId:b.id,nodeId:child.id,changes:{locked:false}}]));assert.equal(findNode(next.boards[0],child.id).locked,false);
+ root.locked=true;assert.throws(()=>applyPatch(p,patch(p,[{kind:'set-node',boardId:b.id,nodeId:child.id,changes:{locked:false}}])),/Locked/);
+});

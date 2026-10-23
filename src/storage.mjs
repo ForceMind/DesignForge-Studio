@@ -18,6 +18,7 @@ export function saveProject(storage,project) {
     if(!validateProject(p).length && hashProject(p)!==hashProject(project) && backups.at(-1)?.hash!==hashProject(p))backups.push({hash:hashProject(p),savedAt:new Date().toISOString(),project:p});
   }catch{}
   // Preserve the current project if backup storage is full. Never clear data to make room.
+  while(backups.length && JSON.stringify(backups).length>750000)backups.shift();
   storage.setItem(BACKUP_KEY,JSON.stringify(backups.slice(-8)));
   storage.setItem(PROJECT_KEY,JSON.stringify(project));
 }
