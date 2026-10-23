@@ -1,0 +1,770 @@
+{
+  "format": "designforge.project",
+  "version": 1,
+  "id": "desktopfilebrowser",
+  "title": "Desktop file browser",
+  "tokens": {
+    "primary": "$accent",
+    "primarySoft": "#EEEAFE",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#F7F8FB",
+    "canvas": "#F3F5F9",
+    "ink": "#202238",
+    "muted": "#667085",
+    "border": "#E4E7F0",
+    "success": "#13734F",
+    "warning": "#F4B754",
+    "danger": "#E16C70",
+    "radius": 14,
+    "fontFamily": "system-ui",
+    "accent": "#2563EB",
+    "spacing": 12,
+    "spaceLarge": 24
+  },
+  "boards": [
+    {
+      "id": "m289",
+      "name": "Desktop file browser",
+      "x": 0,
+      "y": 80,
+      "w": 1200,
+      "h": 800,
+      "bg": "#EEF1F6",
+      "nodes": [
+        {
+          "id": "m288",
+          "type": "frame",
+          "name": "Page frame",
+          "x": 32,
+          "y": 32,
+          "w": 1136,
+          "h": 736,
+          "text": "",
+          "style": {
+            "fill": "$surface",
+            "radius": "$radius"
+          },
+          "children": [
+            {
+              "id": "m242",
+              "type": "frame",
+              "name": "Header",
+              "x": 0,
+              "y": 0,
+              "w": 1000,
+              "h": 48,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m240",
+                  "type": "text",
+                  "name": "Product name",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 36,
+                  "text": "Project library",
+                  "style": {
+                    "fontSize": 22,
+                    "fontWeight": 700,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m241",
+                  "type": "button",
+                  "name": "New project",
+                  "x": 0,
+                  "y": 0,
+                  "w": 140,
+                  "h": 44,
+                  "text": "New project",
+                  "style": {
+                    "fill": "$primary",
+                    "color": "#FFFFFF",
+                    "fontSize": 14,
+                    "fontWeight": 650,
+                    "radius": 10
+                  },
+                  "sizing": {
+                    "w": "fill"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "row",
+                "gap": "$spacing",
+                "padding": 0,
+                "align": "center",
+                "justify": "space-between"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m271",
+              "type": "frame",
+              "name": "Library split",
+              "x": 0,
+              "y": 0,
+              "w": 1000,
+              "h": 420,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m253",
+                  "type": "frame",
+                  "name": "Collections",
+                  "x": 0,
+                  "y": 0,
+                  "w": 320,
+                  "h": 360,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m243",
+                      "type": "text",
+                      "name": "Section heading",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 32,
+                      "text": "Collections",
+                      "style": {
+                        "fontSize": 20,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m246",
+                      "type": "frame",
+                      "name": "All projects",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m244",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "All projects",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m245",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Ready for review",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m249",
+                      "type": "frame",
+                      "name": "Favorites",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m247",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Favorites",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m248",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "In progress",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m252",
+                      "type": "frame",
+                      "name": "Recently opened",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m250",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Recently opened",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m251",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Updated just now",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": "$spacing",
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m270",
+                  "type": "frame",
+                  "name": "File grid",
+                  "x": 0,
+                  "y": 0,
+                  "w": 700,
+                  "h": 320,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m257",
+                      "type": "frame",
+                      "name": "Orbit",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 148,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m254",
+                          "type": "text",
+                          "name": "Orbit",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Orbit",
+                          "style": {
+                            "fontSize": 14,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m255",
+                          "type": "text",
+                          "name": "Value",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 42,
+                          "text": "3 boards",
+                          "style": {
+                            "fontSize": 30,
+                            "fontWeight": 700,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m256",
+                          "type": "text",
+                          "name": "Context",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Demo data · this month",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": "$spacing",
+                        "padding": 20
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m261",
+                      "type": "frame",
+                      "name": "Studio",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 148,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m258",
+                          "type": "text",
+                          "name": "Studio",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Studio",
+                          "style": {
+                            "fontSize": 14,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m259",
+                          "type": "text",
+                          "name": "Value",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 42,
+                          "text": "2 boards",
+                          "style": {
+                            "fontSize": 30,
+                            "fontWeight": 700,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m260",
+                          "type": "text",
+                          "name": "Context",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Demo data · this month",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": "$spacing",
+                        "padding": 20
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m265",
+                      "type": "frame",
+                      "name": "Game HUD",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 148,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m262",
+                          "type": "text",
+                          "name": "Game HUD",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Game HUD",
+                          "style": {
+                            "fontSize": 14,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m263",
+                          "type": "text",
+                          "name": "Value",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 42,
+                          "text": "1 board",
+                          "style": {
+                            "fontSize": 30,
+                            "fontWeight": 700,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m264",
+                          "type": "text",
+                          "name": "Context",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Demo data · this month",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": "$spacing",
+                        "padding": 20
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m269",
+                      "type": "frame",
+                      "name": "Storefront",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 148,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m266",
+                          "type": "text",
+                          "name": "Storefront",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Storefront",
+                          "style": {
+                            "fontSize": 14,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m267",
+                          "type": "text",
+                          "name": "Value",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 42,
+                          "text": "1 board",
+                          "style": {
+                            "fontSize": 30,
+                            "fontWeight": 700,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m268",
+                          "type": "text",
+                          "name": "Context",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Demo data · this month",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": "$spacing",
+                        "padding": 20
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "grid",
+                    "direction": "column",
+                    "gap": "$spacing",
+                    "padding": 0,
+                    "columns": 2
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "grid",
+                "direction": "column",
+                "gap": "$spacing",
+                "padding": 0,
+                "columns": 2
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            }
+          ],
+          "layout": {
+            "mode": "flex",
+            "direction": "column",
+            "gap": 20,
+            "padding": "$spaceLarge"
+          },
+          "sizing": {
+            "h": "hug"
+          },
+          "constraints": {
+            "horizontal": "stretch",
+            "referenceW": 1200
+          }
+        }
+      ]
+    }
+  ],
+  "comments": [],
+  "updatedAt": "2026-10-23T00:00:00.000Z",
+  "themes": {
+    "dark": {
+      "surface": "#202938",
+      "surfaceAlt": "#151D2B",
+      "ink": "#F2F4F8",
+      "muted": "#BCC7DA",
+      "border": "#3A4659",
+      "primarySoft": "#263D62",
+      "accent": "#3B82F6"
+    }
+  },
+  "components": []
+}

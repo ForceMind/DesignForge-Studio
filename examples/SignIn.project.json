@@ -1,0 +1,278 @@
+{
+  "format": "designforge.project",
+  "version": 1,
+  "id": "mobilesignin",
+  "title": "Mobile sign in",
+  "tokens": {
+    "primary": "$accent",
+    "primarySoft": "#EEEAFE",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#F7F8FB",
+    "canvas": "#F3F5F9",
+    "ink": "#202238",
+    "muted": "#667085",
+    "border": "#E4E7F0",
+    "success": "#13734F",
+    "warning": "#F4B754",
+    "danger": "#E16C70",
+    "radius": 14,
+    "fontFamily": "system-ui",
+    "accent": "#2563EB",
+    "spacing": 12,
+    "spaceLarge": 24
+  },
+  "boards": [
+    {
+      "id": "m285",
+      "name": "Mobile sign in",
+      "x": 0,
+      "y": 80,
+      "w": 390,
+      "h": 900,
+      "bg": "#EEF1F6",
+      "nodes": [
+        {
+          "id": "m284",
+          "type": "frame",
+          "name": "Page frame",
+          "x": 32,
+          "y": 32,
+          "w": 326,
+          "h": 836,
+          "text": "",
+          "style": {
+            "fill": "$surface",
+            "radius": "$radius"
+          },
+          "children": [
+            {
+              "id": "m212",
+              "type": "text",
+              "name": "Brand",
+              "x": 0,
+              "y": 0,
+              "w": 260,
+              "h": 44,
+              "text": "FORGE",
+              "style": {
+                "fontSize": 24,
+                "fontWeight": 700,
+                "color": "$ink"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m213",
+              "type": "text",
+              "name": "Welcome",
+              "x": 0,
+              "y": 0,
+              "w": 260,
+              "h": 56,
+              "text": "Welcome back.",
+              "style": {
+                "fontSize": 32,
+                "fontWeight": 700,
+                "color": "$ink"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m214",
+              "type": "text",
+              "name": "Description",
+              "x": 0,
+              "y": 0,
+              "w": 260,
+              "h": 56,
+              "text": "Continue to your local workspace.",
+              "style": {
+                "fontSize": 16,
+                "fontWeight": 500,
+                "color": "$ink"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m219",
+              "type": "frame",
+              "name": "Credentials",
+              "x": 0,
+              "y": 0,
+              "w": 300,
+              "h": 240,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m215",
+                  "type": "text",
+                  "name": "Email",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 24,
+                  "text": "Email address",
+                  "style": {
+                    "fontSize": 14,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m216",
+                  "type": "text",
+                  "name": "Email value",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 40,
+                  "text": "designer@example.com",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m217",
+                  "type": "text",
+                  "name": "Password",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 24,
+                  "text": "Password",
+                  "style": {
+                    "fontSize": 14,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m218",
+                  "type": "text",
+                  "name": "Password value",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 40,
+                  "text": "••••••••••••",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": "$spacing",
+                "padding": 20
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m220",
+              "type": "button",
+              "name": "Continue",
+              "x": 0,
+              "y": 0,
+              "w": 140,
+              "h": 44,
+              "text": "Continue",
+              "style": {
+                "fill": "$primary",
+                "color": "#FFFFFF",
+                "fontSize": 14,
+                "fontWeight": 650,
+                "radius": 10
+              },
+              "sizing": {
+                "w": "fill"
+              }
+            },
+            {
+              "id": "m221",
+              "type": "text",
+              "name": "Privacy",
+              "x": 0,
+              "y": 0,
+              "w": 260,
+              "h": 44,
+              "text": "Your project files stay on this device.",
+              "style": {
+                "fontSize": 12,
+                "fontWeight": 500,
+                "color": "$ink"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            }
+          ],
+          "layout": {
+            "mode": "flex",
+            "direction": "column",
+            "gap": 20,
+            "padding": "$spaceLarge"
+          },
+          "sizing": {
+            "h": "hug"
+          },
+          "constraints": {
+            "horizontal": "stretch",
+            "referenceW": 390
+          }
+        }
+      ]
+    }
+  ],
+  "comments": [],
+  "updatedAt": "2026-10-23T00:00:00.000Z",
+  "themes": {
+    "dark": {
+      "surface": "#202938",
+      "surfaceAlt": "#151D2B",
+      "ink": "#F2F4F8",
+      "muted": "#BCC7DA",
+      "border": "#3A4659",
+      "primarySoft": "#263D62",
+      "accent": "#3B82F6"
+    }
+  },
+  "components": []
+}

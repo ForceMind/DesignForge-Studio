@@ -1,0 +1,276 @@
+{
+  "format": "designforge.project",
+  "version": 1,
+  "id": "portraitgamehud",
+  "title": "Portrait game HUD",
+  "tokens": {
+    "primary": "$accent",
+    "primarySoft": "#EEEAFE",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#F7F8FB",
+    "canvas": "#F3F5F9",
+    "ink": "#202238",
+    "muted": "#667085",
+    "border": "#E4E7F0",
+    "success": "#13734F",
+    "warning": "#F4B754",
+    "danger": "#E16C70",
+    "radius": 14,
+    "fontFamily": "system-ui",
+    "accent": "#2563EB",
+    "spacing": 12,
+    "spaceLarge": 24
+  },
+  "boards": [
+    {
+      "id": "m277",
+      "name": "Portrait game HUD",
+      "x": 0,
+      "y": 80,
+      "w": 390,
+      "h": 850,
+      "bg": "#EEF1F6",
+      "nodes": [
+        {
+          "id": "m276",
+          "type": "frame",
+          "name": "Page frame",
+          "x": 32,
+          "y": 32,
+          "w": 326,
+          "h": 786,
+          "text": "",
+          "style": {
+            "fill": "$surface",
+            "radius": "$radius"
+          },
+          "children": [
+            {
+              "id": "m150",
+              "type": "frame",
+              "name": "HUD",
+              "x": 0,
+              "y": 0,
+              "w": 320,
+              "h": 56,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m148",
+                  "type": "text",
+                  "name": "Coins",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 28,
+                  "text": "● 2,450",
+                  "style": {
+                    "fontSize": 18,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m149",
+                  "type": "text",
+                  "name": "Level",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 28,
+                  "text": "LEVEL 12",
+                  "style": {
+                    "fontSize": 18,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "row",
+                "gap": "$spacing",
+                "padding": 12
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m153",
+              "type": "frame",
+              "name": "Playfield",
+              "x": 0,
+              "y": 0,
+              "w": 320,
+              "h": 390,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m151",
+                  "type": "text",
+                  "name": "Mission",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 50,
+                  "text": "Sort every color",
+                  "style": {
+                    "fontSize": 26,
+                    "fontWeight": 700,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m152",
+                  "type": "text",
+                  "name": "Board hint",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 40,
+                  "text": "Playable content area",
+                  "style": {
+                    "fontSize": 16,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": "$spacing",
+                "padding": 20,
+                "justify": "center",
+                "align": "center"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m156",
+              "type": "frame",
+              "name": "Power ups",
+              "x": 0,
+              "y": 0,
+              "w": 320,
+              "h": 48,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m154",
+                  "type": "button",
+                  "name": "Undo",
+                  "x": 0,
+                  "y": 0,
+                  "w": 140,
+                  "h": 44,
+                  "text": "Undo",
+                  "style": {
+                    "fill": "$primary",
+                    "color": "#FFFFFF",
+                    "fontSize": 14,
+                    "fontWeight": 650,
+                    "radius": 10
+                  },
+                  "sizing": {
+                    "w": "fill"
+                  }
+                },
+                {
+                  "id": "m155",
+                  "type": "button",
+                  "name": "Hint",
+                  "x": 0,
+                  "y": 0,
+                  "w": 140,
+                  "h": 44,
+                  "text": "Hint",
+                  "style": {
+                    "fill": "$primary",
+                    "color": "#FFFFFF",
+                    "fontSize": 14,
+                    "fontWeight": 650,
+                    "radius": 10
+                  },
+                  "sizing": {
+                    "w": "fill"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "row",
+                "gap": "$spacing",
+                "padding": 0
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            }
+          ],
+          "layout": {
+            "mode": "flex",
+            "direction": "column",
+            "gap": 20,
+            "padding": "$spaceLarge"
+          },
+          "sizing": {
+            "h": "hug"
+          },
+          "constraints": {
+            "horizontal": "stretch",
+            "referenceW": 390
+          }
+        }
+      ]
+    }
+  ],
+  "comments": [],
+  "updatedAt": "2026-10-23T00:00:00.000Z",
+  "themes": {
+    "dark": {
+      "surface": "#202938",
+      "surfaceAlt": "#151D2B",
+      "ink": "#F2F4F8",
+      "muted": "#BCC7DA",
+      "border": "#3A4659",
+      "primarySoft": "#263D62",
+      "accent": "#3B82F6"
+    }
+  },
+  "components": []
+}

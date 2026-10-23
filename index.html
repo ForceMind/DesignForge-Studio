@@ -22,7 +22,7 @@
       <span id="project-title" class="crumb-current">Orbit — Product Analytics</span>
       <span class="top-pill"><span class="pulse-dot"></span> Local project</span>
     </div>
-    <div class="top-actions">
+    <div class="top-actions"><select id="example-picker" aria-label="打开示例"><option value="">示例项目</option><option value="Orbit">Orbit · M0 原稿</option><option value="Studio">Studio · 响应式组件</option><option value="Settings">Settings</option><option value="Kanban">Kanban</option><option value="GameHUD">GameHUD</option><option value="LandscapeHUD">LandscapeHUD</option><option value="Pricing">Pricing</option><option value="Messages">Messages</option><option value="SignIn">SignIn</option><option value="Storefront">Storefront</option><option value="Files">Files</option></select><button id="recover-project" class="top-button" title="恢复本地备份">恢复</button><button id="theme-toggle" class="top-button" title="切换编辑器明暗主题" aria-label="切换编辑器明暗主题">◐</button>
       <label class="top-button subtle" for="upload-json" title="打开本地项目"> <span class="topicon">↥</span> 导入</label>
       <input id="upload-json" type="file" accept=".json,application/json" hidden />
       <input id="upload-patch" type="file" accept=".json,application/json" hidden />
@@ -36,17 +36,17 @@
         <div class="panel-header"><span>工作区</span><button class="icon-button" id="rename-project" title="重命名项目" aria-label="重命名项目">✎</button></div>
         <div class="project-box">
           <span class="project-visual">O</span>
-          <div><b id="project-short-name">Orbit Workspace</b><small>Design project · v0.1</small></div>
+          <div><b id="project-short-name">Orbit Workspace</b><small>Design project · M1 preview</small></div>
           <span class="project-ellipsis">⋯</span>
         </div>
-        <div class="pane-tabs" id="left-tabs"><button class="active" data-lefttab="layers">图层</button><button data-lefttab="comments">标注 <span id="comment-count" class="count">1</span></button></div>
+        <div class="pane-tabs" id="left-tabs"><button class="active" data-lefttab="layers">图层</button><button data-lefttab="components">组件</button><button data-lefttab="comments">标注 <span id="comment-count" class="count">1</span></button></div>
         <div id="layers-pane">
           <div class="section-head"><span>画板 <span id="board-count" class="subcount">3</span></span><button id="new-board" class="small-action" title="新增画板">＋</button></div>
           <div id="board-list" class="board-list"></div>
           <div class="section-head with-line"><span>元素图层</span><span class="light-tip" id="layer-count">0</span></div>
-          <div id="layer-list" class="layer-list"></div>
+          <div id="layer-list" class="layer-list" role="tree" aria-label="元素图层树"></div>
         </div>
-        <div id="comments-pane" hidden>
+        <div id="components-pane" hidden><div class="section-head">本地组件库</div><div id="component-list"></div></div><div id="comments-pane" hidden>
           <div class="section-head"><span>评审批注</span><button class="small-action" id="add-comment" title="对当前画板或元素添加标注">＋</button></div>
           <div id="comment-list" class="comments-list"></div>
         </div>
@@ -63,7 +63,7 @@
           <button id="tool-select" class="tool-button selected" title="选择 / 拖动元素 (V)" aria-label="选择">↖</button>
           <button id="tool-hand" class="tool-button" title="平移画布 (H 或空格)" aria-label="平移">✋</button>
           <span class="tool-separator"></span>
-          <button id="add-text" class="tool-button" title="添加文字">T</button>
+          <button id="add-frame" class="tool-button" title="添加嵌套容器">#</button><button id="add-text" class="tool-button" title="添加文字">T</button>
           <button id="add-rect" class="tool-button" title="添加矩形">▭</button>
           <button id="add-button" class="tool-button" title="添加按钮">▣</button>
           <button id="add-icon" class="tool-button" title="添加图标">◇</button>
