@@ -1,6 +1,6 @@
 # M1 第一阶段交付验收
 
-日期：2026-10-24（Asia/Shanghai）。版本：0.2.0-alpha.5。产品代码：856471b0796ee179a25951d903844c56e7c97b26。[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)，分支 codex/m1-editor-foundation；稳定 main 仍为 M0。
+日期：2026-10-25（Asia/Shanghai）。版本：0.2.0-alpha.6。产品代码：47550d482f02b025964a792288d7f0186f9250b0。[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)，分支 codex/m1-editor-foundation；稳定 main 仍为 M0。
 
 本表对应用户要求的第一阶段八项工程交付。结论是这些基础交付已完成验收；不会把长期路线中尚未实现的增强项改写为已完成。
 
@@ -11,7 +11,7 @@
 | 兼容已有数据 | v1继续使用；可选嵌套/分段/设计系统数据，原Orbit不变 | Orbit 3画板/170节点/hash21a89182，原Patch和回归全部保留 |
 | 可复用设计系统 | Token/alias/字体/主题、实例源后代覆盖/恢复、本地库包前缀隔离与冲突拒绝 | 真实库下载→另一项目导入→插实例渲染；主题/字体/资产引用单测 |
 | 可操作示例 | 原Orbit + 10个M1工程，Desktop/Mobile与横竖游戏HUD；Studio.library.json | 11工程JSON往返、全部HTML渲染，Studio390/768/1440原稿/中文长文及约+30%压力场景边界 |
-| 测试及可验证结果 | 158 Node + 99 Chrome全部通过；实际截图复核 | [CI run30](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40103132608)，VALIDATION.md |
+| 测试及可验证结果 | 190 Node + 125 Chrome + 119 Firefox + 119 WebKit全部通过；实际截图复核 | [CI run38](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40115199604)，VALIDATION.md |
 | 架构/路线/缺陷文档 | 模块、协议扩展、投影预算、当前能力边界和历史失败记录已更新 | ARCHITECTURE / PATCH_PROTOCOL / ROADMAP / KNOWN_ISSUES / VALIDATION |
 | GitHub提交及PR | 独立分支持续提交，PR可审阅，不替换稳定main | PR #1、产品代码及后续文档提交；具体head以GitHub为准 |
 
@@ -28,9 +28,14 @@
 
 - 多选缩放限同父自由图层的基础样式，调整盒子与间隙；不等于字体/后代内容整体栅格缩放。实测组合会将参与根尺寸固定，Undo保留原布局；几何断点覆盖等无法无损情况拒绝。
 - 设计系统为受限本地包，不是完整DTCG或在线库版本同步；定义内不支持嵌套实例。富文本不是HTML或完整段落排版引擎。
-- DOM碰撞是建议，可能是有意叠放；当前只验证Chrome及列明视图，未完成Firefox/WebKit/真机/触屏、像素golden、完整WCAG；文字压力不是全语言覆盖。
+- DOM碰撞是建议，可能是有意叠放；已验证列明的Chrome/Firefox/WebKit Linux交互与5张Chrome像素基准；真机/触屏、原生Safari、完整WCAG仍未完成，文字压力不是全语言覆盖。
 - AI调用/BYOK、截图/HTML重构、视觉Diff审批/三方合并仍是M2；React/Vue与原型导航等仍是M3。当前保留严格Patch闭环，不宣称内置AI已完成。
 
-最新截图：[布局排序](screenshots/m1-flow-reorder.png) · [断点范围](screenshots/m1-breakpoint-overview.png) · [文字预检](screenshots/m1-text-expansion.png) · [检测面板](screenshots/m1-audit-final.png)；其他alpha.4原始截图来源和历史失败记录见VALIDATION.md。
+最新截图：[节点历史](screenshots/m1-node-history.png) · [全页断点](screenshots/m1-board-breakpoints.png) · [Firefox来源定位](screenshots/m1-board-breakpoints-firefox.png) · [WebKit历史](screenshots/m1-node-history-webkit.png) · [布局排序](screenshots/m1-flow-reorder.png) · [断点范围](screenshots/m1-breakpoint-overview.png) · [文字预检](screenshots/m1-text-expansion.png) · [检测面板](screenshots/m1-audit-final.png)；其他alpha.4原始截图来源和历史失败记录见VALIDATION.md。
 
-alpha.5 新增的排序仅限单选同父；断点范围图仅列本节点，不是整页聚合。独立预览与无变化排序不写项目/历史；真实拖动、锁定、实例、取消/重载/导出及范围边界回归均已通过。范围截图的测试图层刻意宽于父画板边界，证明预览与修改范围独立，不证明该夹具没有溢出。
+alpha.5 新增的排序仅限单选同父；本节点范围条展示单节点，alpha.6 的画板断点面板聚合整页来源。独立预览与无变化排序不写项目/历史；真实拖动、锁定、实例、取消/重载/导出及范围边界回归均已通过。范围截图的测试图层刻意宽于父画板边界，证明预览与修改范围独立，不证明该夹具没有溢出。
+
+
+alpha.6补齐会话节点历史、整页断点来源聚合、三引擎CI及Chrome像素回归。历史最多35份完整快照且有总字符预算，刷新或文件导入会重新开始；不是长期版本服务。Firefox和WebKit各119项交互通过，6项Chrome专属像素检查明确跳过；Chrome125项包括同样119项交互、5个正向像素视图和1个12px偏移检出对照。
+
+补充安全回归：后续锁定组件源后，历史局部恢复仍复用 Patch 的源层/祖先锁定保护；无关实例名称可独立撤回。恢复已删除的实例也不能把覆盖写回已锁源层。

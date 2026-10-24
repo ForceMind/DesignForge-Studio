@@ -1,6 +1,6 @@
 # DesignForge Studio · 形界设计工作台
 
-> **v0.2.0-alpha.5 · M1 基础交付增强版**。Local-first、AI-native、Agent-friendly UI Design Studio。第一阶段八项交付已通过基础验收；完整范围见 [验收清单](docs/M1_ACCEPTANCE.md)，增强路线及M2/M3继续推进。
+> **v0.2.0-alpha.6 · M1 基础交付增强版**。Local-first、AI-native、Agent-friendly UI Design Studio。第一阶段八项交付已通过基础验收；完整范围见 [验收清单](docs/M1_ACCEPTANCE.md)，增强路线及M2/M3继续推进。
 
 ## 运行
 
@@ -17,7 +17,7 @@ npm start
 ```bash
 npm ci
 npm test
-npx playwright install --with-deps chromium
+npx playwright install --with-deps
 npm run test:browser
 npm run format:check
 ```
@@ -34,23 +34,25 @@ npm run format:check
 - **编辑操作**：空白拖动框选、Shift 增选、六向对齐、同父级图层水平/垂直等距分布、组合/解组、整棵子树复制、排序、删除、方向键、拖动；8px 网格和边缘/中心吸附（Alt 暂停）。同父级自由布局的多选图层可整体调整盒子与间隙，单选图层提供尺寸拖拽，Shift 等比、自由布局 Alt 中心缩放，Esc/取消回滚，松手只提交一次。自由布局编辑与 Auto Layout 的位置管理分开。
 - **布局排序**：Flex 行/列、换行与 Grid 内直接拖动单选图层，插入线提示同父级位置；支持前后移位按钮、Alt + 方向键。松手一次提交，Esc/指针取消/失焦/拖出父容器回滚，顺序在所有断点共用，组件实例保持关联。
 - **本地资源**：PNG/JPEG/WebP/GIF、受限 SVG、WOFF/WOFF2/TTF；内嵌项目及 HTML 导出，无外链请求。单资源编码后最多 512 KB，总计 1 MB。SVG 拒绝脚本、外部引用、HTML、CSS、实体与未知标签/属性。
-- **保存与恢复**：当前项目自动保存、最多 8 个旧快照（并受总大小预算约束）、损坏存档回退、手动选择备份恢复、35 步内存 Undo/Redo。JSON/HTML/ZIP 原有导出保留。
+- **保存与恢复**：当前项目自动保存、最多 8 个旧快照（并受总大小预算约束）、损坏存档回退、手动选择备份恢复、最多35份会话快照（含当前版本，至多34步Undo，并受序列化字符预算约束）。JSON/HTML/ZIP 原有导出保留。
+- **节点历史**：查看当前或已删除图层的会话修订，预览字段差异并选择性撤回。保留后来修改的其他字段；冲突、锁定、资源失效或 ID 碰撞拒绝覆盖。支持受保护的删除恢复、批注恢复和父容器子层排序恢复。
+- **整页断点**：画板右下角“断点”汇总嵌套图层与组件源定义，支持搜索、分页、预览、定位编辑及 JSON 来源报告；实例投影始终定位到实际实例。
 - **Agent Patch**：保持 `designforge.patch` v1、必需 baseHash、字段白名单、原子应用与人工确认；扩展嵌套操作、受限布局编辑和移动节点，Diff 显示父级/顺序变化。
 - **示例**：原 Orbit 三画板 170 节点保持不变；新增 Studio 响应式双画板、Settings、Kanban、Messages、Pricing、SignIn、Storefront、Files、横竖屏游戏 HUD 共 10 个工程。顶部菜单可打开，打开操作可撤销。
 
 ## 实际验证
 
-CI 分开运行 Node 测试和真实 Chrome（Chromium 引擎）测试，浏览器截图/失败追踪保存在对应 Actions 的 `browser-evidence` artifact（保留 14 天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。本轮158项Node和99项真实Chrome全部通过；最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
+CI 分开运行 Node 测试，以及 Chrome、Playwright Firefox/WebKit 三套真实引擎测试；截图/失败追踪和实际版本保存在 `browser-evidence-<engine>` artifact（保留14天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。本轮190项Node、Chrome125项、Firefox119项、WebKit119项全部通过；后两者各跳过6项Chrome专属像素检查；最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
 
 检查面板可运行实际DOM几何检查及约+30%文字膨胀预检（离屏副本，不改原稿），报告可导出并标记过期。
 
-浏览器断言不是视觉差异基准，也不是 WCAG 认证；Firefox、Safari、真实触屏设备尚未验收。
+已加入5张经过人工查看的Chrome/Linux像素基准和差异检出对照；正常CI禁止自动更新。它不是完整WCAG认证、AI视觉审查或原生Safari/真实触屏设备验收。
 
 ## 真实浏览器截图
 
-![深色设计工作台](docs/screenshots/m1-workbench.png)
+![深色设计工作台](tests/browser/visual-baselines.spec.mjs-snapshots/workbench-dark-chromium-linux.png)
 
-[布局拖动排序](docs/screenshots/m1-flow-reorder.png) · [断点总览](docs/screenshots/m1-breakpoint-overview.png) · [富文本](docs/screenshots/m1-richtext.png) · [多选缩放](docs/screenshots/m1-multiresize.png) · [设计系统包](docs/screenshots/m1-library.png) · [浏览器检测](docs/screenshots/m1-audit-final.png) · [文字膨胀预检](docs/screenshots/m1-text-expansion.png) · [浅色参考线](docs/screenshots/m1-guides-light.png) · [深色参考线](docs/screenshots/m1-guides-dark.png) · [等距分布](docs/screenshots/m1-distribution.png) · [尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
+[节点历史](docs/screenshots/m1-node-history.png) · [整页断点](docs/screenshots/m1-board-breakpoints.png) · [布局拖动排序](docs/screenshots/m1-flow-reorder.png) · [断点总览](docs/screenshots/m1-breakpoint-overview.png) · [富文本](docs/screenshots/m1-richtext.png) · [多选缩放](docs/screenshots/m1-multiresize.png) · [设计系统包](docs/screenshots/m1-library.png) · [浏览器检测](docs/screenshots/m1-audit-final.png) · [文字膨胀预检](docs/screenshots/m1-text-expansion.png) · [浅色参考线](docs/screenshots/m1-guides-light.png) · [深色参考线](docs/screenshots/m1-guides-dark.png) · [等距分布](docs/screenshots/m1-distribution.png) · [尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
 
 ## 使用 Agent
 
@@ -67,12 +69,18 @@ node tools/forge.mjs apply examples/Orbit.project.json examples/Rename-revenue.p
 
 ## 尚未完成
 
-当前仍缺整页断点聚合、节点级修订历史、嵌套组件实例与跨项目在线库版本同步；多选缩放限同父级基础样式，Flow/断点模式会明确拒绝。当前导出为静态 HTML/CSS。自然语言生成、BYOK 模型、截图/HTML 重构和可视化审批属于 M2；React/Vue、交互原型与完整自动化视觉质量闭环属于 M3。不要把本版当作完整 Figma 替代品。
+当前节点历史限受预算约束的当前会话，不跨刷新；嵌套组件实例、组件定义直接编辑与跨项目在线库版本同步仍待补齐；多选缩放限同父级基础样式，Flow/断点模式会明确拒绝。当前导出为静态 HTML/CSS。自然语言生成、BYOK 模型、截图/HTML 重构和可视化审批属于 M2；React/Vue、交互原型与完整自动化视觉质量闭环属于 M3。不要把本版当作完整 Figma 替代品。
 
 ## 工程与许可
 
-`src/core.mjs` 协议/渲染/补丁，`tree.mjs` 树编辑，`geometry.mjs` 尺寸/框选/分布/吸附，`guides.mjs` 参考线数据/刻度，`flow-layout.mjs` 实测插入目标/同父排序，`breakpoint-overview.mjs` 本节点范围总览，`responsive.mjs` 断点继承，`viewport.mjs` DOM 测量/预览，`assets.mjs` 资源边界，`storage.mjs` 本地恢复；`app.mjs`/`app.css` 工作台，`tools/` CLI/开发服务器，`tests/` 单元与浏览器测试，`examples/` 可编辑项目。
+`src/core.mjs` 协议/渲染/补丁，`tree.mjs` 树编辑，`geometry.mjs` 尺寸/框选/分布/吸附，`guides.mjs` 参考线数据/刻度，`flow-layout.mjs` 实测插入目标/同父排序，`breakpoint-overview.mjs` 本节点范围总览，`responsive.mjs` 断点继承，`viewport.mjs` DOM 测量/预览，`assets.mjs` 资源边界，`storage.mjs` 本地恢复，`node-history.mjs` 局部撤回与冲突检查，`board-breakpoints.mjs` 全页来源聚合；`app.mjs`/`app.css` 工作台，`tools/` CLI/开发服务器，`tests/` 单元与浏览器测试，`examples/` 可编辑项目。
 
 原创代码 MIT。独立实现，没有复制 BaoCut 受限源码或品牌资源，不是 BaoCut / Anthropic 官方产品。研究来源和许可说明见 [RESEARCH](docs/RESEARCH.md)。
 
 浏览器存储和备份均不替代文件备份；清理站点数据仍会丢失浏览器内项目，请保留 JSON 导出。超出存储额度时明确提示手动保存，不清空旧存档腾空间。
+
+## 浏览器与像素回归
+
+同一套交互用例在三个引擎执行。Linux WebKit不等于原生Safari或iOS真机。像素基准仅针对Chrome/Linux、同一字体/环境；覆盖Studio在390/768/1440px的浏览器视口和明暗工作台。比较阈值为0.1%像素、默认颜色阈值0.2；一个对照用例先匹配原图，再制造12px偏移并要求检出差异。它不自动判断审美或所有无障碍规则。
+
+正常CI使用`updateSnapshots: none`；维护者需要在相同环境显式运行`npx playwright test visual-baselines --update-snapshots`，查看原始PNG后提交基准。不能用自动重写基准掩盖回归。

@@ -175,3 +175,51 @@ Range测量现按非空白连续内容段执行；scroll尺寸保留作证据，
 | [断点范围总览](screenshots/m1-breakpoint-overview.png) | 500px预览、≤600当前效果与基础编辑范围独立、数值范围拒绝反馈 |
 
 PNG直接从该artifact保存，未裁剪或重画。断点图夹具刻意使图层超过画板边界以区分预览效果与基础尺寸，本图不用于证明无溢出；排序图保留布局占位，未承诺实时重排其他兄弟。检查的是Chrome，未新增其他引擎/真机、像素golden或WCAG认证。
+
+
+### M1 alpha.6 · 连续研发与三引擎验收（2026-10-25 Asia/Shanghai）
+
+产品代码 **8b5dafa4abcabc1a74d55c312dcffd257cb2a1ad**，版本 **0.2.0-alpha.6**。[CI run36](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40113832454)四个job均success：
+
+| 检查 | 实际结果 | 环境 |
+|---|---|---|
+| Node | 187通过，0失败 | Node22 CI |
+| Chrome | 124通过，0跳过，约1.8分钟 | Google Chrome155.0.8059.39 / Linux x64 |
+| Firefox | 118通过，6项明确跳过，约1.3分钟 | Playwright Firefox157.0 / Linux x64 |
+| WebKit | 118通过，6项明确跳过，约2.5分钟 | Playwright WebKit27.2 / Linux x64 |
+
+6项像素检查只针对经审阅的Chrome/Linux基准：Studio三个浏览器视口390/768/1440、明/暗工作台，以及先匹配原图、再制造12px偏移并要求检出的负向对照。其他两引擎各自执行同样118项交互；没有把跳过计作通过。WebKit的Safari样式UA不代表运行了用户Mac或iOS真机，实际平台由browser-version.json记录。
+
+新增覆盖节点局部撤回（文字/富文本成组、实例变体成组、叶字段子集）、后续编辑冲突、锁定/缺资源/ID碰撞拒绝、删除与批注恢复、父级/子层顺序保护、Undo/Redo/刷新边界；全页断点的嵌套/源投影/实例覆盖剔除、搜索分页、真实预览、定位到实际可编辑owner、来源JSON下载。导入测试证明保留当前工程、拒绝伪造渲染内部元数据和非法显示名称，原合法自定义元数据不被删除。
+
+历史检查点和实际失败：
+
+| Run / 产品提交 | 结果与修正 |
+|---|---|
+| run32 / 7ef5988 | 176 Node + 109 Chrome全通过，节点历史首轮 |
+| run33 / 8123413 | 183 Node + 115 Chrome全通过，全页断点首轮 |
+| run34 / 28dbfa8 | Chrome115通过；Firefox111/115、WebKit112/115。捕获引擎布局量化带来的累计0.01坐标漂移、整数鼠标事件导致的1px指南差异，以及WebKit测试在手柄异步重绘前读取boundingBox。 |
+| run35 / c1337b0 | 184 Node通过；Chrome121通过但此轮显式自动生成基准，尚不算严格像素验收；WebKit116交互通过，5像素视图跳过；Firefox114/116，剩精度两项。 |
+| run36 / 8b5dafa | 187 Node、124/118/118三引擎通过；禁止自动更新，严格比较及差异检出成功。 |
+
+位置计算改为对既有设计值叠加实测位移，连续40次前后微调在真实浏览器回到原坐标，纯函数100次迭代保持精确；吸附继续从准确目标反解。参考线测试观察真实pointermove坐标，要求与目标屏幕点的差异小于一个屏幕像素再精确核对存档；拖动测试也从真实pointerdown/move计算输入，并保留松手前后<0.1 CSS px的严格断言。WebKit手柄测试使用稳定hover动作后再量测，不用固定延时，也未放松保存/撤销/锁定断言。
+
+#### 原始证据与像素基准来源
+
+- 基准捕获artifact **12567431230**，来源c1337b0/run35，SHA256 `4d9d79c51de2d4e092d8b46e19bbd5a6a8476a1aed9a2e9cbb8ef62fb56a9a6b`。5张PNG均实际下载、逐张查看后直接提交到`tests/browser/visual-baselines.spec.mjs-snapshots/`；同份artifact的[节点历史](screenshots/m1-node-history.png)和[整页断点](screenshots/m1-board-breakpoints.png)也已人工查看并直接保存。
+- run36 Chrome artifact **12567159565**，SHA256 `b57c77d9994176b56336b17d63c0a9c12c17ea50d96ba5307e7a61e18683453e`。严格匹配上述基准，额外12px偏移对照通过。
+- run36 Firefox artifact **12567154629**，SHA256 `02bf55a7a5a346723b9ed177134d6a0ebd9f6fa0c50c2dc5c13f00c6a4f74db5`；实际查看并保存[Firefox全页断点](screenshots/m1-board-breakpoints-firefox.png)。
+- run36 WebKit artifact **12567508376**，SHA256 `0b748cba8c428489464f31db79e4c975295da93676998654b2d87452d8d62441`；实际查看并保存[WebKit节点历史](screenshots/m1-node-history-webkit.png)。
+
+这些artifact均已下载，读取实际启动版本；正常CI不使用`--update-snapshots`，配置为`updateSnapshots: none`。基准容许不同像素比例0.001，颜色阈值采用Playwright默认0.2。它约束固定视图，不承诺所有设计的美观、完整WCAG、AI视觉评审、真实移动触屏或原生Safari。运行/基准维护方式依据[Playwright官方CI](https://playwright.dev/docs/ci)和[视觉比较文档](https://playwright.dev/docs/test-snapshots)，未引入第三方设计源码。
+
+原Orbit再次验证为3画板/170节点/hash21a89182；11个工程往返、旧Patch、原成熟回归和CLI导出保持。
+
+
+#### alpha.6 组件源锁定补充复验
+
+代码复查发现历史恢复入口只校验工程合法性，可能绕过后续新增的组件源锁定。`5a17130` 复用核心 `assertOverrideEditAllowed`，在字段预览与候选工程最终提交前执行同一保护；覆盖现有实例、变体/覆盖原子组和删除实例恢复，不扩大 Patch 权限。
+
+run37 在5a17130：190 Node通过；Chrome124/125、Firefox和WebKit各118/119交互通过。唯一新用例未接管“更新变体”prompt，被浏览器默认取消，因而根本未锁定定义；断言保持不变，补为明确选择既有base变体。修正提交 **47550d482f02b025964a792288d7f0186f9250b0**，[CI run38](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40115199604)四个job全success：**190 Node、Chrome125（1.3分钟）、Firefox119（1.2分钟）、WebKit119（2.5分钟）通过**；后两者各6项Chrome像素检查明确跳过。原5张像素基准和负向检出对照继续严格通过，不自动更新。
+
+新增3项Node、1项真实三引擎回归，证明锁定覆盖被阻止时，无关实例名称仍可独立恢复；候选工程和当前源锁定不变。此补验沿用前述run35/run36截图和基准来源，未把旧截图标成新run生成。
