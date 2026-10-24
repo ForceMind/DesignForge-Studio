@@ -492,3 +492,17 @@ test("row-to-column breakpoint clears inherited flex growth on fixed-height chil
   await expect(el).toHaveCSS("flex-grow", "0");
   await expect(el).toHaveCSS("height", "80px");
 });
+
+test("implicit constraint references keep original margins when a parent has a width override", async ({
+  page,
+}) => {
+  const p = project(),
+    frame = p.boards[0].nodes[0];
+  frame.responsive = [{ maxWidth: 500, changes: { w: 300 } }];
+  frame.children[0].x = 500;
+  frame.children[0].w = 100;
+  frame.children[0].constraints = { horizontal: "end" };
+  await open(page, p);
+  await page.locator("#preview-width").selectOption("390");
+  await expect(page.locator('[data-node-id="one"]')).toHaveCSS("right", "40px");
+});

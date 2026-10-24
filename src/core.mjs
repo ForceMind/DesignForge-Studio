@@ -912,7 +912,9 @@ function layoutStyle(node, tokens, parent) {
         baseline =
           node.constraints?.[
             axis === "horizontal" ? "referenceW" : "referenceH"
-          ] || parent[extent];
+          ] ||
+          parent.$referenceSize?.[extent] ||
+          parent[extent];
       if (rule === "end")
         p.push(
           `${pos}:auto`,
@@ -1007,7 +1009,12 @@ function responsiveStyles(board, tokens, project) {
             `@container (max-width:${px(width)}){${[...affected.get(width)]
               .map(({ node, parent }) => {
                 const current = effectiveNode(node, width),
-                  owner = parent ? effectiveNode(parent, width) : board;
+                  owner = parent
+                    ? {
+                        ...effectiveNode(parent, width),
+                        $referenceSize: { w: parent.w, h: parent.h },
+                      }
+                    : board;
                 const display = current.hidden
                   ? "none"
                   : ["flex", "grid"].includes(current.layout?.mode)

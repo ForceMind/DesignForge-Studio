@@ -1366,7 +1366,11 @@ function clearProjectView() {
 const scopeKey = (id = activeNodeId) => activeBoardId + ":" + id;
 const previewWidth = (board = activeBoard()) =>
   previewWidths.get(board.id) ?? board.w;
-const viewBoard = (board) => ({ ...board, w: previewWidth(board) });
+const viewBoard = (board) => ({
+  ...board,
+  w: previewWidth(board),
+  $referenceSize: { w: board.w, h: board.h },
+});
 function nodeScope(node = activeNode()) {
   if (!node) return null;
   const key = scopeKey(node.id);
