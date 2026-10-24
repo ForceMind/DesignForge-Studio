@@ -88,3 +88,19 @@
 - 原 65 Node、43 Chrome 回归保留；新增 6 Node、8 Chrome，用例覆盖受限参考线数据、hash/Diff/导出隔离、锁定原子性、刻度/投影、参考线事务和实际几何吸附。
 - [CI run 17](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40083797212)：71 Node 通过；Chrome 49/51 通过。两个严格坐标用例分别收到 302 而非 303、369 而非 370。排查发现编辑器 artboard-frame 的 1px border 占用内容宽度，main 的 max-width 被压缩 2px，设计宽与实际 CSS 宽不符。
 - 修复为不占布局空间的装饰描边；保留原精确坐标断言，另加真实 main 宽度 / world scale 为 800px 的检查。最终浏览器结果待下轮记录，不把该轮写作全绿。
+
+
+### alpha.3 最终验收
+
+- 修复画板装饰边框占宽后，[CI run 18](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40083998683) 在 `b259e113462b687972a2326659f2713a7280103b` 上通过 **71 Node + 51 Chrome**；严格坐标及新增实际内容宽度断言通过，没有放宽原断言。
+- 加入等距分布后，[CI run 19](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40084129934) 在产品代码 `cbad269c9c8501aa1dddc386f4057ba51917d477` 上 verify/browser 均 success：**73 Node + 52 真实 Chrome 测试全部通过**，原 43 项浏览器回归保留。
+- 实际浏览器 Google Chrome **155.0.8059.39**；52 项约 33.2 秒。新增等距分布断言浏览器真实 gap 相等、两端/尺寸保留、垂直分布及单步撤销，锁定/Flow 选区无项目写入。
+- 下载 artifact `12556103557`，实际查看以下三张原始 PNG，并直接复制到仓库；未裁剪、重绘或加工。浅/深色标尺刻度、303/210px 参考线、250px 键盘调整及面板读数可见；等距分布的三层选区与面板入口可见。
+
+| 截图 | 范围 |
+|---|---|
+| [浅色参考线](screenshots/m1-guides-light.png) | 水平/垂直标尺、两条参考线、数值/隐藏/锁定面板 |
+| [深色参考线](screenshots/m1-guides-dark.png) | 深色可读性、选中线标签与键盘微调后的值 |
+| [等距分布](screenshots/m1-distribution.png) | 三层多选、不同尺寸、水平等距结果与操作入口 |
+
+本地 `format:check`、原 Orbit validate/audit/export 通过，Orbit hash 仍为 `21a89182`。参考线不进入 HTML 导出；静态导出相等性有 Node 断言。辅助线当前只支持移动吸附，尺寸拖拽仍按网格；没有完成多选整体缩放、富文本、通用碰撞/截断审计、像素差异或其他浏览器/真机验收。
