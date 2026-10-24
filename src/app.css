@@ -1815,6 +1815,92 @@ select:focus-visible {
 .history-error {
   color: #c04a4a;
 }
+.board-breakpoint-panel {
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  padding: 10px;
+  margin-top: 16px;
+}
+.board-breakpoint-panel > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+.board-breakpoint-panel > summary small {
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 6px;
+  font-size: 10px;
+}
+.board-breakpoint-search {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0;
+}
+.board-breakpoint-search input {
+  min-width: 0;
+  flex: 1;
+  padding: 7px;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+  font-size: 11px;
+}
+.board-breakpoint-scope {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  margin: 6px 0;
+}
+.board-breakpoint-scope.selected {
+  border-color: var(--primary);
+  background: var(--ui-selected);
+}
+.board-breakpoint-scope > button:first-child {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  color: var(--ui-ink);
+  padding: 4px;
+}
+.board-breakpoint-scope b {
+  display: block;
+  font-size: 11px;
+}
+.board-breakpoint-scope small {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.board-breakpoint-entry {
+  padding: 10px 0;
+  border-top: 1px solid var(--ui-line);
+}
+.board-breakpoint-entry > b,
+.board-breakpoint-entry > code {
+  display: block;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  font-size: 10px;
+}
+.board-breakpoint-entry > code,
+.board-breakpoint-entry p {
+  color: var(--muted);
+  font-size: 9px;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+.board-breakpoint-entries {
+  margin-top: 14px;
+}
 .history-values {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);

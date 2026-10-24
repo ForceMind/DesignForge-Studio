@@ -32,6 +32,10 @@ import { nodeElement, measureNode, paintResize } from "./viewport.mjs";
 import { flowDropTarget, reorderSibling } from "./flow-layout.mjs";
 import { breakpointOverviewMarkup } from "./breakpoint-overview.mjs";
 import {
+  collectBoardBreakpoints,
+  filterBoardBreakpoints,
+} from "./board-breakpoints.mjs";
+import {
   retainHistory,
   historyNodeChoices,
   nodeRevisionTimeline,
@@ -130,6 +134,8 @@ let richRange = null,
   expansionAudit = null;
 let historyFocusNode = null,
   nodeHistoryPreview = null;
+const boardBreakpointViews = new Map();
+let boardBreakpointCache = null;
 function toast(message) {
   const t = $("toast");
   t.textContent = message;
@@ -496,6 +502,9 @@ function renderProperties() {
           ["true", "内容撑开（单根容器）"],
         ],
       )}<div class="fieldrow">${f("宽度 (px)", "board.w", b.w, "number", 'min="280" max="2400"')}${f("高度 (px)", "board.h", b.h, "number", 'min="280" max="3200"')}</div><div class="singlefield"><label>画板背景</label><input data-prop="board.bg" type="color" value="${esc(b.bg)}"></div><div class="board-settings"><button class="btn-small" data-action="duplicate-board">复制画板</button><button class="btn-small danger" data-action="delete-board">删除画板</button></div><div class="divider"></div>${guideControls(b)}<div class="note-panel"><b>✦ 设计不是一次性的图片</b><p>每个界面由可编辑元素组成，内容和位置可以单独修改，再导出成为无依赖的 HTML。</p><button data-action="add-comment">添加画板反馈 →</button></div>`;
+    $("right-content")
+      .querySelector(".board-settings")
+      .insertAdjacentHTML("afterend", boardBreakpointControls(b));
     return;
   }
   const st = n.style || {};
@@ -1881,6 +1890,8 @@ function clearProjectView() {
   if (gesture) cancelGesture();
   historyFocusNode = null;
   nodeHistoryPreview = null;
+  boardBreakpointViews.clear();
+  boardBreakpointCache = null;
   selectedIds.clear();
   previewWidths.clear();
   editScopes.clear();
@@ -1935,6 +1946,120 @@ function scopedEdit(changes) {
     if (isNodeLocked(board, n.id)) throw Error("Locked layer");
     setScopedChanges(findNode(board, n.id), changes, scope);
   });
+}
+function boardBreakpointView(board = activeBoard()) {
+  if (!boardBreakpointViews.has(board.id))
+    boardBreakpointViews.set(board.id, {
+      open: false,
+      page: 0,
+      scope: null,
+      query: "",
+      limit: 20,
+    });
+  return boardBreakpointViews.get(board.id);
+}
+function boardBreakpointMap(board = activeBoard()) {
+  if (
+    !boardBreakpointCache ||
+    boardBreakpointCache.project !== project ||
+    boardBreakpointCache.boardId !== board.id
+  )
+    boardBreakpointCache = {
+      project,
+      boardId: board.id,
+      scopes: collectBoardBreakpoints(board, project),
+    };
+  return boardBreakpointCache.scopes;
+}
+function boardBreakpointControls(board) {
+  const view = boardBreakpointView(board),
+    all = boardBreakpointMap(board),
+    scopes = filterBoardBreakpoints(all, view.query),
+    pages = Math.max(1, Math.ceil(scopes.length / 6));
+  view.page = Math.max(0, Math.min(pages - 1, view.page));
+  const visible = scopes.slice(view.page * 6, view.page * 6 + 6);
+  if (!visible.some((s) => s.maxWidth === view.scope))
+    view.scope = visible[0]?.maxWidth ?? null;
+  const current = scopes.find((s) => s.maxWidth === view.scope),
+    applied = all.filter((s) => previewWidth(board) <= s.maxWidth).length;
+  return `<details class="board-breakpoint-panel" data-board-breakpoint-panel ${view.open ? "open" : ""}><summary>整页断点 <small>${all.length} 组宽度</small></summary><p class="property-help">包含嵌套图层与实例投影；当前 ${previewWidth(board)}px，${applied ? `${applied} 组覆盖条件生效` : "未命中断点"}。预览不改项目；来源层与实例覆盖一并保留。</p><form data-board-breakpoint-filter class="board-breakpoint-search"><input id="board-breakpoint-filter" aria-label="搜索全页断点图层或宽度" placeholder="图层、ID、字段或宽度" value="${esc(view.query)}" maxlength="100"><button class="btn-small" type="submit">查找</button></form><div class="board-breakpoint-scopes">${visible.map((s) => `<div class="board-breakpoint-scope ${s.maxWidth === view.scope ? "selected" : ""}" data-board-breakpoint="${s.maxWidth}"><button type="button" data-board-bp-open="${s.maxWidth}" aria-expanded="${s.maxWidth === view.scope}"><b>≤ ${s.maxWidth}px</b><small>${s.entries.length} 处定义 · ${s.ownerCount} 个图层</small></button><button type="button" class="btn-small" data-board-bp-preview="${s.maxWidth}">预览</button></div>`).join("") || '<p class="property-help">未找到断点定义。</p>'}</div><div class="button-row"><button type="button" class="btn-small" data-board-bp-page="${view.page - 1}" ${view.page === 0 ? "disabled" : ""}>上一页</button><span class="property-help">${view.page + 1} / ${pages}</span><button type="button" class="btn-small" data-board-bp-page="${view.page + 1}" ${view.page >= pages - 1 ? "disabled" : ""}>下一页</button><button type="button" class="btn-small" data-board-bp-export>导出总览</button></div>${
+    current
+      ? `<div class="board-breakpoint-entries"><div class="panel-section-title">≤ ${current.maxWidth}px 来源 <small>${current.fieldCount} 项字段</small></div>${current.entries
+          .slice(0, view.limit)
+          .map(
+            (entry) =>
+              `<article class="board-breakpoint-entry"><b>${esc(entry.label)}</b><code>#${esc(entry.ownerId)}${entry.sourceId ? ` / source #${esc(entry.sourceId)}` : ""}</code><p>${esc(entry.fields.join(" · ") || "空覆盖")}</p><button type="button" class="btn-small" data-board-bp-node="${esc(entry.ownerId)}" data-board-bp-source="${esc(entry.sourceId || "")}" data-board-bp-width="${current.maxWidth}">${entry.editable ? "编辑覆盖" : "定位实例"}</button></article>`,
+          )
+          .join(
+            "",
+          )}${current.entries.length > view.limit ? `<button type="button" class="btn-small" data-board-bp-more>显示更多 (${Math.min(view.limit, current.entries.length)}/${current.entries.length})</button>` : ""}</div>`
+      : ""
+  }<p class="property-help">列表只统计定义，不证明全部图层当前可见；主题与内容变化请结合实际预览及检查面板。组件源字段通过实例属性或源容器编辑。</p></details>`;
+}
+function boardBreakpointAction(e) {
+  const open = e.target.closest("[data-board-bp-open]"),
+    preview = e.target.closest("[data-board-bp-preview]"),
+    page = e.target.closest("[data-board-bp-page]"),
+    node = e.target.closest("[data-board-bp-node]"),
+    more = e.target.closest("[data-board-bp-more]"),
+    save = e.target.closest("[data-board-bp-export]");
+  if (!open && !preview && !page && !node && !more && !save) return false;
+  const view = boardBreakpointView();
+  if (open) {
+    view.scope = Number(open.dataset.boardBpOpen);
+    view.limit = 20;
+    renderProperties();
+  }
+  if (preview) {
+    view.scope = Number(preview.dataset.boardBpPreview);
+    setPreviewWidth(preview.dataset.boardBpPreview);
+  }
+  if (page) {
+    view.page = Number(page.dataset.boardBpPage);
+    view.scope = null;
+    view.limit = 20;
+    renderProperties();
+  }
+  if (more) {
+    view.limit += 20;
+    renderProperties();
+  }
+  if (save)
+    download(
+      JSON.stringify(
+        {
+          format: "designforge.breakpoint-report",
+          version: 1,
+          baseHash: hashProject(project),
+          boardId: activeBoardId,
+          previewWidth: previewWidth(),
+          scopes: boardBreakpointMap(),
+        },
+        null,
+        2,
+      ),
+      safeName(project.title) + ".breakpoints.json",
+      "application/json",
+    );
+  if (node) {
+    const width = Number(node.dataset.boardBpWidth),
+      entry = boardBreakpointMap()
+        .find((s) => s.maxWidth === width)
+        ?.entries.find(
+          (r) =>
+            r.ownerId === node.dataset.boardBpNode &&
+            (r.sourceId || "") === node.dataset.boardBpSource,
+        );
+    if (entry && findNode(activeBoard(), entry.ownerId)) {
+      rightTab = "properties";
+      selectNode(entry.ownerId);
+      if (entry.editable) editScopes.set(scopeKey(), width);
+      setPreviewWidth(String(width));
+      if (!entry.editable)
+        toast("该断点来自组件源层；可编辑实例属性或更新源容器");
+    }
+  }
+  return true;
 }
 function responsiveControls(node) {
   const scope = nodeScope(node),
@@ -2510,6 +2635,14 @@ function startResize(e, handle) {
 }
 
 function bindStatic() {
+  $("board-breakpoint-overview").onclick = () => {
+    boardBreakpointView().open = true;
+    rightTab = "properties";
+    selectNode(null);
+    $("right-content")
+      .querySelector("[data-board-breakpoint-panel]")
+      ?.scrollIntoView({ block: "start" });
+  };
   $("rulers-toggle").addEventListener("click", toggleRulers);
   $("preview-width").onchange = (e) => setPreviewWidth(e.target.value);
   $("reset-preview").onclick = () => setPreviewWidth("");
@@ -2690,6 +2823,24 @@ function bindStatic() {
     }
   };
   $("right-content").addEventListener("select", rememberRichRange, true);
+  $("right-content").addEventListener(
+    "toggle",
+    (e) => {
+      if (e.target.matches("[data-board-breakpoint-panel]"))
+        boardBreakpointView().open = e.target.open;
+    },
+    true,
+  );
+  $("right-content").addEventListener("submit", (e) => {
+    if (!e.target.matches("[data-board-breakpoint-filter]")) return;
+    e.preventDefault();
+    const view = boardBreakpointView();
+    view.query = $("board-breakpoint-filter").value.slice(0, 100);
+    view.page = 0;
+    view.scope = null;
+    view.limit = 20;
+    renderProperties();
+  });
   $("right-content").addEventListener("pointerdown", (e) => {
     if (e.target.closest("[data-rich-format]")) e.preventDefault();
   });
@@ -2805,6 +2956,7 @@ function bindStatic() {
   });
   $("right-content").addEventListener("click", (e) => {
     if (nodeHistoryAction(e)) return;
+    if (boardBreakpointAction(e)) return;
     if (richTextAction(e)) return;
     const resetComponent = e.target.closest("[data-component-reset]");
     if (resetComponent) {
