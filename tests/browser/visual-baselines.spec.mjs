@@ -52,3 +52,24 @@ for (const theme of ["light", "dark"]) {
     });
   });
 }
+test("pixel guard detects an intentional layout shift against the approved baseline", async ({
+  page,
+}, info) => {
+  test.skip(
+    info.config.updateSnapshots !== "none",
+    "Negative control runs only when comparing approved snapshots.",
+  );
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.setContent(standaloneHtml(studio.boards[0], studio));
+  await page.evaluate(() => document.fonts.ready);
+  const options = {
+    fullPage: true,
+    animations: "disabled",
+    maxDiffPixelRatio: 0.001,
+  };
+  await expect(page).toHaveScreenshot("studio-390.png", options);
+  await page.addStyleTag({
+    content: ".df-board > .df-node { transform:translateX(12px) !important; }",
+  });
+  await expect(page).not.toHaveScreenshot("studio-390.png", options);
+});

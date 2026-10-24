@@ -181,6 +181,14 @@ export function validateProject(project) {
   const issues = [];
   const error = (path, reason) =>
     issues.push({ severity: "error", path, reason });
+  function checkRuntimeFields(value, path) {
+    for (const key of ["$sourceId", "$referenceSize", "$selector"])
+      if (Object.hasOwn(value, key))
+        error(
+          path + "." + key,
+          "Reserved renderer metadata is not project data",
+        );
+  }
   if (!isObject(project)) {
     error("root", "Project must be an object");
     return issues;
@@ -264,6 +272,7 @@ export function validateProject(project) {
       error(p, "Board must be an object");
       continue;
     }
+    checkRuntimeFields(board, p);
     if (!validId(board.id) || globalIds.has(board.id))
       error(p + ".id", "Invalid or duplicate ID");
     globalIds.add(board.id);
@@ -318,6 +327,11 @@ export function validateProject(project) {
             continue;
           }
           variants.add(v.id);
+          if (v.name !== undefined && typeof v.name !== "string")
+            error(
+              `${path}.variants[${j}].name`,
+              "Expected variant name string",
+            );
           validateNodes(
             [v.root],
             `${path}.variants[${j}].root`,
@@ -345,6 +359,7 @@ export function validateProject(project) {
         error(n, "Node must be an object");
         continue;
       }
+      checkRuntimeFields(node, n);
       if (!validId(node.id) || ids.has(node.id))
         error(n + ".id", "Invalid or duplicate node ID");
       if (

@@ -3474,7 +3474,8 @@ function onPointerMove(e) {
       y: Math.round(gesture.y + dy / zoom),
     };
     const excluded = gesture.positions.map((p) => p.id);
-    if ($("snap-toggle").checked && !e.altKey)
+    gesture.snapped = $("snap-toggle").checked && !e.altKey;
+    if (gesture.snapped)
       pos = snapPosition(
         { id: entry.node.id, ...gesture.measured.box },
         pos.x,
@@ -3658,7 +3659,7 @@ function onPointerUp(e) {
               },
               g.parentDesign,
               g.measured.parentSize,
-              { origin: start },
+              { origin: g.snapped ? undefined : start },
             ),
           );
         }
