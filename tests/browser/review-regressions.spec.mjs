@@ -143,6 +143,18 @@ test("End + Fill positioning preserves the mode and alignment uses the intrinsic
   expect(child(await stored(page)).w).toBe(160);
   expect(child(await stored(page)).sizing).toEqual(n.sizing);
 });
+test("repeated End + Hug micro nudges return to the original design coordinates without accumulated drift", async ({
+  page,
+}) => {
+  await open(page);
+  await page.locator('[data-node="copy"]').click();
+  await page.locator("#viewport").focus();
+  const before = child(await stored(page));
+  for (let i = 0; i < 40; i++) await page.keyboard.press("ArrowRight");
+  expect(child(await stored(page)).x).toBe(before.x + 40);
+  for (let i = 0; i < 40; i++) await page.keyboard.press("ArrowLeft");
+  expect(child(await stored(page))).toEqual(before);
+});
 test("responsive icon strokes update in canvas and exported HTML including isolated instance overrides", async ({
   page,
 }) => {

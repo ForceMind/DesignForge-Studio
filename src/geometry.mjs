@@ -44,7 +44,13 @@ export function snapPosition(
   return { x: sx.value, y: sy.value, guideX: sx.guide, guideY: sy.guide };
 }
 /** Invert positioning without changing sizing; node is the effective preview node. */
-export function positionChanges(node, position, parentDesign, parentActual) {
+export function positionChanges(
+  node,
+  position,
+  parentDesign,
+  parentActual,
+  { origin } = {},
+) {
   const changes = {};
   for (const [axis, pos, size, reference] of [
     ["horizontal", "x", "w", "referenceW"],
@@ -53,11 +59,20 @@ export function positionChanges(node, position, parentDesign, parentActual) {
     const baseline = node.constraints?.[reference] || parentDesign[size],
       actual = parentActual[size],
       rule = node.constraints?.[axis] || "start";
-    let value = position[pos];
-    if (rule === "end")
-      value += baseline - actual + (position[size] ?? node[size]) - node[size];
-    if (rule === "center") value += (baseline - actual) / 2;
-    if (rule === "scale") value *= baseline / actual;
+    let value;
+    if (origin) {
+      // DOM engines quantize measured layout differently. Apply a delta to the
+      // existing design value so repeated nudges cannot accumulate that noise.
+      const delta = position[pos] - origin[pos];
+      value = node[pos] + delta * (rule === "scale" ? baseline / actual : 1);
+    } else {
+      value = position[pos];
+      if (rule === "end")
+        value +=
+          baseline - actual + (position[size] ?? node[size]) - node[size];
+      if (rule === "center") value += (baseline - actual) / 2;
+      if (rule === "scale") value *= baseline / actual;
+    }
     changes[pos] = Math.round(value * 100) / 100;
   }
   return changes;

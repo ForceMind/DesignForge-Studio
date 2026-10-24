@@ -5,6 +5,7 @@ if (!["chromium", "firefox", "webkit"].includes(browserName))
 export default defineConfig({
   testDir: "./tests/browser",
   fullyParallel: true,
+  updateSnapshots: "none",
   timeout: 30000,
   use: {
     channel:

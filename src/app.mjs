@@ -1629,6 +1629,7 @@ function alignSelection(alignment) {
           { ...data.boxes[i], ...pos },
           data.parent || data.board,
           data.measurements[i].parentSize,
+          { origin: data.measurements[i].box },
         )[axis];
       });
     });
@@ -2184,6 +2185,7 @@ function distributeSelection(axis) {
           { ...measured[i].box, ...position },
           parent || b,
           measured[i].parentSize,
+          { origin: measured[i].box },
         )[axis];
       }
     });
@@ -3656,6 +3658,7 @@ function onPointerUp(e) {
               },
               g.parentDesign,
               g.measured.parentSize,
+              { origin: start },
             ),
           );
         }
@@ -3831,6 +3834,7 @@ function onKeyDown(e) {
             actual,
             data.parent || data.board,
             data.measurements[i].parentSize,
+            { origin: box },
           )[direction[0]];
         });
       });

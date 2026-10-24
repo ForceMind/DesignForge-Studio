@@ -77,9 +77,9 @@ async function both(page) {
   await page.locator('[data-node="two"]').click({ modifiers: ["Shift"] });
 }
 async function resize(page, handle, dx, dy, finish = true) {
-  const r = await page
-    .locator(`[data-resize-handle="${handle}"]`)
-    .boundingBox();
+  const target = page.locator(`[data-resize-handle="${handle}"]`);
+  await target.hover();
+  const r = await target.boundingBox();
   await page.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
   await page.mouse.down();
   await page.mouse.move(r.x + r.width / 2 + dx, r.y + r.height / 2 + dy, {

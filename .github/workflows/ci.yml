@@ -57,7 +57,8 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.engine }}
       - name: Record the actual launched engine and version
         run: node tools/browser-version.mjs > browser-version.json
-      - run: npm run test:browser
+      - name: Capture initial pixel baselines for explicit review
+        run: npm run test:browser -- --update-snapshots
       - name: Preserve real browser screenshots and traces
         if: always()
         uses: actions/upload-artifact@v4
@@ -67,4 +68,5 @@ jobs:
             test-results/
             playwright-report/
             browser-version.json
+            tests/browser/*-snapshots/
           retention-days: 14

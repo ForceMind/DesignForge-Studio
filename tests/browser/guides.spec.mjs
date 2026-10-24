@@ -70,6 +70,15 @@ async function open(page, p = project()) {
   });
   await expect(page.locator('#board-list [data-board="work"]')).toBeVisible();
   await expect(page.locator('[data-ruler-axis="x"]')).toBeVisible();
+  await page.evaluate(() =>
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        window.lastGuideTestPointer = { x: e.clientX, y: e.clientY };
+      },
+      { passive: true },
+    ),
+  );
 }
 const stored = (page) =>
   page.evaluate((k) => JSON.parse(localStorage.getItem(k)), key);
@@ -77,7 +86,16 @@ async function geometry(page) {
   const r = await page
     .locator('[data-artboard="work"] .df-board')
     .boundingBox();
-  return { ...r, z: r.width / 800 };
+  const z = await page
+    .locator("#world")
+    .evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+  return { ...r, z };
+}
+async function eventGuidePosition(page, r, axis, intended) {
+  const point = await page.evaluate(() => window.lastGuideTestPointer),
+    actual = (axis === "x" ? point.x - r.x : point.y - r.y) / r.z;
+  expect(Math.abs(actual - intended)).toBeLessThanOrEqual(1.1 / r.z);
+  return Math.round(actual);
 }
 async function create(page, axis, position, { finish = true } = {}) {
   const r = await geometry(page),
@@ -93,7 +111,9 @@ async function create(page, axis, position, { finish = true } = {}) {
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
   await page.mouse.move(to.x, to.y, { steps: 6 });
+  const expected = await eventGuidePosition(page, r, axis, position);
   if (finish) await page.mouse.up();
+  return expected;
 }
 async function dragGuide(page, id, to, { finish = true } = {}) {
   const p = await stored(page),
@@ -106,7 +126,14 @@ async function dragGuide(page, id, to, { finish = true } = {}) {
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
   await page.mouse.move(to.x, to.y, { steps: 6 });
+  const expected = await eventGuidePosition(
+    page,
+    r,
+    g.axis,
+    (g.axis === "x" ? to.x - r.x : to.y - r.y) / r.z,
+  );
   if (finish) await page.mouse.up();
+  return expected;
 }
 test("rulers create both axes transactionally, undo/redo and persist without touching nodes", async ({
   page,
@@ -123,20 +150,23 @@ test("rulers create both axes transactionally, undo/redo and persist without tou
         ).a,
     );
   expect(contentWidth).toBeCloseTo(800, 2);
-  await create(page, "x", 303, { finish: false });
+  const expectedX = await create(page, "x", 303, { finish: false });
   expect(await stored(page)).toEqual(before);
   await expect(page.locator(".design-guide.x")).toBeVisible();
   await page.mouse.up();
   let p = await stored(page);
-  expect(p.boards[0].guides[0]).toMatchObject({ axis: "x", position: 303 });
+  expect(p.boards[0].guides[0]).toMatchObject({
+    axis: "x",
+    position: expectedX,
+  });
   await page.locator("#undo").click();
   expect((await stored(page)).boards[0].guides).toEqual([]);
   await page.locator("#redo").click();
-  await create(page, "y", 210);
+  const expectedY = await create(page, "y", 210);
   p = await stored(page);
   expect(p.boards[0].guides.map((g) => [g.axis, g.position])).toEqual([
-    ["x", 303],
-    ["y", 210],
+    ["x", expectedX],
+    ["y", expectedY],
   ]);
   expect(p.boards[0].nodes).toEqual(before.boards[0].nodes);
   await page.screenshot({
@@ -173,8 +203,11 @@ test("guide drag previews, Escape/pointercancel/blur roll back, outside drop del
     await page.mouse.up();
     expect(await stored(page)).toEqual(before);
   }
-  await dragGuide(page, "vertical", { x: r.x + 370 * r.z, y: r.y + 180 * r.z });
-  expect((await stored(page)).boards[0].guides[0].position).toBe(370);
+  const expected = await dragGuide(page, "vertical", {
+    x: r.x + 370 * r.z,
+    y: r.y + 180 * r.z,
+  });
+  expect((await stored(page)).boards[0].guides[0].position).toBe(expected);
   await page.locator("#undo").click();
   expect((await stored(page)).boards[0].guides).toEqual(
     before.boards[0].guides,
