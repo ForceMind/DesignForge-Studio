@@ -188,3 +188,34 @@ export function selectionInBox(entries, box, existing = []) {
     return true;
   });
 }
+
+/** Equal gaps between actual sibling boxes, preserving the two outer anchors. */
+export function distributeBoxes(entries, axis) {
+  if (!["x", "y"].includes(axis) || entries.length < 3)
+    throw Error("Select at least three boxes and a valid axis");
+  const size = axis === "x" ? "w" : "h";
+  if (
+    new Set(entries.map((e) => e.id)).size !== entries.length ||
+    entries.some(
+      (e) =>
+        !Number.isFinite(e[axis]) || !Number.isFinite(e[size]) || e[size] <= 0,
+    )
+  )
+    throw Error("Invalid distribution geometry");
+  const sorted = [...entries].sort((a, b) => a[axis] - b[axis]);
+  const first = sorted[0],
+    last = sorted.at(-1);
+  const gap =
+    (last[axis] +
+      last[size] -
+      first[axis] -
+      sorted.reduce((sum, e) => sum + e[size], 0)) /
+    (sorted.length - 1);
+  let cursor = first[axis];
+  return sorted.map((e, i) => {
+    const position =
+      i === sorted.length - 1 ? last[axis] : Math.round(cursor * 100) / 100;
+    cursor += e[size] + gap;
+    return { id: e.id, [axis]: position };
+  });
+}

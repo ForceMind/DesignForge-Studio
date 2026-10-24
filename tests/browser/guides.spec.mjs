@@ -329,3 +329,69 @@ test("ruler origin follows zoom/pan and constrained drag keeps actual right marg
   await page.keyboard.press("Shift+R");
   await expect(page.locator("[data-ruler-axis]")).toHaveCount(2);
 });
+
+test("equal-gap distribution uses actual siblings, preserves anchors and rejects flow or locked selections", async ({
+  page,
+}) => {
+  const p = project(),
+    frame = p.boards[0].nodes[0];
+  frame.children[0].w = 80;
+  frame.children[1].x = 200;
+  frame.children[1].y = 120;
+  frame.children.push({
+    ...structuredClone(frame.children[0]),
+    id: "three",
+    name: "Third card",
+    x: 420,
+    y: 320,
+    w: 120,
+  });
+  await open(page, p);
+  const selectAll = async () => {
+    await page.locator('[data-node="one"]').click();
+    await page.locator('[data-node="two"]').click({ modifiers: ["Shift"] });
+    await page.locator('[data-node="three"]').click({ modifiers: ["Shift"] });
+  };
+  await selectAll();
+  await page.locator('[data-distribute="x"]').click();
+  let children = (await stored(page)).boards[0].nodes[0].children;
+  expect(children.map((n) => n.x)).toEqual([40, 190, 420]);
+  expect(children.map((n) => n.w)).toEqual([80, 160, 120]);
+  const rects = await page
+    .locator('[data-node-id="frame"] > [data-node-id]')
+    .evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x, right: r.right };
+      }),
+    );
+  expect(
+    Math.abs(rects[1].x - rects[0].right - (rects[2].x - rects[1].right)),
+  ).toBeLessThan(0.1);
+  await page.locator('[data-distribute="y"]').click();
+  expect(
+    (await stored(page)).boards[0].nodes[0].children.map((n) => n.y),
+  ).toEqual([40, 180, 320]);
+  await page.locator("#undo").click();
+  expect(
+    (await stored(page)).boards[0].nodes[0].children.map((n) => n.y),
+  ).toEqual([40, 120, 320]);
+  await page.screenshot({
+    path: "test-results/m1-distribution.png",
+    fullPage: true,
+  });
+  for (const mode of ["locked", "flow"]) {
+    const q = structuredClone(p);
+    if (mode === "locked") q.boards[0].nodes[0].children[1].locked = true;
+    else q.boards[0].nodes[0].layout = { mode: "flex", direction: "row" };
+    await page.locator("#upload-json").setInputFiles({
+      name: "guard.project.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(q)),
+    });
+    await selectAll();
+    const before = await stored(page);
+    await page.locator('[data-distribute="x"]').click();
+    expect(await stored(page)).toEqual(before);
+  }
+});

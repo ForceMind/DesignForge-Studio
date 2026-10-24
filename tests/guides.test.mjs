@@ -141,3 +141,48 @@ test("movement in narrower parents retains end/center/stretch/scale constraints 
     assert.deepEqual(n, before);
   }
 });
+
+test("equal-gap distribution anchors extremes and preserves unequal box sizes and input order", async () => {
+  const { distributeBoxes } = await import("../src/geometry.mjs");
+  const boxes = [
+      { id: "middle", x: 200, y: 120, w: 160, h: 80 },
+      { id: "last", x: 420, y: 320, w: 120, h: 80 },
+      { id: "first", x: 40, y: 40, w: 80, h: 80 },
+    ],
+    before = structuredClone(boxes);
+  assert.deepEqual(distributeBoxes(boxes, "x"), [
+    { id: "first", x: 40 },
+    { id: "middle", x: 190 },
+    { id: "last", x: 420 },
+  ]);
+  assert.deepEqual(distributeBoxes(boxes, "y"), [
+    { id: "first", y: 40 },
+    { id: "middle", y: 180 },
+    { id: "last", y: 320 },
+  ]);
+  assert.deepEqual(boxes, before);
+});
+test("distribution handles overlapping spans and rejects incomplete or invalid geometry", async () => {
+  const { distributeBoxes } = await import("../src/geometry.mjs");
+  const boxes = [
+    { id: "a", x: 0, w: 100 },
+    { id: "b", x: 40, w: 100 },
+    { id: "c", x: 80, w: 100 },
+  ];
+  assert.deepEqual(distributeBoxes(boxes, "x"), [
+    { id: "a", x: 0 },
+    { id: "b", x: 40 },
+    { id: "c", x: 80 },
+  ]);
+  assert.throws(() => distributeBoxes(boxes.slice(0, 2), "x"));
+  assert.throws(() => distributeBoxes(boxes, "z"));
+  assert.throws(() =>
+    distributeBoxes([...boxes, { id: "a", x: 9, w: 20 }], "x"),
+  );
+  assert.throws(() =>
+    distributeBoxes(
+      boxes.map((b) => ({ ...b, w: NaN })),
+      "x",
+    ),
+  );
+});

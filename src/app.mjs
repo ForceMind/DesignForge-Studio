@@ -16,6 +16,7 @@ import {
 import {
   snapPosition,
   positionChanges,
+  distributeBoxes,
   resizeBox,
   geometryChanges,
   boxFromPoints,
@@ -468,7 +469,7 @@ function renderProperties() {
     ? `<div class="singlefield"><label for="prop-text">${n.type === "image" ? "图片替代文字" : "文字内容"}</label><textarea id="prop-text" data-prop="text">${esc(n.text)}</textarea></div>`
     : "";
   $("right-content").innerHTML =
-    `<div class="inspector-title"><span class="element-icon">◇</span> ${esc(n.name || n.type)} <span class="safe-tag">NODE</span></div><div class="selection-id">#${esc(n.id)} · ${esc(n.type)} · ${selected().length} selected</div>${wide("图层名称", "name", n.name || "")}${structureControls(b, n)}<div class="divider"></div><div class="panel-section-title">排列与尺寸</div><div class="fieldrow">${f("X 位置", "x", n.x, "number")}${f("Y 位置", "y", n.y, "number")}</div><div class="fieldrow">${f("宽度 W", "w", n.w, "number", 'min="1"')}${f("高度 H", "h", n.h, "number", 'min="1"')}</div><div class="divider"></div><div class="panel-section-title">外观与内容</div>${txtEdit}${styles}${layoutControls(n)}<div class="divider"></div><div class="panel-section-title">操作</div><div class="button-row"><button data-action="duplicate" class="btn-small">复制图层</button><button data-action="up" class="btn-small">向上一层 ↑</button><button data-action="down" class="btn-small">向下一层 ↓</button><button data-action="delete" class="btn-small danger">删除</button></div><div class="button-row"><button data-action="add-comment" class="btn-small primary">✦ 给该元素写标注</button></div><div class="button-row"><button class="btn-small" data-action="group">组合 ⌘G</button><button class="btn-small" data-action="ungroup">解组</button><button class="btn-small" data-action="make-component">创建组件</button></div><div class="button-row">${["left", "center", "right", "top", "middle", "bottom"].map((a, i) => `<button class="btn-small" data-align="${a}">${["左", "水平中", "右", "上", "垂直中", "下"][i]}</button>`).join("")}</div><p class="muted-tip">Shift 点击多选；Auto Layout 子元素由布局管理，使用图层排序调整顺序。</p>`;
+    `<div class="inspector-title"><span class="element-icon">◇</span> ${esc(n.name || n.type)} <span class="safe-tag">NODE</span></div><div class="selection-id">#${esc(n.id)} · ${esc(n.type)} · ${selected().length} selected</div>${wide("图层名称", "name", n.name || "")}${structureControls(b, n)}<div class="divider"></div><div class="panel-section-title">排列与尺寸</div><div class="fieldrow">${f("X 位置", "x", n.x, "number")}${f("Y 位置", "y", n.y, "number")}</div><div class="fieldrow">${f("宽度 W", "w", n.w, "number", 'min="1"')}${f("高度 H", "h", n.h, "number", 'min="1"')}</div><div class="divider"></div><div class="panel-section-title">外观与内容</div>${txtEdit}${styles}${layoutControls(n)}<div class="divider"></div><div class="panel-section-title">操作</div><div class="button-row"><button data-action="duplicate" class="btn-small">复制图层</button><button data-action="up" class="btn-small">向上一层 ↑</button><button data-action="down" class="btn-small">向下一层 ↓</button><button data-action="delete" class="btn-small danger">删除</button></div><div class="button-row"><button data-action="add-comment" class="btn-small primary">✦ 给该元素写标注</button></div><div class="button-row"><button class="btn-small" data-action="group">组合 ⌘G</button><button class="btn-small" data-action="ungroup">解组</button><button class="btn-small" data-action="make-component">创建组件</button></div><div class="button-row">${["left", "center", "right", "top", "middle", "bottom"].map((a, i) => `<button class="btn-small" data-align="${a}">${["左", "水平中", "右", "上", "垂直中", "下"][i]}</button>`).join("")}</div><div class="button-row"><button class="btn-small" data-distribute="x">水平等距</button><button class="btn-small" data-distribute="y">垂直等距</button></div><p class="muted-tip">Shift 点击多选；Auto Layout 子元素由布局管理，使用图层排序调整顺序。</p>`;
 }
 function resolvedHex(value, fallback) {
   const resolved = resolveToken(value, effectiveTokens(project));
@@ -1500,6 +1501,48 @@ function breakpointAction(event) {
   }
   return false;
 }
+function distributeSelection(axis) {
+  const b = activeBoard(),
+    ids = rootSelection(b, selected());
+  try {
+    if (ids.length < 3) throw Error("请选择至少三个同父级图层");
+    const entries = ids.map((id) => locateNode(b, id)),
+      parent = entries[0].parent;
+    if (entries.some((e) => e.parent?.id !== parent?.id))
+      throw Error("等距分布仅支持同父级图层");
+    if (entries.some((e) => isNodeLocked(b, e.node.id)))
+      throw Error("选区包含锁定图层");
+    if (
+      parent &&
+      ![undefined, "absolute"].includes(
+        effectiveNode(parent, previewWidth(b)).layout?.mode,
+      )
+    )
+      throw Error("Auto Layout 请使用 gap、排序和对齐");
+    const measured = entries.map((e) =>
+      measureNode($("world"), b.id, e.node.id, zoom),
+    );
+    if (measured.some((m) => !m || m.box.w <= 0 || m.box.h <= 0))
+      throw Error("选区包含不可见图层");
+    const boxes = measured.map((m, i) => ({ id: ids[i], ...m.box })),
+      positions = distributeBoxes(boxes, axis);
+    commit((p) => {
+      const board = p.boards.find((board) => board.id === b.id);
+      for (const position of positions) {
+        const i = ids.indexOf(position.id),
+          n = findNode(board, position.id);
+        n[axis] = positionChanges(
+          n,
+          { ...measured[i].box, ...position },
+          parent || b,
+          measured[i].parentSize,
+        )[axis];
+      }
+    });
+  } catch (e) {
+    toast(e.message);
+  }
+}
 function guideControls(board) {
   return `<section class="guide-settings"><div class="panel-section-title">参考线 <small>${(board.guides || []).length}/100</small></div><p class="property-help">从标尺拖出；拖出画板可删除。坐标相对画板，预览宽度不缩放参考线。隐藏的线不参与吸附，锁定的线仍参与。</p>${(board.guides || []).map((g) => `<div class="guide-row ${activeGuideId === g.id ? "active" : ""}"><span>${g.axis.toUpperCase()}</span><input type="number" min="0" max="10000" step="1" value="${g.position}" data-guide-position="${esc(g.id)}" aria-label="参考线 ${esc(g.id)} 坐标" ${g.locked ? "disabled" : ""}><button class="btn-small" data-guide-action="hidden" data-guide="${esc(g.id)}" aria-label="${g.hidden ? "显示" : "隐藏"}参考线 ${esc(g.id)}" ${g.locked ? "disabled" : ""}>${g.hidden ? "显示" : "隐藏"}</button><button class="btn-small" data-guide-action="locked" data-guide="${esc(g.id)}">${g.locked ? "解锁" : "锁定"}</button><button class="btn-small danger" data-guide-action="remove" data-guide="${esc(g.id)}" aria-label="删除参考线 ${esc(g.id)}" ${g.locked ? "disabled" : ""}>×</button></div>`).join("")}<div class="guide-add"><select id="guide-axis" aria-label="新增参考线方向"><option value="x">垂直 X</option><option value="y">水平 Y</option></select><input id="guide-position" type="number" min="0" max="10000" value="40" aria-label="新增参考线坐标"><button class="btn-small" data-guide-action="add">添加</button></div><div class="divider"></div></section>`;
 }
@@ -2003,6 +2046,11 @@ function bindStatic() {
   });
   $("right-content").addEventListener("click", (e) => {
     if (guideAction(e)) return;
+    const distribute = e.target.closest("[data-distribute]");
+    if (distribute) {
+      distributeSelection(distribute.dataset.distribute);
+      return;
+    }
     if (breakpointAction(e)) return;
     const al = e.target.closest("[data-align]");
     if (al) {
