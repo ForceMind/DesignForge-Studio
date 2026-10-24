@@ -5,7 +5,11 @@ import {
   changeComponentLibrary as change,
   componentUsages,
 } from "../src/component-library.mjs";
-import { materializeInstance, validateProject } from "../src/core.mjs";
+import {
+  materializeInstance,
+  validateProject,
+  standaloneHtml,
+} from "../src/core.mjs";
 import {
   exportDesignLibrary,
   importDesignLibrary,
@@ -306,4 +310,5 @@ test("valid leaf component roots can be copied, edited and updated without forci
   assert.equal(next.components[0].variants[0].root.type, "button");
   assert.equal(next.components[0].variants[0].root.text, "Proceed");
   assert.equal(p.components[0].variants[0].root.text, "Continue");
+  assert.match(standaloneHtml(next.boards[0], next), />Proceed<\/button>/);
 });

@@ -73,12 +73,13 @@ function project() {
   expect(validateProject(p)).toEqual([]);
   return p;
 }
-async function open(page) {
+async function open(page, p = project()) {
+  expect(validateProject(p)).toEqual([]);
   await page.goto("/");
   await page.locator("#upload-json").setInputFiles({
     name: "components.project.json",
     mimeType: "application/json",
-    buffer: Buffer.from(JSON.stringify(project())),
+    buffer: Buffer.from(JSON.stringify(p)),
   });
   await expect(page.locator('[data-board="work"]')).toBeVisible();
   await page.locator('[data-lefttab="components"]').click();
@@ -209,4 +210,35 @@ test("a source update cannot silently discard overrides when a copied source lay
   // The failed update adds no history entry; one Undo restores the removed copied layer.
   await page.locator("#undo").click();
   expect((await stored(page)).boards[1].nodes[0].children).toHaveLength(2);
+});
+test("leaf component roots retain their semantic content and can be edited as source copies from another inspector tab", async ({
+  page,
+}) => {
+  const p = project(),
+    root = p.components[0].variants[0].root;
+  root.type = "button";
+  root.text = "Leaf control";
+  root.style = { fill: "$primary", color: "#FFFFFF", fontSize: 20 };
+  delete root.children;
+  p.boards[0].nodes[0].overrides = {};
+  await open(page, p);
+  const instance = page.locator(
+    '[data-artboard="work"] [data-node-id="instance"]',
+  );
+  await expect(instance).toHaveText("Leaf control");
+  expect(await instance.evaluate((el) => el.tagName)).toBe("BUTTON");
+  await page.locator('[data-righttab="tokens"]').click();
+  await copySource(page);
+  await expect(page.locator('[data-righttab="properties"]')).toHaveClass(
+    /active/,
+  );
+  await expect(page.locator('[data-prop="text"]')).toHaveValue("Leaf control");
+  await page.locator('[data-prop="text"]').fill("Updated leaf control");
+  await page.locator('[data-prop="text"]').press("Tab");
+  await page.locator('[data-lefttab="components"]').click();
+  await page
+    .locator('[data-update-variant="control"][data-variant="base"]')
+    .click();
+  await expect(instance).toHaveText("Updated leaf control");
+  expect(await instance.evaluate((el) => el.tagName)).toBe("BUTTON");
 });

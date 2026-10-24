@@ -1082,7 +1082,8 @@ export function materializeInstance(instance, project) {
   return {
     ...root,
     ...instance,
-    type: "frame",
+    type: CONTAINERS.has(root.type) ? "frame" : root.type,
+    text: root.text,
     layout: instance.layout || root.layout,
     children: root.children || [],
     style: { ...root.style, ...instance.style },

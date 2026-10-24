@@ -1833,6 +1833,7 @@ function componentLibraryAction(button) {
   if (commit((p) => Object.assign(p, changeComponentLibrary(p, command)))) {
     if (kind === "copy-source") {
       leftTab = "layers";
+      rightTab = "properties";
       selectNode(variant.root.id, command.targetId);
       focusBoard(command.targetId, true);
       toast("源副本已保存为普通画板；编辑后在组件面板更新对应变体");

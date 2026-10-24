@@ -408,6 +408,7 @@ test("full history values and downloaded review preserve long hostile text witho
   await expect(checkbox).toBeChecked();
   await expect(field.locator("pre")).toBeEmpty();
   await field.locator("summary").click();
+  await expect(field.locator("pre")).toContainText("FINAL REVISED TAIL");
   const full = JSON.parse(await field.locator("pre").textContent());
   expect(full.current.text).toBe(revised);
   expect(full.restore.text).toBe(original);
