@@ -1,6 +1,7 @@
 import { effectiveNode } from "./responsive.mjs";
 import { validateAssets } from "./assets.mjs";
 import { validateGuides } from "./guides.mjs";
+import { sceneBudgetIssues, assertBoardSceneBudget } from "./scene-budget.mjs";
 import {
   validateTextRuns,
   renderRichText,
@@ -248,6 +249,12 @@ export function validateProject(project) {
     project.boards.length > 24
   ) {
     error("boards", "Require 1–24 boards");
+    return issues;
+  }
+  // Budget the projected scene before walking expensive per-instance overrides.
+  const budgetIssues = sceneBudgetIssues(project);
+  if (budgetIssues.length) {
+    for (const issue of budgetIssues) error(issue.path, issue.reason);
     return issues;
   }
   let globalIds = new Set();
@@ -1162,6 +1169,7 @@ export function renderNode(
 }
 export const exportStyles = `*{box-sizing:border-box}body{margin:0}.df-board{position:relative;overflow:hidden;margin:0 auto}.df-node{margin:0;padding:0}.df-button,.df-pill{display:flex;align-items:center;justify-content:center;cursor:pointer;border:0}.df-input{padding:0 14px;outline:0}.df-icon{display:flex;align-items:center;justify-content:center}.df-icon svg{width:100%;height:100%}.df-text{line-height:1.35}.df-line{pointer-events:none}`;
 export function renderBoard(board, tokens, project = null) {
+  assertBoardSceneBudget(board, project);
   const auto =
     board.autoHeight &&
     board.nodes.length === 1 &&

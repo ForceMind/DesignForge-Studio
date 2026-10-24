@@ -1321,8 +1321,17 @@ function groupSelection() {
           { boxes: data.boxes, parentSize: data.measurements[0].parentSize },
         ),
       )
-    )
+    ) {
       selectNode(id);
+      if (
+        data.entries.some((e) =>
+          [e.node.sizing?.w, e.node.sizing?.h].some(
+            (mode) => mode && mode !== "fixed",
+          ),
+        )
+      )
+        toast("已组合：根图层尺寸按当前预览固定，后代布局保留；可撤销。");
+    }
   } catch (error) {
     toast(error.message);
   }
@@ -2232,6 +2241,7 @@ function bindStatic() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
+      if (file.size > 1024 * 1024) throw Error("Patch JSON 最多 1 MB");
       const patch = JSON.parse(await file.text());
       const next = applyPatch(project, patch);
       const changes = diffProjects(project, next);
@@ -2269,6 +2279,7 @@ function bindStatic() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
+      if (file.size > 8 * 1024 * 1024) throw Error("项目 JSON 最多 8 MB");
       const obj = JSON.parse(await file.text());
       const errors = validateProject(obj);
       if (errors.length)
@@ -3024,7 +3035,7 @@ function onPointerUp(e) {
       g.result.boxes.forEach((box, i) => {
         if (isNodeLocked(board, box.id)) throw Error("Locked layer");
         const node = findNode(board, box.id);
-        Object.assign(
+        setScopedChanges(
           node,
           geometryChanges(
             node,

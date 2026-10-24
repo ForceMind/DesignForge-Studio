@@ -70,10 +70,21 @@ function declaredInnerSize(parent) {
   const border = borderInset(parent);
   return checkedSize({ w: parent.w - border * 2, h: parent.h - border * 2 });
 }
-function stableRoot(node) {
-  if (node.responsive?.length)
-    throw Error("Group geometry cannot preserve responsive root overrides");
+function stableRoot(node, measured = false) {
   if (
+    node.responsive?.length &&
+    (!measured ||
+      node.responsive.some((rule) =>
+        Object.keys(rule.changes || {}).some(
+          (key) => !["layout", "style"].includes(key),
+        ),
+      ))
+  )
+    throw Error(
+      "Group geometry cannot preserve responsive size or visibility overrides",
+    );
+  if (
+    !measured &&
     [node.sizing?.w, node.sizing?.h].some((value) => value && value !== "fixed")
   )
     throw Error("Group geometry requires fixed-size root layers");
@@ -124,7 +135,7 @@ function providedBoxes(boxes, ids) {
   return byId;
 }
 /** Keep the original rules while rebasing them to a new absolute parent. */
-function rebaseGeometry(node, box, reference, actual) {
+function rebaseGeometry(node, box, reference, actual, measured = false) {
   const next = { x: box.x, y: box.y, w: box.w, h: box.h };
   const constraints = node.constraints ? { ...node.constraints } : null;
   for (const [axis, pos, size, ref] of [
@@ -147,6 +158,7 @@ function rebaseGeometry(node, box, reference, actual) {
   }
   checkedBox(next);
   if (constraints) next.constraints = constraints;
+  if (measured) next.sizing = { ...node.sizing, w: "fixed", h: "fixed" };
   return next;
 }
 export function groupNodes(board, ids, groupId, options = {}) {
@@ -173,7 +185,7 @@ export function groupNodes(board, ids, groupId, options = {}) {
     throw Error("Group requires unlocked sibling layers");
   if (parent.layout?.mode && parent.layout.mode !== "absolute")
     throw Error("Group absolute-layout layers first");
-  for (const entry of entries) stableRoot(entry.node);
+  for (const entry of entries) stableRoot(entry.node, !!options.boxes);
   if (options.parentSize) checkedSize(options.parentSize);
   if (!options.boxes && parent.responsive?.length)
     throw Error("Use measured geometry for a responsive parent");
@@ -208,6 +220,7 @@ export function groupNodes(board, ids, groupId, options = {}) {
       { x: box.x - x, y: box.y - y, w: box.w, h: box.h },
       { w, h },
       { w, h },
+      !!options.boxes,
     );
   });
   const group = {
@@ -241,13 +254,13 @@ export function ungroupNode(board, id, options = {}) {
   )
     throw Error("Ungroup requires an absolute container");
   if (isNodeLocked(board, id)) throw Error("Locked layer");
-  stableRoot(e.node);
+  stableRoot(e.node, !!options.boxes);
   const children = e.node.children || [],
     parent = e.parent || board;
   if (parent.layout?.mode && parent.layout.mode !== "absolute")
     throw Error("Ungroup into an absolute parent first");
   for (const n of children) {
-    stableRoot(n);
+    stableRoot(n, !!options.boxes);
     if (n.locked) throw Error("Locked layer");
   }
   if (!options.boxes && parent.responsive?.length)
@@ -283,7 +296,7 @@ export function ungroupNode(board, id, options = {}) {
     );
   }
   const prepared = children.map((n) =>
-    rebaseGeometry(n, boxes.get(n.id), parent, actualParent),
+    rebaseGeometry(n, boxes.get(n.id), parent, actualParent, !!options.boxes),
   );
   children.forEach((n, i) => Object.assign(n, prepared[i]));
   e.siblings.splice(e.siblings.indexOf(e.node), 1, ...children);

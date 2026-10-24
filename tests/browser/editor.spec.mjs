@@ -91,7 +91,7 @@ test("Shift selection, group/ungroup and subtree copy preserve unique IDs", asyn
   // Both selected nodes are children of a Flex container: grouping must be rejected without data loss.
   const before = await stored(page);
   await page.locator('[data-action="group"]').click();
-  await expect(page.locator("#toast")).toContainText("absolute-layout");
+  await expect(page.locator("#toast")).toContainText("Auto Layout");
   expect(await stored(page)).toEqual(before);
   await select(page, root.id);
   await page.locator('[data-prop="layout.mode"]').selectOption("absolute");

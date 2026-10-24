@@ -93,7 +93,10 @@ test("measured group/ungroup round-trip all four constraint rules at a narrower 
     ungroupNode(b, "group", { boxes, parentSize: { w: 600, h: 500 } }),
     nodes.map((n) => n.id),
   );
-  assert.deepEqual(b.nodes, before);
+  assert.deepEqual(
+    b.nodes,
+    before.map((n) => ({ ...n, sizing: { w: "fixed", h: "fixed" } })),
+  );
 });
 test("fallback geometry accounts for a literal parent border before and after grouping", () => {
   const children = [
@@ -228,6 +231,77 @@ test("static alignment refuses advanced geometry instead of silently misaligning
     const b = board([rect("a", 40, 20, 100, 50, extra), rect("b", 300, 100)]),
       before = structuredClone(b);
     assert.throws(() => alignNodes(b, ["a", "b"], "left"), /measured geometry/);
+    assert.deepEqual(b, before);
+  }
+});
+
+test("measured grouping normalizes Fill/Hug roots while preserving layout-only responsive fields and descendants", () => {
+  const nested = rect("nested", 8, 12),
+    a = {
+      ...rect("a", 40, 20, 200, 100),
+      type: "frame",
+      sizing: { w: "fill", h: "hug" },
+      layout: { mode: "grid", columns: 2 },
+      responsive: [
+        {
+          maxWidth: 600,
+          changes: { layout: { columns: 1 }, style: { fill: "$surface" } },
+        },
+      ],
+      children: [nested],
+    },
+    b = board([a, rect("b", 300, 150)]),
+    before = structuredClone(a),
+    boxes = [
+      { id: "a", x: 40, y: 20, w: 250, h: 80 },
+      { id: "b", x: 300, y: 150, w: 100, h: 50 },
+    ];
+  const g = groupNodes(b, ["a", "b"], "group", {
+    boxes,
+    parentSize: { w: 800, h: 600 },
+  });
+  const grouped = findNode(b, "a");
+  assert.deepEqual(grouped.sizing, { w: "fixed", h: "fixed" });
+  assert.equal(grouped.w, 250);
+  assert.equal(grouped.h, 80);
+  assert.deepEqual(grouped.children, before.children);
+  assert.deepEqual(grouped.responsive, before.responsive);
+  assert.deepEqual(grouped.style, before.style);
+  assert.equal(grouped.text, before.text);
+  ungroupNode(b, g.id, { boxes, parentSize: { w: 800, h: 600 } });
+  assert.deepEqual(b.nodes[0].sizing, { w: "fixed", h: "fixed" });
+  assert.deepEqual(b.nodes[0].responsive, before.responsive);
+  assert.deepEqual(b.nodes[0].children, before.children);
+  assert.deepEqual(
+    [b.nodes[0].x, b.nodes[0].y, b.nodes[0].w, b.nodes[0].h],
+    [40, 20, 250, 80],
+  );
+});
+test("measured group still refuses root size/visibility breakpoint overrides without changing the project", () => {
+  for (const changes of [
+    { w: 90 },
+    { h: 90 },
+    { sizing: { w: "fill" } },
+    { hidden: true },
+  ]) {
+    const b = board([
+        rect("a", 40, 20, 100, 50, {
+          responsive: [{ maxWidth: 600, changes }],
+        }),
+        rect("b", 300, 100),
+      ]),
+      before = structuredClone(b);
+    assert.throws(
+      () =>
+        groupNodes(b, ["a", "b"], "group", {
+          boxes: [
+            { id: "a", x: 40, y: 20, w: 100, h: 50 },
+            { id: "b", x: 300, y: 100, w: 100, h: 50 },
+          ],
+          parentSize: { w: 800, h: 600 },
+        }),
+      /responsive/,
+    );
     assert.deepEqual(b, before);
   }
 });
