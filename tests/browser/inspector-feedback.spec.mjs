@@ -203,6 +203,40 @@ for (const theme of ["light", "dark"]) {
         contrastRatio(result.foreground, result.background),
         JSON.stringify(result),
       ).toBeGreaterThanOrEqual(4.5);
+    const controls = await page
+      .locator("#right-content select")
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const style = getComputedStyle(element),
+            sample = document.createElement("span");
+          Object.assign(sample.style, {
+            position: "fixed",
+            visibility: "hidden",
+            whiteSpace: "pre",
+            fontFamily: style.fontFamily,
+            fontSize: style.fontSize,
+            fontWeight: style.fontWeight,
+            lineHeight: style.lineHeight,
+          });
+          sample.textContent = element.selectedOptions[0].textContent;
+          document.body.appendChild(sample);
+          const lineHeight = sample.getBoundingClientRect().height;
+          sample.remove();
+          return {
+            field: element.dataset.prop || element.id,
+            lineHeight,
+            available:
+              element.clientHeight -
+              parseFloat(style.paddingTop) -
+              parseFloat(style.paddingBottom),
+          };
+        }),
+      );
+    expect(controls.length).toBeGreaterThan(5);
+    for (const control of controls)
+      expect(control.available, JSON.stringify(control)).toBeGreaterThanOrEqual(
+        control.lineHeight,
+      );
     expect((await stored(page)).boards).toEqual(project().boards);
   });
 }

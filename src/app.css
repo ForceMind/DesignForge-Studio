@@ -1452,7 +1452,7 @@ select:focus-visible {
 }
 :root[data-theme="dark"]
   :is(input, textarea, select, .btn-small, .top-button, .fit-button) {
-  background: var(--ui-soft);
+  background-color: var(--ui-soft);
   color: var(--ui-ink);
   border-color: var(--ui-line);
 }
@@ -1545,6 +1545,20 @@ select:focus-visible {
 }
 .singlefield select {
   width: 100%;
+}
+.singlefield select,
+.fieldcol select {
+  appearance: none;
+  padding: 0 28px 0 10px;
+  line-height: normal;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
 }
 .topbar {
   gap: 14px;
