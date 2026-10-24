@@ -3,7 +3,7 @@
 ## 工程状态
 
 - Public / MIT，主分支 `main` 继续保留 M0 基线 `56a189bf929d09eb8b092a24674b717faba6e0cd`（后续会话必须重新核对）。
-- 开发分支：`codex/m1-editor-foundation`；[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。M1 基础交付 `0.2.0-alpha.4`，用户第一阶段八项交付已验收；原路线增强项未全部完成。
+- 开发分支：`codex/m1-editor-foundation`；[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。M1 基础交付增强版 `0.2.0-alpha.5`，用户第一阶段八项交付已验收；原路线增强项未全部完成。
 - 运行：`npm start`，本地 loopback `127.0.0.1:4173`；运行时零外部依赖。测试工具使用 `npm ci` 安装。
 - 本轮已扩展树、原生布局、约束/断点、组件/变体/实例、Token alias/主题、本地资源、多选/组合/对齐/吸附、存档备份与恢复；保留 M0 的导出、评论、CLI、严格 Patch。
 
@@ -32,3 +32,8 @@ alpha.3 增加标尺/参考线及受限 v1 元数据，修正约束图层在实�
 alpha.4 当前集成多选尺寸事务、富文本/多字体、源子层实例属性、Token主题编辑、本地设计系统包、真实DOM几何检查，以及锁定/选区/组合约束缺陷修复。产品代码 ecd52a3 的 CI run25已通过146 Node + 80 Chrome；文字预检/CLI保护已补齐，原始截图均实际下载复核并保存。逐项交付与边界见 M1_ACCEPTANCE.md；后续仍要重新查当前head CI。
 
 文字压力采用离屏副本，结果按hash/宽度过期，JSON区分renderedFindings与textExpansionFindings；clone前预算和finally清理有回归。下一步M1增强可做节点历史/断点总览/跨浏览器与像素回归；M2内置BYOK/视觉审批仍未实现。
+
+
+alpha.5 继续在同一独立分支扩展：新增 flow-layout.mjs 的 Flex/Grid 画布排序和 breakpoint-overview.mjs 的本节点断点范围总览；版本 0.2.0-alpha.5。先修复 PR 评审发现的 End+Hug/Fill 位移跳变和 SVG 断点颜色，再补实际 Chrome 回归。排序/预览无新增协议字段，原 Orbit 和严格 Patch 保持。最新产品提交、CI、原始截图及失败测试修正记录须查 VALIDATION.md。后续优先节点历史、整页断点聚合、其他浏览器与像素回归；不得把这些增强或 M2/M3 宣称完成。
+
+alpha.5 产品代码 `856471b0796ee179a25951d903844c56e7c97b26` 的 [CI run30](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40103132608) 已通过158 Node + 99 Chrome；artifact 12563339017 的两张新原始截图已下载、实际查看并保存。两条 PR 评审项修复后经真实浏览器验证，已标记解决。main 未合并或部署。

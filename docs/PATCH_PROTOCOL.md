@@ -109,3 +109,8 @@ v1 画板可携带 `guides: [{id,axis,position,hidden?,locked?}]`，每板最多
 节点可选 textRuns: [{text,style?}]，最多 256 段且拼接必须等于 node.text，仅 text/button/pill 支持。分段 style 白名单为 color/fontSize/fontWeight/italic/underline/strike，禁止 HTML/原始 CSS。set-node.changes.textRuns 可替换完整分段，null 清格式；只传 text 则显式改纯文本并清旧分段，传 text+textRuns 必须同步。
 
 节点 style 增加 lineHeight（0.8..4 或数值 Token）与 fontFamily（安全系统字体、本地 font asset 或字体 Token）。原 v1 纯文本继续有效。designforge.library 的导入、主题/组件库定义与资产管理仍由编辑器负责，不扩展 Agent Patch 的权限。
+
+
+### 编辑器排序与断点总览（alpha.5）
+
+画布 Auto Layout 排序仍保存为同父 children 数组顺序，与现有 move-node.index 相同语义，不新增 Patch 动作。结构顺序始终跨断点共用。断点范围图、当前预览游标和修改范围均为编辑器状态，不是 Agent 可写的项目字段；Agent 仍需保留未指定的 responsive 条目。

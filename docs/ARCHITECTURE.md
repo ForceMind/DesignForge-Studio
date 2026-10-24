@@ -72,7 +72,7 @@ Node 测试覆盖协议、树操作、锁定、资产、存储和 CLI 文件保�
 
 标尺和可拖动的线使用 viewport 像素覆盖层，命中区域不随 zoom 缩小；原点跟随当前画板的 DOM 实测位置。pointermove 仅改变暂态位置和面板读数，pointerup 单次提交；取消/失焦复原。隐藏线不吸附，锁定线仍吸附但不能被移动/删除；解锁必须是单独操作。移出画板释放删除，按 Esc 取消。线坐标超出当前预览范围时不渲染、不吸附，但不丢弃工程数据。
 
-图层移动同样测量实际父级 padding-box/子项/兄弟几何，按边框修正画板参考线到父相对坐标，再用 `positionChanges` 反解 End/Center/Scale 等原约束。历史写入保留原宽高、sizing 和 constraints。Auto Layout 子项仍由原生布局管理，不提供自由拖动重排。
+图层移动同样测量实际父级 padding-box/子项/兄弟几何，按边框修正画板参考线到父相对坐标，再用 `positionChanges` 反解 End/Center/Scale 等原约束。历史写入保留原宽高、sizing 和 constraints。Auto Layout 子项仍由原生布局管理；alpha.5 的排序手势只改 children 顺序，不写自由坐标。
 
 等距分布使用同父级、可见且未锁定的至少三个自由图层的 DOM 几何，固定两端盒子的外沿，按真实尺寸计算相等间隙。只反解并写入分布轴的位置，保留另一轴、宽高、约束和树顺序；Auto Layout 选区明确拒绝，由 gap/justify 管理。跨度不足时可得到负间隙，不承担自动消除重叠的功能。
 
@@ -89,3 +89,14 @@ Node 测试覆盖协议、树操作、锁定、资产、存储和 CLI 文件保�
 `scene-budget.mjs` 按组件变体缓存投影成本，并对重复实例累加节点、富文本 span 与文本成本，阻止小 JSON 放大成海量 DOM。validateProject 与直接 renderBoard 均有预算保护，不先 materialize 巨树；读取前再限制项目/Patch/库文件大小。失败不会覆盖存档。
 
 文字膨胀预检在离屏fixed/inert副本按同一CSS宽度扩大字素，使用原字体/分段与container queries，审计后finally清除。原DOM/AST/存档不写入，结果按hash/宽度标记过期并可单独导出；因子1..2，UI固定约+30%，按分段向上取整。CLI读取采用固定上限缓冲区和分块读，文件增长也不突破预算；init不能覆盖既存文件。
+
+
+## M1 alpha.5：原生布局排序与宽度总览
+
+`flow-layout.mjs` 根据可见兄弟图层的 viewport 实测盒子选出最近边缘；Grid 按行、Flex 按主轴选择前/后插入点。它输出插入锚点及屏幕标记，不猜测 Flex/Grid 尺寸。`reorderSibling` 在全部检查完成后仅调整同父数组，保留节点对象和所有字段，返回 false 表示无顺序变化；锁定源/祖先、跨父级和非法位置均拒绝。
+
+工作台在 pointermove 只临时平移原图层 DOM 并降低透明度（图层仍占布局空间）和画插入线；pointerup 检查父框、画板、viewport 与起始项目 hash，再调用统一 commit 一次。取消、窗口失焦及拖出父框不记录历史；显式项目修改、Undo/Redo、宽度切换或项目导入会先结束手势。组件投影被当作完整实例排序，不解除关联。前后按钮和 Alt + 方向键复用同一顺序操作。
+
+`breakpoint-overview.mjs` 将本节点 maxWidth 集合划为 280–2400px 连续区间；最窄区间含左端，其余左开右闭，与 effectiveNode 的 ≤ 级联一致。边界为 280 时保留单点按钮；2400 断点覆盖整个预览域时不虚构基础专属区间。区间、预览游标和修改范围是不同状态；预览 width 和 scope 继续只存会话 Map，不写 v1，不增加 Undo。父级/组件源影响由真实 container queries 执行，总览明确只显示本节点。
+
+End 定位的反解加入“实测尺寸 − 当前有效声明尺寸”差值；拖动每个兄弟保存各自盒子，并用 important 临时样式预览，避免断点定位规则遮住拖动。SVG 图标从 wrapper 的安全 CSS color 继承 stroke，响应式颜色与静态导出因此共用路径。没有新增项目字段、Patch 权限或运行依赖。
