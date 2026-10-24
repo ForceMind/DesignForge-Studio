@@ -6,7 +6,13 @@ import {
   RESPONSIVE_FIELDS,
 } from "./responsive.mjs";
 import { nodeElement, measureNode, paintResize } from "./viewport.mjs";
-import { snapPosition, resizeBox, geometryChanges } from "./geometry.mjs";
+import {
+  snapPosition,
+  resizeBox,
+  geometryChanges,
+  boxFromPoints,
+  selectionInBox,
+} from "./geometry.mjs";
 import { validateAssets } from "./assets.mjs";
 import {
   CONTAINERS,
@@ -1459,6 +1465,8 @@ function breakpointAction(event) {
 }
 function updateSelectionOverlay() {
   $("selection-overlay")?.remove();
+  if (!project) return;
+  if (gesture?.kind === "marquee") return;
   const n = activeNode(),
     b = activeBoard();
   if (!n || selected().length !== 1 || tool !== "select" || heldSpace) return;
@@ -1495,15 +1503,68 @@ function updateSelectionOverlay() {
     `<span class="selection-size">${Math.round(r.width / zoom)} × ${Math.round(r.height / zoom)}${scope !== null ? " · ≤" + scope : ""}</span>`;
   $("viewport").appendChild(overlay);
 }
+function startMarquee(e, boardId) {
+  const original = {
+    boardId: activeBoardId,
+    ids: selected(),
+    nodeId: activeNodeId,
+  };
+  const same = activeBoardId === boardId,
+    initial = e.shiftKey && same ? selected() : [];
+  activeBoardId = boardId;
+  selectedIds = new Set(initial);
+  activeNodeId = initial.at(-1) || null;
+  render();
+  const b = activeBoard(),
+    entries = flattenNodes(b.nodes).flatMap(({ node, parent }) => {
+      const element = nodeElement($("world"), b.id, node.id);
+      if (!element) return [];
+      const r = element.getBoundingClientRect();
+      return [
+        {
+          id: node.id,
+          parentId: parent?.id || null,
+          locked: isNodeLocked(b, node.id),
+          hidden: !r.width || !r.height,
+          rect: { x: r.x, y: r.y, w: r.width, h: r.height },
+        },
+      ];
+    });
+  gesture = {
+    kind: "marquee",
+    original,
+    boardId,
+    startX: e.clientX,
+    startY: e.clientY,
+    pointerId: e.pointerId,
+    initial,
+    entries,
+  };
+  $("selection-overlay")?.remove();
+  const box = document.createElement("div");
+  box.id = "selection-marquee";
+  box.className = "selection-marquee";
+  $("viewport").appendChild(box);
+  $("viewport").classList.add("is-marquee");
+  $("viewport").setPointerCapture(e.pointerId);
+  e.preventDefault();
+}
+
 function cancelGesture() {
   const g = gesture;
+  if (g?.kind === "marquee") {
+    activeBoardId = g.original.boardId;
+    selectedIds = new Set(g.original.ids);
+    activeNodeId = g.original.nodeId;
+  }
   gesture = null;
   if (
     g?.pointerId !== undefined &&
     $("viewport").hasPointerCapture(g.pointerId)
   )
     $("viewport").releasePointerCapture(g.pointerId);
-  $("viewport").classList.remove("is-panning");
+  $("viewport").classList.remove("is-panning", "is-marquee");
+  $("selection-marquee")?.remove();
   render();
 }
 function startResize(e, handle) {
@@ -1697,6 +1758,7 @@ function bindStatic() {
       const c = project.comments.find((c) => c.id === el.dataset.commentfocus);
       if (c) {
         focusBoard(c.boardId);
+        selectedIds = new Set(c.nodeId ? [c.nodeId] : []);
         activeNodeId = c.nodeId;
         leftTab = "comments";
         render();
@@ -1894,7 +1956,11 @@ function bindStatic() {
   $("viewport").addEventListener(
     "wheel",
     (e) => {
-      if (e.target.closest("[data-preview-control]") || gesture) return;
+      if (e.target.closest("[data-preview-control]")) return;
+      if (gesture) {
+        e.preventDefault();
+        return;
+      }
       e.preventDefault();
       if (e.ctrlKey || e.metaKey) {
         zoomAt(e.deltaY < 0 ? 1.065 : 1 / 1.065, e.clientX, e.clientY);
@@ -1935,9 +2001,12 @@ function bindStatic() {
         );
     }
   });
-  window.addEventListener("resize", () => updateWorld());
+  window.addEventListener("resize", () =>
+    gesture ? cancelGesture() : updateWorld(),
+  );
 }
 function onPointerDown(e) {
+  if (!project) return;
   if (gesture) return;
   if (e.target.closest("[data-preview-control]")) return;
   const handle = e.target.closest("[data-resize-handle]");
@@ -1951,9 +2020,7 @@ function onPointerDown(e) {
     const c = project.comments.find((x) => x.id === pin.dataset.commentPin);
     if (c) {
       leftTab = "comments";
-      activeBoardId = c.boardId;
-      activeNodeId = c.nodeId;
-      render();
+      selectNode(c.nodeId, c.boardId);
     }
     return;
   }
@@ -1961,7 +2028,7 @@ function onPointerDown(e) {
   const node = e.target.closest("[data-node-id]");
   const board = e.target.closest("[data-artboard]");
   const panMode = tool === "hand" || heldSpace || e.button === 1;
-  if (panMode || (!head && !node && !board)) {
+  if (panMode) {
     gesture = { kind: "pan", x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
     $("viewport").classList.add("is-panning");
     e.preventDefault();
@@ -2025,15 +2092,49 @@ function onPointerDown(e) {
     e.preventDefault();
     return;
   }
-  if (board) {
-    switchBoard(board.dataset.artboard);
-    e.preventDefault();
-  }
+  startMarquee(e, board?.dataset.artboard || activeBoardId);
 }
 function onPointerMove(e) {
   if (!gesture) return;
   const dx = e.clientX - gesture.startX,
     dy = e.clientY - gesture.startY;
+  if (gesture.kind === "marquee") {
+    const box = boxFromPoints(
+        { x: gesture.startX, y: gesture.startY },
+        { x: e.clientX, y: e.clientY },
+      ),
+      viewport = $("viewport").getBoundingClientRect(),
+      el = $("selection-marquee");
+    Object.assign(el.style, {
+      left: box.x - viewport.left + "px",
+      top: box.y - viewport.top + "px",
+      width: box.w + "px",
+      height: box.h + "px",
+    });
+    const ids = selectionInBox(gesture.entries, box, gesture.initial);
+    selectedIds = new Set(ids);
+    activeNodeId = ids.at(-1) || null;
+    $("world")
+      .querySelectorAll("[data-node-id]")
+      .forEach((el) =>
+        el.classList.toggle(
+          "is-selected",
+          el.closest("[data-artboard]").dataset.artboard === activeBoardId &&
+            selectedIds.has(el.dataset.nodeId),
+        ),
+      );
+    $("layer-list")
+      .querySelectorAll("[data-node]")
+      .forEach((el) => {
+        el.classList.toggle("active", selectedIds.has(el.dataset.node));
+        el.closest("[role=treeitem]").setAttribute(
+          "aria-selected",
+          String(selectedIds.has(el.dataset.node)),
+        );
+      });
+    $("selection-path").textContent = ids.length + " 个图层";
+    return;
+  }
   if (gesture.kind === "resize") {
     const g = gesture,
       width = /[ew]/.test(g.handle),
@@ -2123,8 +2224,9 @@ function onPointerUp(e) {
   if (g.pointerId !== undefined && $("viewport").hasPointerCapture(g.pointerId))
     $("viewport").releasePointerCapture(g.pointerId);
   render();
-  $("viewport").classList.remove("is-panning");
-  if (g.kind === "pan") return;
+  $("viewport").classList.remove("is-panning", "is-marquee");
+  $("selection-marquee")?.remove();
+  if (g.kind === "pan" || g.kind === "marquee") return;
   const dx = e.clientX - g.startX,
     dy = e.clientY - g.startY;
   if (Math.abs(dx) + Math.abs(dy) < 3) {

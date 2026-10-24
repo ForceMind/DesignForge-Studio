@@ -1843,3 +1843,14 @@ select:focus-visible {
 .floating-coordinate {
   z-index: 25;
 }
+
+.selection-marquee {
+  position: absolute;
+  border: 1px solid #8b78ff;
+  background: #8b78ff20;
+  pointer-events: none;
+  z-index: 19;
+}
+.viewport.is-marquee {
+  cursor: crosshair;
+}

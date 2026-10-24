@@ -99,6 +99,7 @@ test("nested resize previews without saving, commits once, and survives undo/red
   expect(node(await stored(page))).toEqual(node(before));
   await page.locator("#redo").click();
   expect(node(await stored(page))).toEqual(node(p));
+  await page.screenshot({ path: "test-results/m1-resize-inspector.png" });
   await page.reload();
   await select(page, "one");
   expect(node(await stored(page))).toEqual(node(p));
@@ -182,6 +183,7 @@ test("breakpoint editor scopes changes and field resets restore larger-width inh
     updated.boards[0].nodes[0].responsive.find((r) => r.maxWidth === 500)
       .changes.layout.gap,
   ).toBe(8);
+  await page.screenshot({ path: "test-results/m1-breakpoint-editor.png" });
   await page.locator('[data-reset-override="layout.gap"]').click();
   await expect(page.locator('[data-prop="layout.gap"]')).toHaveValue("20");
   expect(
@@ -243,4 +245,117 @@ test("responsive parent layout changes reflow children and clearing hidden/fill/
   const r1 = await page.locator('[data-node-id="one"]').boundingBox(),
     r2 = await page.locator('[data-node-id="two"]').boundingBox();
   expect(r2.y).toBeGreaterThan(r1.y + r1.height);
+});
+async function marquee(page, from, to, { shift = false, finish = true } = {}) {
+  if (shift) await page.keyboard.down("Shift");
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 6 });
+  if (finish) await page.mouse.up();
+  if (shift) await page.keyboard.up("Shift");
+}
+test("marquee selects nested siblings, syncs tree/inspector and does not save a project edit", async ({
+  page,
+}) => {
+  await open(page);
+  const before = await stored(page),
+    a = await page.locator('[data-node-id="one"]').boundingBox(),
+    b = await page.locator('[data-node-id="two"]').boundingBox();
+  await marquee(
+    page,
+    { x: a.x - 8, y: a.y - 8 },
+    { x: b.x + b.width + 8, y: b.y + b.height + 8 },
+  );
+  await expect(page.locator("#layer-list .layer-item.active")).toHaveCount(2);
+  await expect(page.locator('[data-node="frame"]')).not.toHaveClass(/active/);
+  await expect(page.locator(".selection-id")).toContainText("2 selected");
+  expect(await stored(page)).toEqual(before);
+  await page.screenshot({ path: "test-results/m1-marquee-selection.png" });
+  await page.keyboard.press("Control+g");
+  expect((await stored(page)).boards[0].nodes[0].children[0].type).toBe(
+    "group",
+  );
+});
+test("Shift marquee adds a layer, Escape restores selection and Space retains pan behavior", async ({
+  page,
+}) => {
+  await open(page);
+  await select(page, "one");
+  const before = await stored(page),
+    a = await page.locator('[data-node-id="one"]').boundingBox(),
+    b = await page.locator('[data-node-id="two"]').boundingBox();
+  await marquee(
+    page,
+    { x: b.x - 6, y: b.y - 6 },
+    { x: b.x + b.width + 6, y: b.y + b.height + 6 },
+    { shift: true },
+  );
+  await expect(page.locator("#layer-list .layer-item.active")).toHaveCount(2);
+  await marquee(
+    page,
+    { x: a.x - 8, y: a.y - 8 },
+    { x: a.x + a.width + 8, y: a.y + a.height + 8 },
+    { finish: false },
+  );
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+  await expect(page.locator("#layer-list .layer-item.active")).toHaveCount(2);
+  const position = await page.locator("#world").getAttribute("style");
+  await page.keyboard.down("Space");
+  await page.mouse.move(a.x - 10, a.y - 10);
+  await page.mouse.down();
+  await page.mouse.move(a.x + 20, a.y + 20, { steps: 4 });
+  await page.mouse.up();
+  await page.keyboard.up("Space");
+  expect(await page.locator("#world").getAttribute("style")).not.toBe(position);
+  expect(await stored(page)).toEqual(before);
+});
+test("marquee enclosing a container selects it once and excludes locked/hidden layers", async ({
+  page,
+}) => {
+  const p = project();
+  p.boards[0].nodes[0].children[1].locked = true;
+  await open(page, p);
+  const a = await page.locator('[data-node-id="one"]').boundingBox(),
+    b = await page.locator('[data-node-id="two"]').boundingBox();
+  await marquee(
+    page,
+    { x: a.x - 7, y: a.y - 7 },
+    { x: b.x + b.width + 7, y: b.y + b.height + 7 },
+  );
+  await expect(page.locator("#layer-list .layer-item.active")).toHaveCount(1);
+  await expect(page.locator('[data-node="one"]')).toHaveClass(/active/);
+  const frame = await page.locator('[data-node-id="frame"]').boundingBox();
+  await marquee(
+    page,
+    { x: frame.x - 8, y: frame.y - 8 },
+    { x: frame.x + frame.width + 8, y: frame.y + frame.height + 8 },
+  );
+  await expect(page.locator("#layer-list .layer-item.active")).toHaveCount(1);
+  await expect(page.locator('[data-node="frame"]')).toHaveClass(/active/);
+});
+test("resizing a stretched child in a narrow preview preserves its reference constraints and visual edge", async ({
+  page,
+}) => {
+  const p = project(),
+    frame = p.boards[0].nodes[0];
+  frame.constraints = { horizontal: "stretch", referenceW: 800 };
+  frame.children[0].w = 500;
+  frame.children[0].constraints = { horizontal: "stretch", referenceW: 640 };
+  await open(page, p);
+  await page.locator("#preview-width").selectOption("390");
+  await select(page, "one");
+  const el = page.locator('[data-node-id="one"]'),
+    before = await el.boundingBox();
+  await dragHandle(page, "e", 25, 0);
+  const after = await el.boundingBox();
+  expect(after.x).toBeCloseTo(before.x, 0);
+  expect(after.width).toBeCloseTo(before.width + 25, 0);
+  const updated = node(await stored(page));
+  expect(updated.constraints).toEqual(
+    p.boards[0].nodes[0].children[0].constraints,
+  );
+  expect(updated.x).toBe(40);
+  expect(updated.w).toBeGreaterThan(500);
+  expect((await stored(page)).boards[0].w).toBe(800);
 });

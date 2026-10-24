@@ -51,3 +51,14 @@ Patch v1 保留强制 baseHash、受限操作/字段及整批原子校验；锁�
 ## 验证分层
 
 Node 测试覆盖协议、树操作、锁定、资产、存储和 CLI 文件保护。Playwright 在 CI 的真实 Chromium 中运行操作/尺寸检查、保存截图和失败 trace。截图需人工复核，未建立像素差异阈值；当前未覆盖其他浏览器与真机。记录见 VALIDATION.md，剩余工作见 KNOWN_ISSUES.md。
+
+
+## M1 alpha.2：事务交互与断点继承
+
+`responsive.mjs` 统一渲染器和 Inspector 的宽→窄继承：layout/style/sizing 逐字段合并，其他允许字段替换。`setScopedChanges` 只在所选 maxWidth 写入，`resetScopedField` 仅删一个覆盖字段。重复宽度被结构校验拒绝。渲染会在全部断点上同步重算后代，避免父容器切换 Flex/Grid 后子项仍为 absolute；组件投影子层的选择器按实例 ID 隔离。
+
+预览宽度及手工选择的编辑范围保存在会话 Map，不写进项目、不加入历史。画板尺寸输入仍修改设计尺寸。预览宽度可以帮助编辑同一树的实际容器查询，位置/名称/文字内容仍属全局字段。场景切换/重载后默认从设计宽度开始。
+
+`viewport.mjs` 只负责真实 DOM 测量与临时样式。`geometry.mjs` 提供尺寸计算、约束反解、框选和父子去重。尺寸操作记录初始测量，pointermove 不写 AST/存储；pointerup 经统一 commit 校验后只写一份历史；取消清除预览并恢复。Overlay 在 viewport 坐标中保持固定像素大小，脱离嵌套容器裁切。Flow 或断点模式不提供会移动原点的缩放方向，避免改动全局 x/y。
+
+框选使用真实客户端几何，只选当前画板完全包围的图层，过滤隐藏及祖先锁定，再去掉重复子层。它只改变选区，无项目写入。默认空白拖动改为框选，Space/H/中键仍平移。

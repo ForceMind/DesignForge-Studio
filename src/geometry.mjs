@@ -133,3 +133,37 @@ export function geometryChanges(
   changes.sizing = sizing;
   return changes;
 }
+export function boxFromPoints(a, b) {
+  return {
+    x: Math.min(a.x, b.x),
+    y: Math.min(a.y, b.y),
+    w: Math.abs(a.x - b.x),
+    h: Math.abs(a.y - b.y),
+  };
+}
+/** Fully enclosed layers; an enclosed parent subsumes its children. */
+export function selectionInBox(entries, box, existing = []) {
+  const byId = new Map(entries.map((e) => [e.id, e])),
+    ids = new Set(existing.filter((id) => byId.has(id)));
+  for (const e of entries) {
+    const r = e.rect;
+    if (e.locked || e.hidden || r.w <= 0 || r.h <= 0) continue;
+    if (
+      r.x >= box.x - 0.5 &&
+      r.y >= box.y - 0.5 &&
+      r.x + r.w <= box.x + box.w + 0.5 &&
+      r.y + r.h <= box.y + box.h + 0.5
+    )
+      ids.add(e.id);
+  }
+  return [...ids].filter((id) => {
+    let parent = byId.get(id)?.parentId;
+    const seen = new Set();
+    while (parent && !seen.has(parent)) {
+      if (ids.has(parent)) return false;
+      seen.add(parent);
+      parent = byId.get(parent)?.parentId;
+    }
+    return true;
+  });
+}

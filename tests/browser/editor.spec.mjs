@@ -326,9 +326,13 @@ test("free-layer mouse drag snaps and is one undoable transaction", async ({
   );
   await el.scrollIntoViewIfNeeded();
   const box = await el.boundingBox();
-  await page.mouse.move(box.x + 4, box.y + 4);
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
-  await page.mouse.move(box.x + 35, box.y + 21, { steps: 5 });
+  await page.mouse.move(
+    box.x + box.width / 2 + 31,
+    box.y + box.height / 2 + 17,
+    { steps: 5 },
+  );
   await page.mouse.up();
   let p = await stored(page),
     n = p.boards
