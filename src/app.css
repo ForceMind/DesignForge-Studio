@@ -1712,3 +1712,134 @@ select:focus-visible {
   font-size: 11px;
   padding: 6px;
 }
+/* Selection chrome stays in viewport pixels, outside clipped nested containers. */
+.selection-overlay {
+  position: absolute;
+  border: 1px solid #8b78ff;
+  pointer-events: none;
+  z-index: 20;
+  box-sizing: border-box;
+}
+.resize-handle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 1px solid #7360df;
+  background: #fff;
+  border-radius: 1px;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  touch-action: none;
+}
+.resize-handle.nw {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+}
+.resize-handle.n {
+  left: 50%;
+  top: 0;
+  cursor: ns-resize;
+}
+.resize-handle.ne {
+  left: 100%;
+  top: 0;
+  cursor: nesw-resize;
+}
+.resize-handle.e {
+  left: 100%;
+  top: 50%;
+  cursor: ew-resize;
+}
+.resize-handle.se {
+  left: 100%;
+  top: 100%;
+  cursor: nwse-resize;
+}
+.resize-handle.s {
+  left: 50%;
+  top: 100%;
+  cursor: ns-resize;
+}
+.resize-handle.sw {
+  left: 0;
+  top: 100%;
+  cursor: nesw-resize;
+}
+.resize-handle.w {
+  left: 0;
+  top: 50%;
+  cursor: ew-resize;
+}
+.selection-size {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #6a58d5;
+  color: white;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font:
+    10px ui-monospace,
+    monospace;
+  white-space: nowrap;
+}
+.artboard-frame .df-node.is-selected:after {
+  display: none;
+}
+.artboard-frame .df-node.is-selected {
+  z-index: auto;
+}
+.breakpoint-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin: 8px 0;
+  min-width: 0;
+  font-size: 11px;
+}
+.breakpoint-row label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+.breakpoint-row input {
+  width: 70px;
+  min-width: 0;
+  border: 1px solid var(--ui-line);
+  padding: 6px;
+  border-radius: 5px;
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+}
+.breakpoint-row .btn-small {
+  padding: 6px;
+}
+.override-resets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 10px 0;
+}
+.override-resets .btn-small {
+  font:
+    10px ui-monospace,
+    monospace;
+}
+.floating-coordinate select,
+.floating-coordinate button {
+  margin-left: 7px;
+  padding: 5px;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+  font-size: 11px;
+}
+.floating-coordinate {
+  z-index: 25;
+}

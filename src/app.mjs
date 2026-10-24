@@ -1,4 +1,12 @@
-import { snapPosition } from "./geometry.mjs";
+import {
+  effectiveNode,
+  activeBreakpoint,
+  setScopedChanges,
+  resetScopedField,
+  RESPONSIVE_FIELDS,
+} from "./responsive.mjs";
+import { nodeElement, measureNode, paintResize } from "./viewport.mjs";
+import { snapPosition, resizeBox, geometryChanges } from "./geometry.mjs";
 import { validateAssets } from "./assets.mjs";
 import {
   CONTAINERS,
@@ -144,6 +152,7 @@ function setTool(t) {
   $("tool-select").classList.toggle("selected", t === "select");
   $("tool-hand").classList.toggle("selected", t === "hand");
   $("viewport").classList.toggle("is-hand", t === "hand");
+  updateSelectionOverlay();
 }
 function render() {
   if (!project) return;
@@ -162,8 +171,21 @@ function render() {
   $("selection-path").textContent = activeNode()
     ? `${activeBoard().name} / ${activeNode().name || activeNode().type}`
     : activeBoard()?.name || "无选中对象";
+  const picker = $("preview-width");
+  picker.querySelectorAll("[data-custom-preview]").forEach((el) => el.remove());
+  if (
+    previewWidths.has(activeBoard().id) &&
+    ![...picker.options].some((o) => o.value === String(previewWidth()))
+  ) {
+    const option = new Option(previewWidth() + " px", String(previewWidth()));
+    option.dataset.customPreview = "";
+    picker.add(option);
+  }
+  $("preview-width").value = previewWidths.has(activeBoard().id)
+    ? String(previewWidth())
+    : "";
   $("view-status").textContent = activeBoard()
-    ? `${activeBoard().w} × ${activeBoard().h}`
+    ? `${previewWidth()} × ${activeBoard().h}${previewWidths.has(activeBoardId) ? " · 预览" : ""}`
     : "—";
   $("left-tabs")
     .querySelectorAll("button")
@@ -249,9 +271,10 @@ function renderCanvas() {
           return `<button type="button" class="comment-pin" title="${esc(c.text)}" data-comment-pin="${esc(c.id)}" style="left:${pt.x}px;top:${pt.y}px">${i + 1}</button>`;
         })
         .join("");
-      let html = renderBoard(b, effectiveTokens(project), project);
+      const view = viewBoard(b);
+      let html = renderBoard(view, effectiveTokens(project), project);
       html = html.replace('<main class="df-board"', '<main class="df-board"');
-      return `<section class="artboard-shell ${b.id === activeBoardId ? "is-active" : ""}" data-artboard="${esc(b.id)}" style="left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px"><div class="artboard-title" data-boardhead="${esc(b.id)}"><span class="board-tag">${b.w < 500 ? "MOBILE" : "DESKTOP"}</span><b>${esc(b.name)}</b><span class="ab-res">${b.w} × ${b.h}</span></div><div class="artboard-frame" style="width:${b.w}px;height:${b.h}px">${html}${pins}</div></section>`;
+      return `<section class="artboard-shell ${b.id === activeBoardId ? "is-active" : ""}" data-artboard="${esc(b.id)}" style="left:${b.x}px;top:${b.y}px;width:${view.w}px;height:${b.h}px"><div class="artboard-title" data-boardhead="${esc(b.id)}"><span class="board-tag">${b.w < 500 ? "MOBILE" : "DESKTOP"}</span><b>${esc(b.name)}</b><span class="ab-res">${view.w} × ${b.h}${view.w !== b.w ? " · 预览" : ""}</span></div><div class="artboard-frame" style="width:${view.w}px;height:${b.h}px">${html}${pins}</div></section>`;
     })
     .join("");
   $("world")
@@ -286,12 +309,14 @@ function renderCanvas() {
         pin.style.top = (r.top - b.top) / zoom - 7 + "px";
       }
     }
+    updateSelectionOverlay();
   });
 }
 function updateWorld() {
   $("world").style.transform =
     `translate(${pan.x}px,${pan.y}px) scale(${zoom})`;
   $("zoom-label").textContent = `${Math.round(zoom * 100)}%`;
+  updateSelectionOverlay();
 }
 function fitAll() {
   if (!project?.boards.length) return;
@@ -306,7 +331,7 @@ function fitAll() {
   for (const b of project.boards) {
     minx = Math.min(minx, b.x);
     miny = Math.min(miny, b.y - 45);
-    maxx = Math.max(maxx, b.x + b.w);
+    maxx = Math.max(maxx, b.x + previewWidth(b));
     maxy = Math.max(
       maxy,
       b.y +
@@ -327,10 +352,10 @@ function fitAll() {
   };
   updateWorld();
 }
-function focusBoard(id) {
+function focusBoard(id, retainSelection = false) {
   const b = project.boards.find((b) => b.id === id);
   if (!b) return;
-  switchBoard(b.id);
+  if (!retainSelection) switchBoard(b.id);
   const bh =
     $("world").querySelector(`[data-artboard="${b.id}"] .df-board`)
       ?.offsetHeight || b.h;
@@ -339,11 +364,14 @@ function focusBoard(id) {
     0.22,
     Math.min(
       1.1,
-      Math.min((v.clientWidth - 130) / b.w, (v.clientHeight - 115) / bh),
+      Math.min(
+        (v.clientWidth - 130) / previewWidth(b),
+        (v.clientHeight - 115) / bh,
+      ),
     ),
   );
   pan = {
-    x: (v.clientWidth - b.w * zoom) / 2 - b.x * zoom,
+    x: (v.clientWidth - previewWidth(b) * zoom) / 2 - b.x * zoom,
     y: (v.clientHeight - bh * zoom) / 2 - b.y * zoom,
   };
   updateWorld();
@@ -373,7 +401,8 @@ function renderRight() {
 }
 function renderProperties() {
   const b = activeBoard(),
-    n = activeNode();
+    source = activeNode(),
+    n = source ? effectiveNode(source, nodeScope(source) ?? Infinity) : null;
   if (!n) {
     $("right-content").innerHTML =
       `<div class="inspector-title">画板设置 <span class="safe-tag">EDITABLE</span></div><p class="property-help">选择画布中的元素，或在左侧点选图层，进行像素级调整。</p><div class="divider"></div><div class="panel-section-title">画板属性 <small>${esc(b.id)}</small></div>${wide("画板名称", "board.name", b.name)}${selectField(
@@ -764,6 +793,36 @@ function propChange(field, raw) {
     toast("图层或父容器已锁定");
     return;
   }
+  const [section, sub] = field.split(".");
+  if (RESPONSIVE_FIELDS.has(section)) {
+    let value = raw;
+    if (["w", "h"].includes(section)) value = Number(raw);
+    if (section === "hidden") value = raw === "true";
+    if (
+      ["layout", "style"].includes(section) &&
+      [
+        "gap",
+        "padding",
+        "columns",
+        "fontSize",
+        "fontWeight",
+        "radius",
+        "opacity",
+        "strokeWidth",
+        "letterSpacing",
+      ].includes(sub) &&
+      !raw.startsWith("$")
+    )
+      value = Number(raw);
+    let changes = sub ? { [section]: { [sub]: value } } : { [section]: value };
+    if (
+      section === "layout" &&
+      !effectiveNode(n, nodeScope(n) ?? Infinity).layout?.mode
+    )
+      changes.layout.mode = "absolute";
+    scopedEdit(changes);
+    return;
+  }
   commit((p) => {
     const target = findNode(
       p.boards.find((q) => q.id === b.id),
@@ -951,7 +1010,7 @@ function layoutControls(n) {
       ["scale", "比例"],
     ],
   )}</div>`;
-  html += `<p class="property-help">${(n.responsive || []).map((r) => "≤ " + r.maxWidth + "px: " + Object.keys(r.changes).join(", ")).join("<br>") || "尚无断点覆盖"}</p><div class="button-row"><button class="btn-small" data-action="add-breakpoint">添加断点布局</button><button class="btn-small" data-action="clear-breakpoints">清除覆盖</button></div>`;
+  html += responsiveControls(activeNode());
   return html;
 }
 function themeControls() {
@@ -1048,36 +1107,17 @@ function ungroupSelection() {
 function addBreakpoint() {
   const n = activeNode();
   if (!n) return;
-  const width = Number(prompt("画板宽度小于等于多少时应用？", "600"));
-  if (!width) return;
-  let changes;
-  if (CONTAINERS.has(n.type)) {
-    const mode = prompt("断点布局：column / row / grid", "column");
-    if (!mode) return;
-    changes = {
-      layout: {
-        ...n.layout,
-        mode: mode === "grid" ? "grid" : "flex",
-        direction: mode === "row" ? "row" : "column",
-        columns: 1,
-      },
-    };
-  } else {
-    const w = Number(prompt("断点下元素宽度", String(n.w)));
-    if (!w) return;
-    changes = { w };
-  }
-  commit((p) => {
-    const target = findNode(
-      p.boards.find((b) => b.id === activeBoardId),
-      n.id,
-    );
-    target.responsive = [
-      ...(target.responsive || []).filter((r) => r.maxWidth !== width),
-      { maxWidth: width, changes },
-    ];
+  const width = Number($("breakpoint-new-width")?.value || 600);
+  if (scopedEditBreakpoint(n, width)) setEditScope(String(width));
+}
+function scopedEditBreakpoint(n, width) {
+  return commit((p) => {
+    const b = p.boards.find((b) => b.id === activeBoardId);
+    if (isNodeLocked(b, n.id)) throw Error("Locked layer");
+    setScopedChanges(findNode(b, n.id), {}, width);
   });
 }
+
 function makeComponent() {
   const n = activeNode();
   if (!n || !CONTAINERS.has(n.type)) {
@@ -1302,7 +1342,206 @@ function assetAction(e) {
   }
 }
 
+const previewWidths = new Map(),
+  editScopes = new Map();
+const scopeKey = (id = activeNodeId) => activeBoardId + ":" + id;
+const previewWidth = (board = activeBoard()) =>
+  previewWidths.get(board.id) ?? board.w;
+const viewBoard = (board) => ({ ...board, w: previewWidth(board) });
+function nodeScope(node = activeNode()) {
+  if (!node) return null;
+  const key = scopeKey(node.id);
+  if (editScopes.has(key)) {
+    const scope = editScopes.get(key);
+    if (scope === null || node.responsive?.some((r) => r.maxWidth === scope))
+      return scope;
+    editScopes.delete(key);
+  }
+  return activeBreakpoint(node, previewWidth());
+}
+function setPreviewWidth(value) {
+  const b = activeBoard();
+  if (value === "") {
+    previewWidths.delete(b.id);
+  } else {
+    const width = Number(value);
+    if (!Number.isFinite(width) || width < 280 || width > 2400) {
+      toast("预览宽度须为 280–2400");
+      return;
+    }
+    previewWidths.set(b.id, width);
+  }
+  render();
+  focusBoard(b.id, true);
+}
+function scopedEdit(changes) {
+  const b = activeBoard(),
+    n = activeNode();
+  if (!n) return;
+  const scope = nodeScope(n);
+  return commit((p) => {
+    const board = p.boards.find((x) => x.id === b.id);
+    if (isNodeLocked(board, n.id)) throw Error("Locked layer");
+    setScopedChanges(findNode(board, n.id), changes, scope);
+  });
+}
+function responsiveControls(node) {
+  const scope = nodeScope(node),
+    rules = [...(node.responsive || [])].sort(
+      (a, b) => b.maxWidth - a.maxWidth,
+    );
+  const rule = rules.find((r) => r.maxWidth === scope),
+    paths = Object.entries(rule?.changes || {}).flatMap(([k, v]) =>
+      ["style", "layout", "sizing"].includes(k)
+        ? Object.keys(v).map((c) => k + "." + c)
+        : [k],
+    );
+  return `<div class="divider"></div><div class="panel-section-title">响应式编辑</div><div class="singlefield"><label for="breakpoint-scope">当前修改范围</label><select id="breakpoint-scope"><option value="" ${scope === null ? "selected" : ""}>基础样式 · 所有宽度</option>${rules.map((r) => `<option value="${r.maxWidth}" ${r.maxWidth === scope ? "selected" : ""}>≤ ${r.maxWidth}px 覆盖</option>`).join("")}</select></div><p class="property-help">${scope === null ? "布局和外观写入基础样式；已有断点继续覆盖这些值。" : `布局、尺寸和外观仅写入 ≤ ${scope}px；名称、内容、位置和结构仍为全局。`} 当前画板预览 ${previewWidth()}px。</p><div class="breakpoint-list">${rules.map((r) => `<div class="breakpoint-row"><label>≤ <input type="number" aria-label="断点 ${r.maxWidth} 宽度" data-rename-breakpoint="${r.maxWidth}" value="${r.maxWidth}" min="280" max="2400">px</label><button class="btn-small" data-edit-breakpoint="${r.maxWidth}">编辑</button><button class="btn-small" data-delete-breakpoint="${r.maxWidth}">删除</button></div>`).join("")}</div>${paths.length ? `<div class="override-resets">${paths.map((path) => `<button class="btn-small" data-reset-override="${path}" data-breakpoint="${scope}" title="仅移除此字段覆盖，恢复继承">↶ ${path}</button>`).join("")}</div>` : ""}<div class="breakpoint-row"><input id="breakpoint-new-width" aria-label="新断点宽度" type="number" min="280" max="2400" value="600"><button class="btn-small" data-action="add-breakpoint">新增断点</button></div>${rules.length ? '<button class="btn-small" data-action="clear-breakpoints">清除全部覆盖</button>' : ""}`;
+}
+function setEditScope(value) {
+  const n = activeNode();
+  if (!n) return;
+  const scope = value === "" ? null : Number(value);
+  editScopes.set(scopeKey(), scope);
+  if (scope !== null) setPreviewWidth(scope);
+  else render();
+}
+function changeBreakpoint(event) {
+  const input = event.target.closest("[data-rename-breakpoint]");
+  if (!input) return false;
+  const old = Number(input.dataset.renameBreakpoint),
+    width = Number(input.value),
+    n = activeNode();
+  const ok = commit((p) => {
+    const b = p.boards.find((b) => b.id === activeBoardId);
+    if (isNodeLocked(b, n.id)) throw Error("Locked layer");
+    const target = findNode(b, n.id);
+    if (
+      target.responsive.some((r) => r.maxWidth === width && r.maxWidth !== old)
+    )
+      throw Error("断点宽度重复");
+    target.responsive.find((r) => r.maxWidth === old).maxWidth = width;
+  });
+  if (ok && nodeScope(n) === old) {
+    editScopes.set(scopeKey(), width);
+    setPreviewWidth(width);
+  }
+  return true;
+}
+function breakpointAction(event) {
+  const edit = event.target.closest("[data-edit-breakpoint]");
+  if (edit) {
+    setEditScope(edit.dataset.editBreakpoint);
+    return true;
+  }
+  const remove = event.target.closest("[data-delete-breakpoint]"),
+    reset = event.target.closest("[data-reset-override]");
+  if (remove || reset) {
+    const n = activeNode();
+    commit((p) => {
+      const b = p.boards.find((b) => b.id === activeBoardId);
+      if (isNodeLocked(b, n.id)) throw Error("Locked layer");
+      const target = findNode(b, n.id);
+      if (remove)
+        target.responsive = target.responsive.filter(
+          (r) => r.maxWidth !== Number(remove.dataset.deleteBreakpoint),
+        );
+      else
+        resetScopedField(
+          target,
+          Number(reset.dataset.breakpoint),
+          reset.dataset.resetOverride,
+        );
+    });
+    return true;
+  }
+  return false;
+}
+function updateSelectionOverlay() {
+  $("selection-overlay")?.remove();
+  const n = activeNode(),
+    b = activeBoard();
+  if (!n || selected().length !== 1 || tool !== "select" || heldSpace) return;
+  const el = nodeElement($("world"), b.id, n.id);
+  if (!el) return;
+  const r = el.getBoundingClientRect(),
+    v = $("viewport").getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const entry = locateNode(b, n.id),
+    scope = nodeScope(n),
+    parent = entry.parent ? effectiveNode(entry.parent, previewWidth(b)) : null,
+    flow = parent?.layout?.mode && parent.layout.mode !== "absolute";
+  const handles = isNodeLocked(b, n.id)
+    ? []
+    : flow || scope !== null
+      ? ["e", "se", "s"]
+      : ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+  const overlay = document.createElement("div");
+  overlay.id = "selection-overlay";
+  overlay.className = "selection-overlay";
+  Object.assign(overlay.style, {
+    left: r.left - v.left + "px",
+    top: r.top - v.top + "px",
+    width: r.width + "px",
+    height: r.height + "px",
+  });
+  overlay.innerHTML =
+    handles
+      .map(
+        (h) =>
+          `<button type="button" tabindex="-1" class="resize-handle ${h}" data-resize-handle="${h}" aria-label="调整 ${esc(n.name || n.type)} ${h}" title="拖动调整尺寸；Shift 等比，Alt 从中心（自由布局）"></button>`,
+      )
+      .join("") +
+    `<span class="selection-size">${Math.round(r.width / zoom)} × ${Math.round(r.height / zoom)}${scope !== null ? " · ≤" + scope : ""}</span>`;
+  $("viewport").appendChild(overlay);
+}
+function cancelGesture() {
+  const g = gesture;
+  gesture = null;
+  if (
+    g?.pointerId !== undefined &&
+    $("viewport").hasPointerCapture(g.pointerId)
+  )
+    $("viewport").releasePointerCapture(g.pointerId);
+  $("viewport").classList.remove("is-panning");
+  render();
+}
+function startResize(e, handle) {
+  const b = activeBoard(),
+    n = activeNode();
+  if (!n || isNodeLocked(b, n.id) || selected().length !== 1) return;
+  const measured = measureNode($("world"), b.id, n.id, zoom);
+  if (!measured) return;
+  const entry = locateNode(b, n.id),
+    parent = entry.parent
+      ? effectiveNode(entry.parent, previewWidth(b))
+      : viewBoard(b),
+    flow = parent.layout?.mode && parent.layout.mode !== "absolute",
+    scope = nodeScope(n);
+  if ((flow || scope !== null) && !["e", "s", "se"].includes(handle)) return;
+  gesture = {
+    kind: "resize",
+    boardId: b.id,
+    nodeId: n.id,
+    startX: e.clientX,
+    startY: e.clientY,
+    pointerId: e.pointerId,
+    measured,
+    parentDesign: entry.parent || b,
+    parentActual: measured.parentSize,
+    node: effectiveNode(n, scope ?? Infinity),
+    scope,
+    flow,
+    handle,
+    box: measured.box,
+  };
+  $("viewport").setPointerCapture(e.pointerId);
+  e.preventDefault();
+}
+
 function bindStatic() {
+  $("preview-width").onchange = (e) => setPreviewWidth(e.target.value);
+  $("reset-preview").onclick = () => setPreviewWidth("");
   $("tool-select").onclick = () => setTool("select");
   $("tool-hand").onclick = () => setTool("hand");
   $("upload-asset").onchange = importAsset;
@@ -1468,6 +1707,11 @@ function bindStatic() {
     }
   };
   $("right-content").addEventListener("change", (e) => {
+    if (e.target.id === "breakpoint-scope") {
+      setEditScope(e.target.value);
+      return;
+    }
+    if (changeBreakpoint(e)) return;
     const color = e.target.closest("[data-style-color]");
     if (color) {
       propChange(color.dataset.styleColor, color.value);
@@ -1518,6 +1762,7 @@ function bindStatic() {
     if (e.target.id === "agent-brief") briefText = e.target.value;
   });
   $("right-content").addEventListener("click", (e) => {
+    if (breakpointAction(e)) return;
     const al = e.target.closest("[data-align]");
     if (al) {
       commit((p) =>
@@ -1645,13 +1890,11 @@ function bindStatic() {
   $("viewport").addEventListener("pointerdown", onPointerDown);
   window.addEventListener("pointermove", onPointerMove);
   window.addEventListener("pointerup", onPointerUp);
-  window.addEventListener("pointercancel", () => {
-    gesture = null;
-    render();
-  });
+  window.addEventListener("pointercancel", cancelGesture);
   $("viewport").addEventListener(
     "wheel",
     (e) => {
+      if (e.target.closest("[data-preview-control]") || gesture) return;
       e.preventDefault();
       if (e.ctrlKey || e.metaKey) {
         zoomAt(e.deltaY < 0 ? 1.065 : 1 / 1.065, e.clientX, e.clientY);
@@ -1672,9 +1915,7 @@ function bindStatic() {
   });
   window.addEventListener("blur", () => {
     heldSpace = false;
-    gesture = null;
-    render();
-    $("viewport").classList.remove("is-panning");
+    cancelGesture();
   });
   $("viewport").addEventListener("dblclick", (e) => {
     const el = e.target.closest("[data-node-id]");
@@ -1697,6 +1938,13 @@ function bindStatic() {
   window.addEventListener("resize", () => updateWorld());
 }
 function onPointerDown(e) {
+  if (gesture) return;
+  if (e.target.closest("[data-preview-control]")) return;
+  const handle = e.target.closest("[data-resize-handle]");
+  if (handle && tool === "select" && !heldSpace && e.button === 0) {
+    startResize(e, handle.dataset.resizeHandle);
+    return;
+  }
   if (e.button !== 0 && e.button !== 1) return;
   const pin = e.target.closest("[data-comment-pin]");
   if (pin) {
@@ -1786,6 +2034,30 @@ function onPointerMove(e) {
   if (!gesture) return;
   const dx = e.clientX - gesture.startX,
     dy = e.clientY - gesture.startY;
+  if (gesture.kind === "resize") {
+    const g = gesture,
+      width = /[ew]/.test(g.handle),
+      height = /[ns]/.test(g.handle);
+    g.box = resizeBox(g.measured.box, g.handle, dx / zoom, dy / zoom, {
+      ratio: e.shiftKey,
+      center: e.altKey && !g.flow && g.scope === null,
+      grid: $("snap-toggle").checked && !e.altKey ? 8 : 1,
+    });
+    paintResize(g.measured.element, g.box, { flow: g.flow, width, height });
+    const changes = geometryChanges(
+      g.node,
+      g.box,
+      g.parentDesign,
+      g.parentActual,
+      { flow: g.flow, width, height, position: g.scope === null },
+    );
+    for (const key of ["x", "y", "w", "h"]) {
+      const input = $("right-content").querySelector(`[data-prop="${key}"]`);
+      if (input && changes[key] !== undefined) input.value = changes[key];
+    }
+    updateSelectionOverlay();
+    return;
+  }
   if (gesture.kind === "pan") {
     pan = {
       x: gesture.px + e.clientX - gesture.x,
@@ -1848,6 +2120,8 @@ function onPointerUp(e) {
   if (!gesture) return;
   const g = gesture;
   gesture = null;
+  if (g.pointerId !== undefined && $("viewport").hasPointerCapture(g.pointerId))
+    $("viewport").releasePointerCapture(g.pointerId);
   render();
   $("viewport").classList.remove("is-panning");
   if (g.kind === "pan") return;
@@ -1855,6 +2129,26 @@ function onPointerUp(e) {
     dy = e.clientY - g.startY;
   if (Math.abs(dx) + Math.abs(dy) < 3) {
     render();
+    return;
+  }
+  if (g.kind === "resize") {
+    const changes = geometryChanges(
+      g.node,
+      g.box,
+      g.parentDesign,
+      g.parentActual,
+      {
+        flow: g.flow,
+        width: /[ew]/.test(g.handle),
+        height: /[ns]/.test(g.handle),
+        position: g.scope === null,
+      },
+    );
+    commit((p) => {
+      const b = p.boards.find((b) => b.id === g.boardId);
+      if (isNodeLocked(b, g.nodeId)) throw Error("Locked layer");
+      setScopedChanges(findNode(b, g.nodeId), changes, g.scope);
+    });
     return;
   }
   if (g.kind === "node") {
@@ -1888,6 +2182,34 @@ function isTyping() {
   );
 }
 function onKeyDown(e) {
+  if (
+    gesture &&
+    (e.key === "Escape" ||
+      ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z"))
+  ) {
+    e.preventDefault();
+    cancelGesture();
+    return;
+  }
+  if (
+    gesture &&
+    [
+      "Delete",
+      "Backspace",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+    ].includes(e.key)
+  ) {
+    e.preventDefault();
+    return;
+  }
+  if (gesture) {
+    if (!["Shift", "Alt", "Control", "Meta"].includes(e.key))
+      e.preventDefault();
+    return;
+  }
   if (e.code === "Space" && !isTyping()) {
     heldSpace = true;
     $("viewport").classList.add("is-hand");

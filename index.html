@@ -258,7 +258,20 @@
               <span class="kbd">⌘</span> + 滚轮缩放
             </div>
             <div class="floating-coordinate" id="coordinate-hint">
-              ✦ 多画板设计系统
+              <span data-preview-control
+                ><label for="preview-width">画板预览</label
+                ><select id="preview-width" aria-label="画板预览宽度">
+                  <option value="">设计宽度</option>
+                  <option>320</option>
+                  <option>390</option>
+                  <option>600</option>
+                  <option>768</option>
+                  <option>1024</option>
+                  <option>1280</option></select
+                ><button id="reset-preview" type="button" title="恢复设计宽度">
+                  ↺
+                </button></span
+              >
             </div>
           </div>
           <div class="statusbar">

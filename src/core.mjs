@@ -1,3 +1,4 @@
+import { effectiveNode } from "./responsive.mjs";
 import { validateAssets } from "./assets.mjs";
 import {
   CONTAINERS,
@@ -365,6 +366,12 @@ export function validateProject(project) {
           ))
       )
         error(n + ".constraints", "Invalid constraints");
+      if (
+        Array.isArray(node.responsive) &&
+        new Set(node.responsive.map((r) => r?.maxWidth)).size !==
+          node.responsive.length
+      )
+        error(n + ".responsive", "Duplicate breakpoint width");
       if (node.responsive !== undefined) {
         if (!Array.isArray(node.responsive) || node.responsive.length > 8)
           error(n + ".responsive", "Expected <= 8 breakpoint overrides");
@@ -386,9 +393,7 @@ export function validateProject(project) {
               error(n + ".responsive", "Invalid breakpoint");
               continue;
             }
-            if (r.changes.layout)
-              checkLayout(r.changes.layout, n + ".responsive.layout");
-            const changed = { ...node, ...r.changes };
+            const changed = effectiveNode(node, r.maxWidth);
             delete changed.responsive;
             delete changed.children;
             validateNodes(
@@ -829,11 +834,12 @@ function colorStyle(node, tokens, board, parent = board) {
     `opacity:${clamp(scalar(s.opacity, tokens, 1), 0, 1, 1)}`,
   ];
   const fill = s.fill ? cssColor(s.fill, tokens, "transparent") : "transparent";
-  if (fill !== "transparent") parts.push(`background:${fill}`);
+  parts.push(`background:${fill}`);
   if (s.stroke && s.stroke !== "none")
     parts.push(
       `border:${clamp(s.strokeWidth ?? 1, 0, 20, 1)}px solid ${cssColor(s.stroke, tokens, "#000000")}`,
     );
+  else parts.push("border:0");
   const radius = resolveToken(s.radius, tokens);
   if (Number.isFinite(radius))
     parts.push(`border-radius:${px(clamp(radius, 0, 200))}`);
@@ -963,28 +969,63 @@ export function materializeInstance(instance, project) {
     $sourceId: undefined,
   };
 }
-function responsiveStyles(board, tokens) {
-  const rules = [];
-  for (const { node, parent } of flattenNodes(board.nodes))
-    for (const r of [...(node.responsive || [])].sort(
-      (a, b) => b.maxWidth - a.maxWidth,
-    )) {
-      const effective = {
-        ...node,
-        ...r.changes,
-        style: { ...node.style, ...r.changes.style },
-      };
-      const css = colorStyle(effective, tokens, board, parent || board)
-        .split(";")
-        .filter(Boolean)
-        .map((s) => s + "!important")
-        .join(";");
-      rules.push(
-        `@container (max-width:${px(r.maxWidth)}){[data-board-id="${escapeHtml(board.id)}"] [${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}"]{${css}}}`,
-      );
-    }
-  return rules.length ? `<style>${rules.join("")}</style>` : "";
+function responsiveStyles(board, tokens, project) {
+  // Recompute descendants too: switching a parent to Flex must remove their absolute positioning.
+  function expand(node, scope = "") {
+    const instance = node.type === "instance" && project;
+    const current = instance ? materializeInstance(node, project) : node;
+    const selector =
+      scope +
+      `[${current.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(current.id)}"]`;
+    const childScope = instance
+      ? `[data-node-id="${escapeHtml(current.id)}"] `
+      : scope;
+    return {
+      ...current,
+      $selector: selector,
+      children: (current.children || []).map((n) => expand(n, childScope)),
+    };
+  }
+  const entries = flattenNodes(board.nodes.map((n) => expand(n))),
+    widths = [
+      ...new Set(
+        entries.flatMap(({ node }) =>
+          (node.responsive || []).map((r) => r.maxWidth),
+        ),
+      ),
+    ].sort((a, b) => b - a);
+  return widths.length
+    ? `<style>${widths
+        .map(
+          (width) =>
+            `@container (max-width:${px(width)}){${entries
+              .map(({ node, parent }) => {
+                const current = effectiveNode(node, width),
+                  owner = parent ? effectiveNode(parent, width) : board;
+                const display = current.hidden
+                  ? "none"
+                  : ["flex", "grid"].includes(current.layout?.mode)
+                    ? current.layout.mode
+                    : ["button", "pill", "icon"].includes(current.type)
+                      ? "flex"
+                      : "block";
+                const css = (
+                  colorStyle(current, tokens, board, owner) +
+                  ";display:" +
+                  display
+                )
+                  .split(";")
+                  .filter(Boolean)
+                  .map((s) => s + "!important")
+                  .join(";");
+                return `[data-board-id="${escapeHtml(board.id)}"] ${node.$selector}{${css}}`;
+              })
+              .join("")}}`,
+        )
+        .join("")}</style>`
+    : "";
 }
+
 export function renderNode(
   node,
   board,
@@ -1006,7 +1047,7 @@ export function renderNode(
     const asset = validateAssets(project?.assets).length
       ? null
       : project?.assets?.find((a) => a.id === node.assetId);
-    return `<img class="df-node df-image" data-node-id="${escapeHtml(node.id)}" alt="${escapeHtml(node.text)}" src="${escapeHtml(asset?.data || "")}" style="${st};object-fit:contain" draggable="false" />`;
+    return `<img class="df-node df-image" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" alt="${escapeHtml(node.text)}" src="${escapeHtml(asset?.data || "")}" style="${st};object-fit:contain" draggable="false" />`;
   }
   if (node.type === "button")
     return `<button type="button" class="df-node df-button" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}">${content}</button>`;
@@ -1035,7 +1076,7 @@ export function renderBoard(board, tokens, project = null) {
         `@font-face{font-family:df-${a.id};src:url("${a.data}");font-display:swap}`,
     )
     .join("");
-  return `${fonts ? `<style>${fonts}</style>` : ""}<main class="df-board" data-board-id="${escapeHtml(board.id)}" style="container-type:inline-size;width:${px(board.w)};max-width:100%;height:${auto ? "auto" : px(board.h)};${auto ? `min-height:${px(board.h)};padding-bottom:${px(Math.max(0, board.nodes[0]?.y || 0) * 2)};` : ""}background:${safeColor(board.bg) || "#FFFFFF"}">${board.nodes.map((n) => renderNode(n, board, tokens, board, project)).join("")}</main>${responsiveStyles(board, tokens)}`;
+  return `${fonts ? `<style>${fonts}</style>` : ""}<main class="df-board" data-board-id="${escapeHtml(board.id)}" style="container-type:inline-size;width:${px(board.w)};max-width:100%;height:${auto ? "auto" : px(board.h)};${auto ? `min-height:${px(board.h)};padding-bottom:${px(Math.max(0, board.nodes[0]?.y || 0) * 2)};` : ""}background:${safeColor(board.bg) || "#FFFFFF"}">${board.nodes.map((n) => renderNode(n, board, tokens, board, project)).join("")}</main>${responsiveStyles(board, tokens, project)}`;
 }
 export function standaloneHtml(board, project) {
   const title = escapeHtml(`${board.name} – ${project.title}`);
