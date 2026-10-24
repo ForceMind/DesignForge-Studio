@@ -30,6 +30,7 @@ import {
 } from "./responsive.mjs";
 import { nodeElement, measureNode, paintResize } from "./viewport.mjs";
 import { flowDropTarget, reorderSibling } from "./flow-layout.mjs";
+import { breakpointOverviewMarkup } from "./breakpoint-overview.mjs";
 import {
   addGuide,
   updateGuide,
@@ -1820,7 +1821,14 @@ function responsiveControls(node) {
         ? Object.keys(v).map((c) => k + "." + c)
         : [k],
     );
-  return `<div class="divider"></div><div class="panel-section-title">响应式编辑</div><div class="singlefield"><label for="breakpoint-scope">当前修改范围</label><select id="breakpoint-scope"><option value="" ${scope === null ? "selected" : ""}>基础样式 · 所有宽度</option>${rules.map((r) => `<option value="${r.maxWidth}" ${r.maxWidth === scope ? "selected" : ""}>≤ ${r.maxWidth}px 覆盖</option>`).join("")}</select></div><p class="property-help">${scope === null ? "布局和外观写入基础样式；已有断点继续覆盖这些值。" : `布局、尺寸和外观仅写入 ≤ ${scope}px；名称、内容、位置和结构仍为全局。`} 当前画板预览 ${previewWidth()}px。</p><div class="breakpoint-list">${rules.map((r) => `<div class="breakpoint-row"><label>≤ <input type="number" aria-label="断点 ${r.maxWidth} 宽度" data-rename-breakpoint="${r.maxWidth}" value="${r.maxWidth}" min="280" max="2400">px</label><button class="btn-small" data-edit-breakpoint="${r.maxWidth}">编辑</button><button class="btn-small" data-delete-breakpoint="${r.maxWidth}">删除</button></div>`).join("")}</div>${paths.length ? `<div class="override-resets">${paths.map((path) => `<button class="btn-small" data-reset-override="${path}" data-breakpoint="${scope}" title="仅移除此字段覆盖，恢复继承">↶ ${path}</button>`).join("")}</div>` : ""}<div class="breakpoint-row"><input id="breakpoint-new-width" aria-label="新断点宽度" type="number" min="280" max="2400" value="600"><button class="btn-small" data-action="add-breakpoint">新增断点</button></div>${rules.length ? '<button class="btn-small" data-action="clear-breakpoints">清除全部覆盖</button>' : ""}`;
+  return (
+    breakpointOverviewMarkup(node, {
+      width: previewWidth(),
+      scope,
+      baseWidth: activeBoard().w,
+    }) +
+    `<div class="divider"></div><div class="panel-section-title">响应式编辑</div><div class="singlefield"><label for="breakpoint-scope">当前修改范围</label><select id="breakpoint-scope"><option value="" ${scope === null ? "selected" : ""}>基础样式 · 所有宽度</option>${rules.map((r) => `<option value="${r.maxWidth}" ${r.maxWidth === scope ? "selected" : ""}>≤ ${r.maxWidth}px 覆盖</option>`).join("")}</select></div><p class="property-help">${scope === null ? "布局和外观写入基础样式；已有断点继续覆盖这些值。" : `布局、尺寸和外观仅写入 ≤ ${scope}px；名称、内容、位置和结构仍为全局。`} 当前画板预览 ${previewWidth()}px。</p><div class="breakpoint-list">${rules.map((r) => `<div class="breakpoint-row"><label>≤ <input type="number" aria-label="断点 ${r.maxWidth} 宽度" data-rename-breakpoint="${r.maxWidth}" value="${r.maxWidth}" min="280" max="2400">px</label><button class="btn-small" data-edit-breakpoint="${r.maxWidth}">编辑</button><button class="btn-small" data-delete-breakpoint="${r.maxWidth}">删除</button></div>`).join("")}</div>${paths.length ? `<div class="override-resets">${paths.map((path) => `<button class="btn-small" data-reset-override="${path}" data-breakpoint="${scope}" title="仅移除此字段覆盖，恢复继承">↶ ${path}</button>`).join("")}</div>` : ""}<div class="breakpoint-row"><input id="breakpoint-new-width" aria-label="新断点宽度" type="number" min="280" max="2400" value="600"><button class="btn-small" data-action="add-breakpoint">新增断点</button></div>${rules.length ? '<button class="btn-small" data-action="clear-breakpoints">清除全部覆盖</button>' : ""}`
+  );
 }
 function setEditScope(value) {
   const n = activeNode();
@@ -1853,6 +1861,15 @@ function changeBreakpoint(event) {
   return true;
 }
 function breakpointAction(event) {
+  const range = event.target.closest("[data-range-scope]");
+  if (range) {
+    editScopes.set(
+      scopeKey(),
+      range.dataset.rangeScope === "" ? null : Number(range.dataset.rangeScope),
+    );
+    setPreviewWidth(range.dataset.rangeWidth);
+    return true;
+  }
   const edit = event.target.closest("[data-edit-breakpoint]");
   if (edit) {
     setEditScope(edit.dataset.editBreakpoint);
@@ -2551,6 +2568,12 @@ function bindStatic() {
     if (e.target.closest("[data-rich-format]")) e.preventDefault();
   });
   $("right-content").addEventListener("change", (e) => {
+    if (e.target.matches("[data-breakpoint-preview]")) {
+      setPreviewWidth(e.target.value);
+      const field = $("breakpoint-preview-value");
+      if (field) field.value = previewWidth();
+      return;
+    }
     const component = e.target.closest("[data-component-field]");
     if (component) {
       commit((p) => {

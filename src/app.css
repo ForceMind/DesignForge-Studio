@@ -1756,6 +1756,82 @@ select:focus-visible {
 .flow-order-controls {
   margin-top: 14px;
 }
+.breakpoint-overview {
+  border-top: 1px solid var(--ui-line);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+.breakpoint-track {
+  position: relative;
+  height: 10px;
+  margin: 13px 3px 15px;
+  background: var(--ui-soft);
+  border-radius: 3px;
+}
+.breakpoint-segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-selected);
+}
+.breakpoint-segment.current {
+  background: var(--primary);
+}
+.breakpoint-cursor {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 16px;
+  background: var(--ui-ink);
+  transform: translateX(-1px);
+  box-shadow: 0 0 0 1px var(--ui-bg);
+}
+.breakpoint-range-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+.breakpoint-range-buttons button {
+  min-height: 39px;
+  min-width: 0;
+  padding: 5px 3px;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+  font-size: 11px;
+}
+.breakpoint-range-buttons button[aria-pressed="true"] {
+  border-color: var(--primary);
+}
+.breakpoint-range-buttons button.is-preview {
+  background: var(--ui-selected);
+}
+.breakpoint-range-buttons small {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  margin-top: 2px;
+}
+.breakpoint-preview-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+}
+.breakpoint-preview-field label {
+  flex: 1;
+}
+.breakpoint-preview-field input {
+  width: 78px;
+  padding: 6px;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+}
 .resize-handle {
   position: absolute;
   width: 9px;

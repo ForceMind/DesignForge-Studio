@@ -174,9 +174,9 @@ test("Escape, pointercancel, blur, outside drop and unchanged drops leave storag
       /transform:/,
     );
   }
+  await expect(page.locator("#undo")).toBeDisabled();
+  await drag(page, "alpha", "epsilon");
   await page.locator("#undo").click();
-  expect((await stored(page)).id).not.toBe(before.id);
-  await page.locator("#redo").click();
   expect(children(await stored(page))).toEqual(children(before));
 });
 test("responsive Flow order is global while positions, breakpoints and hidden siblings stay intact", async ({
