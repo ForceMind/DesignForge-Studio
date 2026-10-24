@@ -136,3 +136,5 @@
 多选截图允许用户把图层缩放至父框外，证明操作与选区，不证明该测试设计无溢出。检测截图刻意包含设计问题，证明能发现并导出证据。截图人工复核不等于golden image、WCAG或Firefox/WebKit/真机验收。第一阶段八项交付的逐项证据见 [M1_ACCEPTANCE.md](M1_ACCEPTANCE.md)；原路线中的增强项仍以ROADMAP/KNOWN_ISSUES为准。
 
 验收复核补充：数值宽高输入此前只改参考值，Fill/Hug下可能不改变实际尺寸。现改为仅把输入轴切到fixed，保留另一轴；Auto Layout子项X/Y只读并说明布局管理。新增浏览器回归，待下一轮实际结果。
+
+[CI run23](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40091994281) 在4a96933上通过141 Node + 73 Chrome（57.8秒），包含数值宽高与未改轴模式、Flow坐标只读。随后接入只读文字膨胀预检及CLI有界读/init保护，新增测试待下一轮实际执行。

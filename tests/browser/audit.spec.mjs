@@ -154,3 +154,243 @@ test("Studio exports produce bounded, serializable evidence at mobile and deskto
     expect(JSON.stringify(issues)).not.toContain('null,"w":null');
   }
 });
+
+const expansion = (page, options = {}) =>
+  page.evaluate(async (options) => {
+    const { auditTextExpansion } = await import("/src/browser-audit.mjs");
+    return auditTextExpansion(document.querySelector(".df-board"), options);
+  }, options);
+
+test("text expansion exposes fixed-box clipping without changing original DOM or local storage", async ({
+  page,
+}) => {
+  await fixture(
+    page,
+    '<div class="df-node df-text" data-node-id="tight" style="left:20px;top:20px;width:104px;height:24px;overflow:hidden;white-space:nowrap;font:20px/24px monospace">ABCDEFGH</div>',
+  );
+  await page.evaluate(() =>
+    localStorage.setItem(
+      "expansion-proof",
+      JSON.stringify({ project: "unchanged", text: "ABCDEFGH" }),
+    ),
+  );
+  const before = await page.locator(".df-board").evaluate((el) => el.outerHTML),
+    storage = await page.evaluate(() => JSON.stringify({ ...localStorage }));
+  expect((await audit(page)).filter((i) => i.code === "TEXT_CLIP")).toEqual([]);
+  const issues = await expansion(page);
+  expect(
+    issues.some((i) => i.code === "TEXT_CLIP" && i.nodeId === "tight"),
+  ).toBe(true);
+  expect(
+    issues.every((i) => i.scenario === "text-expansion" && i.factor === 1.3),
+  ).toBe(true);
+  expect(await page.locator(".df-board").evaluate((el) => el.outerHTML)).toBe(
+    before,
+  );
+  expect(await page.evaluate(() => JSON.stringify({ ...localStorage }))).toBe(
+    storage,
+  );
+  await expect(page.locator("[data-text-expansion-stage]")).toHaveCount(0);
+});
+
+test("text expansion allows Flow/Hug content to grow and keeps the same CSS board width", async ({
+  page,
+}) => {
+  await fixture(
+    page,
+    '<div class="df-node df-frame flow" data-node-id="flow"><div class="df-node df-text bodycopy" data-node-id="copy">Adaptive content wraps cleanly across several rows.</div></div>',
+    ".df-board{width:280px;height:auto}.flow{position:relative;display:flex;flex-direction:column;width:100%;height:auto;padding:12px}.bodycopy{position:relative;width:100%;height:auto;font:20px/24px monospace;overflow-wrap:anywhere}",
+  );
+  const result = await page.evaluate(async () => {
+    const { auditTextExpansion } = await import("/src/browser-audit.mjs"),
+      main = document.querySelector(".df-board"),
+      before = main.getBoundingClientRect(),
+      original = Element.prototype.getBoundingClientRect;
+    let rendered;
+    Element.prototype.getBoundingClientRect = function () {
+      const r = original.call(this);
+      if (
+        this.matches(".df-board") &&
+        this.closest("[data-text-expansion-stage]")
+      )
+        rendered = { width: r.width, height: r.height };
+      return r;
+    };
+    try {
+      return {
+        issues: auditTextExpansion(main),
+        before: { width: before.width, height: before.height },
+        rendered,
+      };
+    } finally {
+      Element.prototype.getBoundingClientRect = original;
+    }
+  });
+  expect(result.rendered.width).toBeCloseTo(result.before.width, 2);
+  expect(result.rendered.height).toBeGreaterThan(result.before.height);
+  expect(
+    result.issues.filter((i) =>
+      ["RENDER_OVERFLOW", "TEXT_CLIP", "TEXT_OVERFLOW"].includes(i.code),
+    ),
+  ).toEqual([]);
+  await expect(page.locator("[data-text-expansion-stage]")).toHaveCount(0);
+});
+
+test("text expansion preserves rich run styles and whole emoji graphemes in text and placeholders", async ({
+  page,
+}) => {
+  await fixture(
+    page,
+    '<div class="df-node df-text" data-node-id="emoji" style="left:20px;top:20px;width:500px;height:100px;font-size:20px"><span data-text-run style="font-weight:700">A👩‍💻</span><span data-text-run style="font-style:italic">🇨🇳éZ</span></div><input class="df-node df-input" data-node-id="emojiInput" placeholder="👩‍💻" style="left:20px;top:150px;width:300px;height:48px;font-size:20px">',
+  );
+  const before = await page.locator(".df-board").evaluate((el) => el.outerHTML);
+  const result = await page.evaluate(async () => {
+    const { auditTextExpansion } = await import("/src/browser-audit.mjs"),
+      original = Element.prototype.getBoundingClientRect;
+    let snapshot;
+    Element.prototype.getBoundingClientRect = function () {
+      const r = original.call(this);
+      if (
+        this.matches(".df-board") &&
+        this.closest("[data-text-expansion-stage]")
+      )
+        snapshot = {
+          runs: [...this.querySelectorAll("[data-text-run]")].map((el) => ({
+            text: el.textContent,
+            fontWeight: getComputedStyle(el).fontWeight,
+            fontStyle: getComputedStyle(el).fontStyle,
+          })),
+          placeholder: this.querySelector("input").placeholder,
+        };
+      return r;
+    };
+    try {
+      auditTextExpansion(document.querySelector(".df-board"));
+      return snapshot;
+    } finally {
+      Element.prototype.getBoundingClientRect = original;
+    }
+  });
+  expect(result.runs).toEqual([
+    { text: "A👩‍💻A", fontWeight: "700", fontStyle: "normal" },
+    { text: "🇨🇳éZ🇨🇳", fontWeight: "400", fontStyle: "italic" },
+  ]);
+  expect(result.placeholder).toBe("👩‍💻👩‍💻");
+  expect(await page.locator(".df-board").evaluate((el) => el.outerHTML)).toBe(
+    before,
+  );
+});
+
+test("text expansion enforces clone budgets and cleans its offscreen stage even when measurement throws", async ({
+  page,
+}) => {
+  await fixture(
+    page,
+    '<div class="df-node df-text" data-node-id="a" style="width:100px;height:30px">One</div><div class="df-node df-text" data-node-id="b" style="top:40px;width:100px;height:30px">Two</div><div class="df-node df-text" data-node-id="c" style="top:80px;width:100px;height:30px">Three</div>',
+  );
+  const limited = await expansion(page, { maxNodes: 2 });
+  expect(limited).toHaveLength(1);
+  expect(limited[0]).toMatchObject({
+    code: "AUDIT_LIMIT",
+    scenario: "text-expansion",
+    factor: 1.3,
+  });
+  await expect(page.locator("[data-text-expansion-stage]")).toHaveCount(0);
+  const before = await page.locator(".df-board").evaluate((el) => el.outerHTML);
+  const message = await page.evaluate(async () => {
+    const { auditTextExpansion } = await import("/src/browser-audit.mjs"),
+      original = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function () {
+      if (this.closest("[data-text-expansion-stage]"))
+        throw Error("forced clone measurement failure");
+      return original.call(this);
+    };
+    try {
+      auditTextExpansion(document.querySelector(".df-board"));
+      return "not thrown";
+    } catch (e) {
+      return e.message;
+    } finally {
+      Element.prototype.getBoundingClientRect = original;
+    }
+  });
+  expect(message).toBe("forced clone measurement failure");
+  await expect(page.locator("[data-text-expansion-stage]")).toHaveCount(0);
+  expect(await page.locator(".df-board").evaluate((el) => el.outerHTML)).toBe(
+    before,
+  );
+});
+
+test("localized long-content Studio exports retain real boundaries at 390, 768 and 1440px under expansion", async ({
+  page,
+}) => {
+  const p = structuredClone(studio),
+    translations = {
+      Brand: "FORGE / 团队设计空间",
+      "Page title": "为下一次团队协作与跨端设计留出更多空间。",
+      Footer:
+        "本地优先设计 · 可复用组件 · 多语言长内容演示 · 修改后仍保留人工布局",
+      Detail: "正在由团队成员审阅，预计下一个工作日完成设计确认",
+      Context: "演示数据 · 本月及跨地区团队协作进度",
+      "Section heading": "设计规范与发布前质量检查",
+      Label: "移动端新用户引导与账号验证流程",
+      Projects: "团队协作设计项目",
+      "Tasks completed": "本月已完成设计任务",
+      "Review queue": "待处理设计审查任务",
+      "Action label": "创建协作项目",
+    };
+  const walk = (nodes) => {
+    for (const node of nodes) {
+      if (node.type === "text" && translations[node.name]) {
+        node.text = translations[node.name];
+        delete node.textRuns;
+      }
+      if (node.children) walk(node.children);
+    }
+  };
+  for (const board of p.boards) walk(board.nodes);
+  for (const component of p.components)
+    for (const variant of component.variants) walk([variant.root]);
+  await page.goto("/src/browser-audit.mjs");
+  for (const width of [390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.setContent(standaloneHtml({ ...p.boards[0], w: width }, p));
+    await page.evaluate(() => document.fonts.ready);
+    const measured = await audit(page),
+      stressed = await expansion(page);
+    expect(
+      measured.filter((i) => ["RENDER_OVERFLOW", "TEXT_CLIP"].includes(i.code)),
+      `localized baseline at ${width}px`,
+    ).toEqual([]);
+    expect(
+      stressed.filter((i) => ["RENDER_OVERFLOW", "TEXT_CLIP"].includes(i.code)),
+      `localized +30% at ${width}px`,
+    ).toEqual([]);
+    const limits = await page.locator(".df-board").evaluate((el) => {
+      const b = el.getBoundingClientRect();
+      return [...el.querySelectorAll(".df-node")]
+        .filter((n) => getComputedStyle(n).display !== "none")
+        .map((n) => {
+          const r = n.getBoundingClientRect();
+          return {
+            left: r.left - b.left,
+            top: r.top - b.top,
+            right: r.right - b.left,
+            bottom: r.bottom - b.top,
+            w: b.width,
+            h: b.height,
+          };
+        });
+    });
+    expect(
+      limits.every(
+        (r) =>
+          r.left >= -1 &&
+          r.top >= -1 &&
+          r.right <= r.w + 1 &&
+          r.bottom <= r.h + 1,
+      ),
+    ).toBe(true);
+    await expect(page.locator("[data-text-expansion-stage]")).toHaveCount(0);
+  }
+});

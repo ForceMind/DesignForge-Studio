@@ -41,6 +41,8 @@ npm run format:check
 
 CI 分开运行 Node 测试和真实 Chrome（Chromium 引擎）测试，浏览器截图/失败追踪保存在对应 Actions 的 `browser-evidence` artifact（保留 14 天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
 
+检查面板可运行实际DOM几何检查及约+30%文字膨胀预检（离屏副本，不改原稿），报告可导出并标记过期。
+
 浏览器断言不是视觉差异基准，也不是 WCAG 认证；Firefox、Safari、真实触屏设备尚未验收。
 
 ## 真实浏览器截图

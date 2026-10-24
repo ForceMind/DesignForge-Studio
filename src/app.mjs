@@ -20,7 +20,7 @@ import {
   importDesignLibrary,
   summarizeDesignLibraryImport,
 } from "./design-library.mjs";
-import { auditRenderedBoard } from "./browser-audit.mjs";
+import { auditRenderedBoard, auditTextExpansion } from "./browser-audit.mjs";
 import {
   effectiveNode,
   activeBreakpoint,
@@ -118,7 +118,8 @@ const selected = () =>
 const saveStatus = $("save-status");
 let toastTimer;
 let richRange = null,
-  renderedAudit = null;
+  renderedAudit = null,
+  expansionAudit = null;
 function toast(message) {
   const t = $("toast");
   t.textContent = message;
@@ -653,6 +654,53 @@ async function runBrowserAudit() {
   if (rightTab === "audit") renderRight();
   toast(`浏览器检查完成：${findings.length} 项提示`);
 }
+const expansionAuditCurrent = () =>
+  expansionAudit?.hash === hashProject(project) &&
+  expansionAudit?.view === auditViewSignature();
+async function runTextExpansionAudit() {
+  const hash = hashProject(project),
+    view = auditViewSignature();
+  toast("正在以离屏副本检查文字 +30%…");
+  await document.fonts.ready;
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  if (hash !== hashProject(project) || view !== auditViewSignature()) {
+    toast("设计已变化，请重新检测");
+    return;
+  }
+  const findings = project.boards.flatMap((b) => {
+    const main = $("world").querySelector(
+      `[data-artboard="${b.id}"] .df-board`,
+    );
+    return main ? auditTextExpansion(main, { scale: zoom, factor: 1.3 }) : [];
+  });
+  expansionAudit = {
+    hash,
+    view,
+    factor: 1.3,
+    findings,
+    checkedAt: new Date().toISOString(),
+    widths: project.boards.map((b) => ({
+      boardId: b.id,
+      width: previewWidth(b),
+    })),
+  };
+  if (rightTab === "audit") renderRight();
+  toast(`文字膨胀预检完成：${findings.length} 项提示，原工程未改动`);
+}
+function expansionAuditMarkup() {
+  const current = expansionAuditCurrent();
+  return `<section class="expansion-audit"><div class="divider"></div><div class="panel-section-title">文字膨胀预检</div><div class="button-row"><button class="btn-small" data-action="run-text-expansion">模拟文字 +30%</button></div><p class="property-help" data-expansion-findings data-audit-stale="${expansionAudit && !current ? "true" : "false"}">${current ? `文字 +30% 模拟：${expansionAudit.findings.length} 项提示。` : expansionAudit ? "上次模拟已过期，请重新检测。" : "在离屏副本扩展字素，不改原工程。分段向上取整，短段可能超过30%；不是实际翻译或新增问题Diff。"}</p>${
+    current
+      ? expansionAudit.findings
+          .slice(0, 50)
+          .map(
+            (i) =>
+              `<button class="issue-row" data-auditnode="${esc(i.nodeId || "")}" data-auditboard="${esc(i.boardId)}"><strong class="issue-code">+30% ${esc(i.code)}</strong><span>${esc(i.message)}</span></button>`,
+          )
+          .join("")
+      : ""
+  }</section>`;
+}
 function renderAudit() {
   const staticIssues = auditProject(project),
     current = renderedAuditCurrent(),
@@ -670,7 +718,7 @@ function renderAudit() {
             )
             .join("")}</div>`
         : '<div class="audit-good"><p>请进一步检查多尺寸、真实设备及视觉差异。</p></div>'
-    }<div class="divider"></div><div class="button-row"><button class="btn-small primary" data-action="download-audit">导出检测报告</button><button class="btn-small" data-action="open-agent">交给 Agent 修复</button></div>`;
+    }${expansionAuditMarkup()}<div class="divider"></div><div class="button-row"><button class="btn-small primary" data-action="download-audit">导出检测报告</button><button class="btn-small" data-action="open-agent">交给 Agent 修复</button></div>`;
 }
 function agentInstruction() {
   const b = activeBoard(),
@@ -1679,6 +1727,7 @@ function clearProjectView() {
   collapsed.clear();
   richRange = null;
   renderedAudit = null;
+  expansionAudit = null;
   activeGuideId = null;
 }
 const scopeKey = (id = activeNodeId) => activeBoardId + ":" + id;
@@ -2581,6 +2630,9 @@ function bindStatic() {
           );
           toast("Patch 模板已导出，按需编辑再用 CLI 应用");
           break;
+        case "run-text-expansion":
+          runTextExpansionAudit().catch((error) => toast(error.message));
+          break;
         case "run-browser-audit":
           runBrowserAudit().catch((error) => toast(error.message));
           break;
@@ -2592,6 +2644,16 @@ function bindStatic() {
                 findings: auditProject(project),
                 renderedFindings: renderedAuditCurrent()
                   ? renderedAudit.findings
+                  : null,
+                textExpansionFindings: expansionAuditCurrent()
+                  ? expansionAudit.findings
+                  : null,
+                textExpansionContext: expansionAuditCurrent()
+                  ? {
+                      factor: expansionAudit.factor,
+                      checkedAt: expansionAudit.checkedAt,
+                      widths: expansionAudit.widths,
+                    }
                   : null,
                 renderedContext: renderedAuditCurrent()
                   ? {

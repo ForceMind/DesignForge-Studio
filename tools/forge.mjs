@@ -14,7 +14,7 @@ import {
 } from "../src/core.mjs";
 const [cmd, src, arg3, arg4, arg5] = process.argv.slice(2);
 const help = () => {
-  console.log(`DesignForge CLI v0.1
+  console.log(`DesignForge CLI · project protocol v1
   node tools/forge.mjs validate <project.json>
   node tools/forge.mjs audit <project.json>
   node tools/forge.mjs export <project.json> <output-dir>
@@ -23,8 +23,34 @@ const help = () => {
 
 Patches contain format=designforge.patch, version=1, baseHash=<current hash>, ops=[...].`);
 };
-async function loadJSON(file) {
-  return JSON.parse(await fs.readFile(file, "utf8"));
+const PROJECT_BUDGET = 8 * 1024 * 1024;
+const PATCH_BUDGET = 1024 * 1024;
+async function loadJSON(file, limit, label) {
+  const handle = await fs.open(file, "r");
+  const overBudget = () =>
+    Error(`${label} budget exceeded (${limit / 1024 / 1024} MB maximum)`);
+  try {
+    const info = await handle.stat();
+    if (!info.isFile()) throw Error(`${label} must be a regular JSON file`);
+    if (info.size > limit) throw overBudget();
+    // A fixed upper bound still applies if the file grows after the size check.
+    const buffer = Buffer.allocUnsafe(limit + 1);
+    let length = 0;
+    while (length <= limit) {
+      const { bytesRead } = await handle.read(
+        buffer,
+        length,
+        Math.min(65536, limit + 1 - length),
+        null,
+      );
+      if (!bytesRead) break;
+      length += bytesRead;
+    }
+    if (length > limit) throw overBudget();
+    return JSON.parse(buffer.subarray(0, length).toString("utf8"));
+  } finally {
+    await handle.close();
+  }
 }
 async function main() {
   if (!cmd || cmd === "help" || cmd === "--help") {
@@ -47,11 +73,11 @@ async function main() {
       },
     ];
     await fs.mkdir(path.dirname(path.resolve(src)), { recursive: true });
-    await fs.writeFile(src, JSON.stringify(p, null, 2) + "\n");
+    await fs.writeFile(src, JSON.stringify(p, null, 2) + "\n", { flag: "wx" });
     console.log("Created:", path.resolve(src));
     return;
   }
-  const project = await loadJSON(src);
+  const project = await loadJSON(src, PROJECT_BUDGET, "Project");
   const issues = validateProject(project);
   if (issues.length) {
     console.error("Project validation FAILED:");
@@ -108,7 +134,7 @@ async function main() {
       throw Error(
         "apply must specify --out <new-file.json>; original not overwritten",
       );
-    const patch = await loadJSON(arg3);
+    const patch = await loadJSON(arg3, PATCH_BUDGET, "Patch");
     const revised = applyPatch(project, patch);
     await fs.mkdir(path.dirname(path.resolve(arg5)), { recursive: true });
     await fs.writeFile(arg5, JSON.stringify(revised, null, 2) + "\n", {

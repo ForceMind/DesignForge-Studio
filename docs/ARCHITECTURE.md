@@ -87,3 +87,5 @@ Node 测试覆盖协议、树操作、锁定、资产、存储和 CLI 文件保�
 - `browser-audit.mjs` 读取当前 DOM 的父级/画板越界、可见文字溢出/实际裁切、兄弟矩形碰撞及触控热区。实例源图层映射回实例 ID；碰撞仅是 warning。报告记录 hash、预览宽度、时间和浏览器，编辑后显示过期；未声称像素 Diff 或 WCAG 认证。
 
 `scene-budget.mjs` 按组件变体缓存投影成本，并对重复实例累加节点、富文本 span 与文本成本，阻止小 JSON 放大成海量 DOM。validateProject 与直接 renderBoard 均有预算保护，不先 materialize 巨树；读取前再限制项目/Patch/库文件大小。失败不会覆盖存档。
+
+文字膨胀预检在离屏fixed/inert副本按同一CSS宽度扩大字素，使用原字体/分段与container queries，审计后finally清除。原DOM/AST/存档不写入，结果按hash/宽度标记过期并可单独导出；因子1..2，UI固定约+30%，按分段向上取整。CLI读取采用固定上限缓冲区和分块读，文件增长也不突破预算；init不能覆盖既存文件。

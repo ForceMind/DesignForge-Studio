@@ -390,3 +390,189 @@ export function auditRenderedBoard(
   }
   return findings;
 }
+
+const expansionSelector = ".df-text,.df-button,.df-pill,.df-input";
+const expansionCharBudget = 200000;
+function expansionFactor(factor) {
+  if (!Number.isFinite(factor) || factor < 1 || factor > 2)
+    throw Error("Text expansion factor must be between 1 and 2");
+  return factor;
+}
+/** Append complete graphemes to the existing text; original prefix and styles stay intact. */
+export function expandTextByGraphemes(text, factor = 1.3) {
+  expansionFactor(factor);
+  if (typeof text !== "string" || text.length > expansionCharBudget)
+    throw Error("Text expansion input exceeds the bounded text budget");
+  if (!text || factor === 1) return text;
+  for (const char of text) {
+    const point = char.codePointAt(0);
+    if (point >= 0xd800 && point <= 0xdfff)
+      throw Error("Text expansion requires valid Unicode");
+  }
+  if (typeof Intl.Segmenter !== "function")
+    throw Error("Text expansion requires Unicode grapheme segmentation");
+  const parts = [
+    ...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text),
+  ].map((p) => p.segment);
+  const extra = Math.ceil(parts.length * (factor - 1) - 1e-9);
+  return text + parts.slice(0, extra).join("");
+}
+
+/**
+ * Localization stress scenario on a disposable, offscreen copy of the rendered board.
+ * Only text/placeholder content in the copy changes; the live scene and storage do not.
+ * This repeats existing graphemes, not a linguistic translation or all-locale guarantee.
+ */
+export function auditTextExpansion(
+  mainElement,
+  { scale = 1, factor = 1.3, maxNodes = 2000, maxFindings = 200 } = {},
+) {
+  expansionFactor(factor);
+  if (
+    !mainElement ||
+    mainElement.nodeType !== 1 ||
+    !mainElement.matches(".df-board")
+  )
+    throw Error("Expected a rendered .df-board element");
+  if (!Number.isFinite(scale) || scale <= 0)
+    throw Error("Expected a positive finite scale");
+  maxNodes = limit(maxNodes, 2000, 5000);
+  maxFindings = limit(maxFindings, 200, 1000);
+  const doc = mainElement.ownerDocument,
+    view = doc.defaultView;
+  const boardId =
+    mainElement.dataset.boardId ||
+    mainElement.closest("[data-artboard]")?.dataset.artboard ||
+    null;
+  const scenario = (issues) =>
+    issues.map((issue) => ({ ...issue, scenario: "text-expansion", factor }));
+  const nodeCount = mainElement.querySelectorAll(".df-node").length;
+  const elementCount = mainElement.querySelectorAll("*").length;
+  const incomplete = (reason) =>
+    scenario([
+      {
+        severity: "warning",
+        code: "AUDIT_LIMIT",
+        boardId,
+        nodeId: null,
+        message: reason,
+        evidence: {
+          maxNodes,
+          totalNodes: nodeCount,
+          totalElements: elementCount,
+          maxTextChars: expansionCharBudget,
+        },
+      },
+    ]);
+  if (nodeCount > maxNodes || elementCount > 20000)
+    return incomplete(
+      "Text expansion clone budget reached; the scenario was not rendered.",
+    );
+  let chars = 0;
+  const originalWalker = doc.createTreeWalker(
+    mainElement,
+    view.NodeFilter.SHOW_TEXT,
+  );
+  let originalText;
+  while ((originalText = originalWalker.nextNode())) {
+    if (originalText.parentElement?.closest(expansionSelector))
+      chars += originalText.textContent.length;
+    if (chars > expansionCharBudget)
+      return incomplete(
+        "Text expansion text budget reached; the scenario was not rendered.",
+      );
+  }
+  for (const input of mainElement.querySelectorAll(".df-input")) {
+    chars += (input.getAttribute("placeholder") || "").length;
+    if (chars > expansionCharBudget)
+      return incomplete(
+        "Text expansion text budget reached; the scenario was not rendered.",
+      );
+  }
+  const original = mainElement.getBoundingClientRect();
+  if (original.width <= 0 || original.height <= 0)
+    return incomplete(
+      "The original board has no measurable area; the scenario was not rendered.",
+    );
+  const stage = doc.createElement("div");
+  stage.className = "artboard-frame";
+  stage.dataset.textExpansionStage = "";
+  stage.setAttribute("aria-hidden", "true");
+  stage.inert = true;
+  Object.assign(stage.style, {
+    position: "fixed",
+    left: "-100000px",
+    top: "0",
+    width: original.width / scale + "px",
+    height: "auto",
+    pointerEvents: "none",
+    overflow: "visible",
+    border: "0",
+    margin: "0",
+    padding: "0",
+    transform: "none",
+    boxSizing: "border-box",
+  });
+  const inherited = view.getComputedStyle(mainElement);
+  for (const key of [
+    "fontFamily",
+    "fontSize",
+    "fontWeight",
+    "fontStyle",
+    "lineHeight",
+    "letterSpacing",
+    "direction",
+    "writingMode",
+  ])
+    stage.style[key] = inherited[key];
+  try {
+    const clone = mainElement.cloneNode(true);
+    clone.style.setProperty(
+      "width",
+      original.width / scale + "px",
+      "important",
+    );
+    clone.style.setProperty("max-width", "100%", "important");
+    clone.style.setProperty("transform", "none", "important");
+    // Renderer scenes never contain these; do not activate embedded content in arbitrary DOM.
+    clone
+      .querySelectorAll(
+        "script,style,link,iframe,object,embed,video,audio,source,base",
+      )
+      .forEach((el) => el.remove());
+    for (const el of [clone, ...clone.querySelectorAll("*")]) {
+      el.removeAttribute("autofocus");
+      for (const attr of [...el.attributes])
+        if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+      if (
+        el.matches("img") &&
+        !/^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,/i.test(
+          el.getAttribute("src") || "",
+        )
+      )
+        el.removeAttribute("src");
+      el.removeAttribute("srcset");
+    }
+    const walker = doc.createTreeWalker(clone, view.NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.parentElement?.closest(expansionSelector))
+        node.textContent = expandTextByGraphemes(node.textContent, factor);
+    }
+    for (const input of clone.querySelectorAll(".df-input")) {
+      const placeholder = input.getAttribute("placeholder");
+      if (placeholder !== null)
+        input.setAttribute(
+          "placeholder",
+          expandTextByGraphemes(placeholder, factor),
+        );
+    }
+    stage.appendChild(clone);
+    doc.body.appendChild(stage);
+    return scenario(
+      auditRenderedBoard(clone, { scale: 1, maxNodes, maxFindings }),
+    );
+  } finally {
+    stage.remove();
+  }
+}

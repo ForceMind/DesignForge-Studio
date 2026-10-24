@@ -491,3 +491,45 @@ test("rich text ranges never leak between boards reusing a node ID", async ({
     ),
   ).toBe(true);
 });
+
+test("text expansion preflight measures a clone, exports its context and never saves simulated text", async ({
+  page,
+}) => {
+  const p = project("text-preflight");
+  p.boards[0].nodes = [
+    text("tight", "Short label", 40, 40, 130, 26, { fontSize: 20 }),
+  ];
+  await open(page, p);
+  const before = await stored(page),
+    original = await page.locator('[data-node-id="tight"]').textContent();
+  await page.locator('[data-righttab="audit"]').click();
+  await page.locator('[data-action="run-text-expansion"]').click();
+  await expect(page.locator("[data-expansion-findings]")).toContainText("+30%");
+  await expect(page.locator("[data-expansion-findings]")).toHaveAttribute(
+    "data-audit-stale",
+    "false",
+  );
+  expect(await stored(page)).toEqual(before);
+  await expect(page.locator("[data-text-expansion-stage]")).toHaveCount(0);
+  await expect(page.locator('[data-node-id="tight"]')).toHaveText(original);
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.locator('[data-action="download-audit"]').click(),
+  ]);
+  const report = await downloadedJSON(download);
+  expect(Array.isArray(report.textExpansionFindings)).toBe(true);
+  expect(report.textExpansionContext.factor).toBe(1.3);
+  await page.screenshot({
+    path: "test-results/m1-text-expansion.png",
+    fullPage: true,
+  });
+  await page.locator('[data-righttab="properties"]').click();
+  await select(page, "tight");
+  await page.locator('[data-prop="w"]').fill("200");
+  await page.locator('[data-prop="w"]').press("Tab");
+  await page.locator('[data-righttab="audit"]').click();
+  await expect(page.locator("[data-expansion-findings]")).toHaveAttribute(
+    "data-audit-stale",
+    "true",
+  );
+});
