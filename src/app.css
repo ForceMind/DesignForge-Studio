@@ -18,7 +18,7 @@
   -webkit-font-smoothing: antialiased;
   --primary: #6958e8;
   --panel-line: #e9ebf1;
-  --muted: #888da1;
+  --muted: #626a7e;
   --subtle: #f7f8fb;
 }
 * {
@@ -767,22 +767,22 @@ select:focus-visible {
   bottom: 18px;
   left: 20px;
   padding: 8px 11px;
-  background: #ffffffcf;
-  border: 1px solid #eceef4;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line);
   border-radius: 8px;
-  color: #9da0ae;
+  color: var(--muted);
   font-size: 10px;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 .kbd {
-  border: 1px solid #e6e8f0;
+  border: 1px solid var(--ui-line);
   padding: 2px 5px;
   border-radius: 5px;
   font-size: 10px;
-  color: #767b90;
-  background: white;
+  color: var(--muted);
+  background: var(--ui-soft);
 }
 .canvas-help .sep {
   color: #ccc;
@@ -866,7 +866,7 @@ select:focus-visible {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
-  color: #32364c;
+  color: var(--ui-ink);
 }
 .eyebrow {
   font-size: 10px;
@@ -877,7 +877,7 @@ select:focus-visible {
 }
 .divider {
   height: 1px;
-  background: #ebedf1;
+  background: var(--ui-line);
   margin: 20px 0;
 }
 .fieldrow {
@@ -893,7 +893,7 @@ select:focus-visible {
 .singlefield label {
   font-size: 10px;
   font-weight: 680;
-  color: #999fb0;
+  color: var(--muted);
   display: block;
   margin-bottom: 6px;
 }
@@ -930,20 +930,20 @@ select:focus-visible {
 .panel-section-title {
   font-size: 11px;
   font-weight: 750;
-  color: #43475c;
+  color: var(--ui-ink);
   margin-bottom: 11px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .panel-section-title small {
-  color: #aaaeba;
+  color: var(--muted);
   font-size: 9px;
   font-weight: 550;
 }
 .property-help {
   font-size: 11px;
-  color: #a0a3b5;
+  color: var(--muted);
   line-height: 1.7;
 }
 .empty-select {
@@ -1260,7 +1260,7 @@ select:focus-visible {
 }
 .muted-tip {
   font-size: 10px;
-  color: #aaabba;
+  color: var(--muted);
   margin: 12px 0;
 }
 .toggle-pill {
@@ -1299,7 +1299,7 @@ select:focus-visible {
   color: #6c5cde;
 }
 .form-hint {
-  color: #a4a9b8;
+  color: var(--muted);
   font-size: 10px;
 }
 .alert-line {
@@ -1309,7 +1309,7 @@ select:focus-visible {
 }
 .selection-id {
   font-size: 10px;
-  color: #a6aab8;
+  color: var(--muted);
   font-family: ui-monospace, monospace;
 }
 .safe-tag {
@@ -1795,7 +1795,7 @@ select:focus-visible {
   padding: 10px 0;
   font-size: 11px;
 }
-.history-field > span:first-child {
+.history-field > label {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -1932,6 +1932,52 @@ select:focus-visible {
 .history-error {
   font-size: 11px;
   overflow-wrap: anywhere;
+}
+.history-full {
+  margin-top: 8px;
+  color: var(--muted);
+}
+.history-full summary {
+  cursor: pointer;
+}
+.history-full pre {
+  max-height: 240px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--ui-soft);
+  color: var(--ui-ink);
+  border: 1px solid var(--ui-line);
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 10px;
+  user-select: text;
+}
+.layout-measurement {
+  padding: 9px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  background: var(--ui-soft);
+  font-size: 10px;
+}
+.layout-measurement > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--muted);
+}
+.layout-measurement output {
+  font:
+    11px ui-monospace,
+    monospace;
+  color: var(--ui-ink);
+  font-variant-numeric: tabular-nums;
+}
+.layout-measurement p {
+  margin: 5px 0 0;
+  line-height: 1.7;
+  color: var(--muted);
 }
 .breakpoint-overview {
   border-top: 1px solid var(--ui-line);

@@ -479,6 +479,7 @@ function renderRight() {
   else renderProperties();
 }
 function renderProperties() {
+  inspectorSizeObserver.disconnect();
   const b = activeBoard(),
     source = activeNode(),
     n = source ? effectiveNode(source, nodeScope(source) ?? Infinity) : null;
@@ -535,7 +536,51 @@ function renderProperties() {
     : "";
   $("right-content").innerHTML =
     `<div class="inspector-title"><span class="element-icon">◇</span> ${esc(n.name || n.type)} <span class="safe-tag">NODE</span></div><div class="selection-id">#${esc(n.id)} · ${esc(n.type)} · ${selected().length} selected</div>${wide("图层名称", "name", n.name || "")}${structureControls(b, n)}<div class="divider"></div><div class="panel-section-title">排列与尺寸</div><div class="fieldrow">${f("X 位置", "x", n.x, "number", positionAttrs)}${f("Y 位置", "y", n.y, "number", positionAttrs)}</div><div class="fieldrow">${f("宽度 W", "w", n.w, "number", 'min="1"')}${f("高度 H", "h", n.h, "number", 'min="1"')}</div><div class="divider"></div><div class="panel-section-title">外观与内容</div>${txtEdit}${richTextControls(n)}${styles}${fontControls(n)}${layoutControls(n)}<div class="divider"></div><div class="panel-section-title">操作</div><div class="button-row"><button data-action="duplicate" class="btn-small">复制图层</button><button data-action="up" class="btn-small">向上一层 ↑</button><button data-action="down" class="btn-small">向下一层 ↓</button><button data-action="delete" class="btn-small danger">删除</button></div><div class="button-row"><button data-action="add-comment" class="btn-small primary">✦ 给该元素写标注</button></div><div class="button-row"><button class="btn-small" data-action="group">组合 ⌘G</button><button class="btn-small" data-action="ungroup">解组</button><button class="btn-small" data-action="make-component">创建组件</button></div><div class="button-row">${["left", "center", "right", "top", "middle", "bottom"].map((a, i) => `<button class="btn-small" data-align="${a}">${["左", "水平中", "右", "上", "垂直中", "下"][i]}</button>`).join("")}</div><div class="button-row"><button class="btn-small" data-distribute="x">水平等距</button><button class="btn-small" data-distribute="y">垂直等距</button></div><p class="muted-tip">Shift 点击多选；Auto Layout 子元素由布局管理，使用图层排序调整顺序。</p>`;
+  const rendered = effectiveNode(
+    source.type === "instance" ? materializeInstance(source, project) : source,
+    previewWidth(b),
+  );
+  const mode = (axis) =>
+    ({ fixed: "固定", fill: "Fill", hug: "Hug" })[
+      rendered.sizing?.[axis] || "fixed"
+    ];
+  $("right-content")
+    .querySelector('[data-prop="w"]')
+    .closest(".fieldrow")
+    .insertAdjacentHTML(
+      "afterend",
+      `<section class="layout-measurement" aria-label="当前图层实际布局尺寸"><div><span>实际布局</span><output data-measured-size>等待测量</output></div><p>宽 ${mode("w")} · 高 ${mode("h")} · 预览 ${previewWidth(b)}px</p><p>W/H 为参考尺寸。输入数值会将该轴设为固定，另一轴保留原模式。</p></section>`,
+    );
+  observeInspectorSize();
 }
+function observeInspectorSize() {
+  inspectorSizeObserver.disconnect();
+  const node = activeNode();
+  const element = node && nodeElement($("world"), activeBoardId, node.id);
+  if (element) inspectorSizeObserver.observe(element);
+  updateInspectorSize();
+}
+function updateInspectorSize() {
+  const output = $("right-content")?.querySelector("[data-measured-size]");
+  if (!output || !project) return;
+  const node = activeNode(),
+    element = node && nodeElement($("world"), activeBoardId, node.id),
+    rect = element?.getBoundingClientRect();
+  if (!rect?.width || !rect.height) {
+    output.textContent = "当前图层未显示";
+    delete output.dataset.width;
+    delete output.dataset.height;
+    return;
+  }
+  const width = Number((rect.width / zoom).toFixed(2)),
+    height = Number((rect.height / zoom).toFixed(2));
+  output.textContent = `${width} × ${height} px`;
+  output.dataset.width = width;
+  output.dataset.height = height;
+}
+const inspectorSizeObserver = new ResizeObserver(() =>
+  updateSelectionOverlay(),
+);
 function resolvedHex(value, fallback) {
   const resolved = resolveToken(value, effectiveTokens(project));
   return /^#[0-9a-f]{6}$/i.test(resolved || "") ? resolved : fallback;
@@ -781,7 +826,7 @@ function renderNodeHistory() {
     nodeHistoryPreview.boardId === board.id
   ) {
     const p = nodeHistoryPreview.plan;
-    preview = `<section class="history-preview" aria-label="节点撤回预览"><div class="panel-section-title">撤回预览 <small>第 ${nodeHistoryPreview.index} 步</small></div><p class="property-help">只恢复勾选字段；冲突字段保留当前内容。先检查差异，再应用。</p>${p.changes.map((c, i) => `<label class="history-field ${c.status}"><span><input type="checkbox" data-history-field="${i}" ${p.selected.includes(c.key) ? "checked" : ""} ${c.status !== "ready" ? "disabled" : ""}><strong>${esc(c.key)}</strong><small>${{ ready: "可撤回", conflict: "冲突", blocked: "锁定", already: "已恢复" }[c.status]}</small></span><span class="history-values"><code title="当前">${esc(historyValue(c.current))}</code><b>→</b><code title="恢复为">${esc(historyValue(c.before))}</code></span>${c.reason ? `<em>${esc(c.reason)}</em>` : ""}</label>`).join("")}${p.error ? `<p class="history-error" role="alert">无法应用：${esc(p.error)}</p>` : ""}<div class="button-row"><button class="btn-small primary" data-history-apply ${!p.project || !p.selected.length ? "disabled" : ""}>撤回 ${p.selected.length} 项字段</button><button class="btn-small" data-history-close>关闭预览</button></div></section>`;
+    preview = `<section class="history-preview" aria-label="节点撤回预览"><div class="panel-section-title">撤回预览 <small>第 ${nodeHistoryPreview.index} 步</small></div><p class="property-help">只恢复勾选字段；冲突字段保留当前内容。先检查差异，再应用。</p>${p.changes.map((c, i) => `<article class="history-field ${c.status}"><label><input type="checkbox" data-history-field="${i}" ${p.selected.includes(c.key) ? "checked" : ""} ${c.status !== "ready" ? "disabled" : ""}><strong>${esc(c.key)}</strong><small>${{ ready: "可撤回", conflict: "冲突", blocked: "锁定", already: "已恢复" }[c.status]}</small></label><div class="history-values"><code title="当前">${esc(historyValue(c.current))}</code><b>→</b><code title="恢复为">${esc(historyValue(c.before))}</code></div>${c.reason ? `<em>${esc(c.reason)}</em>` : ""}<details class="history-full" data-history-full="${i}"><summary>查看完整值</summary><pre></pre></details></article>`).join("")}${p.error ? `<p class="history-error" role="alert">无法应用：${esc(p.error)}</p>` : ""}<div class="button-row"><button class="btn-small primary" data-history-apply ${!p.project || !p.selected.length ? "disabled" : ""}>撤回 ${p.selected.length} 项字段</button><button class="btn-small" data-history-export>导出完整差异</button><button class="btn-small" data-history-close>关闭预览</button></div></section>`;
   }
   $("right-content").innerHTML =
     `<div class="inspector-title">节点修订历史 <span class="safe-tag">LOCAL</span></div><p class="property-help">会话内最近最多35份快照，并受总大小预算约束。导入文件或刷新会重新开始；文件备份请用顶部“恢复”。Token与组件源变更用整体Undo，子层排序请选父容器。</p><div class="singlefield"><label for="history-node">当前或已删除的图层</label><select id="history-node"><option value="">请选择图层</option>${choices.map((n) => `<option value="${esc(n.id)}" ${n.id === id ? "selected" : ""}>${esc([...n.name].slice(0, 40).join(""))} · #${esc(n.id)}${findNode(board, n.id) ? "" : " · 已删除"}</option>`).join("")}</select></div>${id ? `<p class="selection-id">#${esc(id)} · ${exists ? "当前图层" : "已删除图层"} · ${rows.length} 次修订</p>` : ""}${preview}<div class="node-revision-list">${rows.map((row) => `<article class="node-revision" data-node-revision="${row.index}"><div><strong>第 ${row.index} 步</strong><time>${Number.isFinite(Date.parse(row.time)) ? new Date(row.time).toLocaleTimeString("zh-CN", { hour12: false }) : "未记时"}</time></div><p>${esc(row.error || row.fields.join(" · "))}</p><button class="btn-small" data-history-preview="${row.index}" ${row.error ? "disabled" : ""}>预览撤回</button></article>`).join("") || '<p class="property-help">保留的会话历史中没有该图层的修改。选中图层编辑后，可在这里查看和局部撤回。</p>'}</div>`;
@@ -820,11 +865,23 @@ function updateNodeHistoryPreview() {
     toast(error.message);
   }
 }
+function assertHistoryPreviewCurrent(p) {
+  if (
+    !p ||
+    p.boardId !== activeBoardId ||
+    p.plan.baseHash !== hashProject(project) ||
+    !history[p.index] ||
+    p.beforeHash !== hashProject(history[p.index - 1]) ||
+    p.afterHash !== hashProject(history[p.index])
+  )
+    throw Error("工程或历史已改变，请重新预览");
+}
 function nodeHistoryAction(e) {
   const preview = e.target.closest("[data-history-preview]"),
     close = e.target.closest("[data-history-close]"),
-    apply = e.target.closest("[data-history-apply]");
-  if (!preview && !close && !apply) return false;
+    apply = e.target.closest("[data-history-apply]"),
+    report = e.target.closest("[data-history-export]");
+  if (!preview && !close && !apply && !report) return false;
   try {
     if (preview) openNodeHistoryPreview(Number(preview.dataset.historyPreview));
     else if (close) {
@@ -832,15 +889,35 @@ function nodeHistoryAction(e) {
       renderNodeHistory();
     } else {
       const p = nodeHistoryPreview;
-      if (
-        !p ||
-        p.boardId !== activeBoardId ||
-        p.plan.baseHash !== hashProject(project) ||
-        !history[p.index] ||
-        p.beforeHash !== hashProject(history[p.index - 1]) ||
-        p.afterHash !== hashProject(history[p.index])
-      )
-        throw Error("工程或历史已改变，请重新预览");
+      assertHistoryPreviewCurrent(p);
+      if (report) {
+        download(
+          JSON.stringify(
+            {
+              format: "designforge.node-history-review",
+              version: 1,
+              generatedAt: new Date().toISOString(),
+              projectId: project.id,
+              baseHash: p.plan.baseHash,
+              boardId: p.boardId,
+              nodeId: p.nodeId,
+              source: {
+                index: p.index,
+                beforeHash: p.beforeHash,
+                afterHash: p.afterHash,
+              },
+              selected: p.plan.selected,
+              changes: p.plan.changes,
+              error: p.plan.error || null,
+            },
+            null,
+            2,
+          ),
+          `node-history-${p.nodeId}.review.json`,
+          "application/json",
+        );
+        return true;
+      }
       const plan = planNodeRevisionRevert(
         project,
         history[p.index - 1],
@@ -2347,6 +2424,7 @@ function measuredSelection({ min = 1, base = false } = {}) {
   };
 }
 function updateSelectionOverlay() {
+  updateInspectorSize();
   $("selection-overlay")?.remove();
   if (
     !project ||
@@ -2830,6 +2908,27 @@ function bindStatic() {
     (e) => {
       if (e.target.matches("[data-board-breakpoint-panel]"))
         boardBreakpointView().open = e.target.open;
+      if (e.target.matches("[data-history-full]") && e.target.open) {
+        try {
+          assertHistoryPreviewCurrent(nodeHistoryPreview);
+          const change =
+            nodeHistoryPreview.plan.changes[
+              Number(e.target.dataset.historyFull)
+            ];
+          e.target.querySelector("pre").textContent = JSON.stringify(
+            {
+              status: change.status,
+              reason: change.reason || null,
+              current: change.current,
+              restore: change.before,
+            },
+            null,
+            2,
+          );
+        } catch (error) {
+          e.target.querySelector("pre").textContent = error.message;
+        }
+      }
     },
     true,
   );

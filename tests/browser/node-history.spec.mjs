@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import fs from "node:fs";
 import { newProject, hashProject } from "../../src/core.mjs";
 const key = "designforge.project.v1";
 const stored = (page) =>
@@ -386,4 +387,52 @@ test("source locks added after an instance edit also guard the history restore p
   expect(instance.name).toBe("Original instance");
   expect(instance.overrides.sourceLabel.text).toBe("Revised override");
   expect(result.components[0].variants[0].root.children[0].locked).toBe(true);
+});
+test("full history values and downloaded review preserve long hostile text without changing selection or the project", async ({
+  page,
+}) => {
+  const original = "Original long value ".repeat(40) + "FINAL ORIGINAL TAIL",
+    revised =
+      "<img src=x onerror=window.historyInjected=1>" +
+      "Revised content ".repeat(40) +
+      "FINAL REVISED TAIL",
+    p = project();
+  alpha(p).text = original;
+  await open(page, p);
+  await patch(page, [set({ text: revised })]);
+  const before = await stored(page);
+  await history(page);
+  const field = page.locator(".history-field.ready"),
+    checkbox = field.locator("input");
+  await field.locator(".history-values code").first().click();
+  await expect(checkbox).toBeChecked();
+  await expect(field.locator("pre")).toBeEmpty();
+  await field.locator("summary").click();
+  const full = JSON.parse(await field.locator("pre").textContent());
+  expect(full.current.text).toBe(revised);
+  expect(full.restore.text).toBe(original);
+  await expect(checkbox).toBeChecked();
+  await expect(field.locator("img")).toHaveCount(0);
+  expect(await page.evaluate(() => window.historyInjected)).toBeUndefined();
+  const pending = page.waitForEvent("download");
+  await page.locator("[data-history-export]").click();
+  const download = await pending,
+    report = JSON.parse(fs.readFileSync(await download.path(), "utf8"));
+  expect(download.suggestedFilename()).toBe("node-history-alpha.review.json");
+  expect(report).toMatchObject({
+    format: "designforge.node-history-review",
+    version: 1,
+    projectId: p.id,
+    boardId: "work",
+    nodeId: "alpha",
+    baseHash: hashProject(before),
+    selected: ["text + textRuns"],
+  });
+  expect(report.changes[0].current.text).toBe(revised);
+  expect(report.changes[0].before.text).toBe(original);
+  expect(await stored(page)).toEqual(before);
+  await page.screenshot({ path: "test-results/m1-history-full-review.png" });
+  // Export is a read-only report, not an extra history entry.
+  await page.locator("#undo").click();
+  expect(alpha(await stored(page)).text).toBe(original);
 });
