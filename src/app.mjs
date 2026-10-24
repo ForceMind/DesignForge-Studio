@@ -493,6 +493,7 @@ function travel(delta) {
   const next = historyIndex + delta;
   if (next < 0 || next >= history.length) return;
   historyIndex = next;
+  if (project.id !== history[historyIndex].id) clearProjectView();
   project = clone(history[historyIndex]);
   if (!project.boards.some((b) => b.id === activeBoardId))
     activeBoardId = project.boards[0].id;
@@ -1076,6 +1077,7 @@ function addFrame() {
       const b = p.boards.find((b) => b.id === activeBoardId),
         target =
           parent && CONTAINERS.has(parent.type) ? findNode(b, parent.id) : null;
+      if (target && isNodeLocked(b, target.id)) throw Error("Locked layer");
       (target ? (target.children ||= []) : b.nodes).push(n);
     })
   )
@@ -1241,6 +1243,9 @@ function recoverProject() {
     selectedIds.clear();
     render();
     fitAll();
+    clearProjectView();
+    render();
+    fitAll();
     toast("备份已恢复，可撤销");
   }
 }
@@ -1263,6 +1268,9 @@ async function openExample(name) {
       activeBoardId = project.boards[0].id;
       activeNodeId = null;
       selectedIds.clear();
+      render();
+      fitAll();
+      clearProjectView();
       render();
       fitAll();
       toast("示例已打开；可撤销恢复之前的项目");
@@ -1350,6 +1358,11 @@ function assetAction(e) {
 
 const previewWidths = new Map(),
   editScopes = new Map();
+function clearProjectView() {
+  previewWidths.clear();
+  editScopes.clear();
+  collapsed.clear();
+}
 const scopeKey = (id = activeNodeId) => activeBoardId + ":" + id;
 const previewWidth = (board = activeBoard()) =>
   previewWidths.get(board.id) ?? board.w;
@@ -1503,7 +1516,7 @@ function updateSelectionOverlay() {
     `<span class="selection-size">${Math.round(r.width / zoom)} × ${Math.round(r.height / zoom)}${scope !== null ? " · ≤" + scope : ""}</span>`;
   $("viewport").appendChild(overlay);
 }
-function startMarquee(e, boardId) {
+function startMarquee(e, boardId, clickNodeId = null) {
   const original = {
     boardId: activeBoardId,
     ids: selected(),
@@ -1532,6 +1545,7 @@ function startMarquee(e, boardId) {
     });
   gesture = {
     kind: "marquee",
+    clickNodeId,
     original,
     boardId,
     startX: e.clientX,
@@ -1712,6 +1726,7 @@ function bindStatic() {
             .join(" / "),
         );
       selectedIds.clear();
+      clearProjectView();
       project = obj;
       activeBoardId = obj.boards[0].id;
       activeNodeId = null;
@@ -1852,13 +1867,11 @@ function bindStatic() {
           addBreakpoint();
           break;
         case "clear-breakpoints":
-          commit(
-            (p) =>
-              delete findNode(
-                p.boards.find((b) => b.id === activeBoardId),
-                activeNodeId,
-              ).responsive,
-          );
+          commit((p) => {
+            const b = p.boards.find((b) => b.id === activeBoardId);
+            if (isNodeLocked(b, activeNodeId)) throw Error("Locked layer");
+            delete findNode(b, activeNodeId).responsive;
+          });
           break;
         case "detach":
           detachInstance();
@@ -1989,7 +2002,11 @@ function bindStatic() {
     const bid = el.closest("[data-artboard]").dataset.artboard;
     const b = project.boards.find((q) => q.id === bid);
     const n = findNode(b, el.dataset.nodeId);
-    if (n && ["text", "button", "pill", "input"].includes(n.type)) {
+    if (
+      n &&
+      !isNodeLocked(b, n.id) &&
+      ["text", "button", "pill", "input"].includes(n.type)
+    ) {
       const change = prompt("修改元素文字", n.text);
       if (change !== null)
         commit(
@@ -2056,6 +2073,10 @@ function onPointerDown(e) {
       b = project.boards.find((q) => q.id === bid),
       n = findNode(b, node.dataset.nodeId);
     if (!n) return;
+    if (CONTAINERS.has(n.type) && (!selectedIds.has(n.id) || e.shiftKey)) {
+      startMarquee(e, bid, n.id);
+      return;
+    }
     if (e.shiftKey || !selectedIds.has(n.id) || activeBoardId !== bid)
       selectNode(n.id, bid, e.shiftKey);
     else {
@@ -2226,7 +2247,15 @@ function onPointerUp(e) {
   render();
   $("viewport").classList.remove("is-panning", "is-marquee");
   $("selection-marquee")?.remove();
-  if (g.kind === "pan" || g.kind === "marquee") return;
+  if (g.kind === "pan") return;
+  if (g.kind === "marquee") {
+    if (
+      g.clickNodeId &&
+      Math.abs(e.clientX - g.startX) + Math.abs(e.clientY - g.startY) < 3
+    )
+      selectNode(g.clickNodeId, g.boardId, e.shiftKey);
+    return;
+  }
   const dx = e.clientX - g.startX,
     dy = e.clientY - g.startY;
   if (Math.abs(dx) + Math.abs(dy) < 3) {
@@ -2319,7 +2348,7 @@ function onKeyDown(e) {
     return;
   }
   const meta = e.metaKey || e.ctrlKey;
-  if (meta && e.key.toLowerCase() === "z") {
+  if (meta && e.key.toLowerCase() === "z" && !isTyping()) {
     e.preventDefault();
     travel(e.shiftKey ? 1 : -1);
     return;

@@ -359,3 +359,77 @@ test("resizing a stretched child in a narrow preview preserves its reference con
   expect(updated.w).toBeGreaterThan(500);
   expect((await stored(page)).boards[0].w).toBe(800);
 });
+test("project import clears preview and scope state even when imported IDs match", async ({
+  page,
+}) => {
+  const p = project();
+  p.boards[0].nodes[0].children[0].responsive = [
+    { maxWidth: 500, changes: { w: 140 } },
+  ];
+  await open(page, p);
+  await select(page, "one");
+  await page.locator('[data-edit-breakpoint="500"]').click();
+  await expect(page.locator("#preview-width")).toHaveValue("500");
+  const next = structuredClone(p);
+  next.title = "A different project with the same IDs";
+  await page.locator("#upload-json").setInputFiles({
+    name: "other.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(next)),
+  });
+  await expect(page.locator("#project-title")).toHaveText(next.title);
+  await select(page, "one");
+  await expect(page.locator("#preview-width")).toHaveValue("");
+  await expect(page.locator("#breakpoint-scope")).toHaveValue("");
+  await expect(page.locator('[data-prop="w"]')).toHaveValue("160");
+});
+test("locked ancestors block clearing breakpoints, adding a frame and double-click text editing", async ({
+  page,
+}) => {
+  const p = project(),
+    frame = p.boards[0].nodes[0];
+  frame.locked = true;
+  frame.responsive = [
+    { maxWidth: 500, changes: { style: { fill: "$primarySoft" } } },
+  ];
+  Object.assign(frame.children[0], {
+    type: "text",
+    text: "Locked text",
+    style: { fontSize: 16, color: "$ink" },
+  });
+  await open(page, p);
+  await page.locator('[data-node="frame"]').click();
+  const before = await stored(page);
+  await page.locator('[data-action="clear-breakpoints"]').click();
+  expect(await stored(page)).toEqual(before);
+  await page.locator("#add-frame").click();
+  expect(await stored(page)).toEqual(before);
+  const dialogs = [];
+  page.on("dialog", (dialog) => {
+    dialogs.push(dialog.message());
+    dialog.dismiss();
+  });
+  await page.locator('[data-node-id="one"]').dblclick();
+  expect(dialogs).toEqual([]);
+  expect(await stored(page)).toEqual(before);
+});
+test("native text-field undo does not undo an already committed design change", async ({
+  page,
+}) => {
+  const p = project();
+  Object.assign(p.boards[0].nodes[0].children[0], {
+    type: "text",
+    text: "Original label",
+    style: { fontSize: 16, color: "$ink" },
+  });
+  await open(page, p);
+  await select(page, "one");
+  await dragHandle(page, "e", 20, 0);
+  const before = await stored(page);
+  const text = page.locator('[data-prop="text"]');
+  await text.click();
+  await text.press("Control+a");
+  await page.keyboard.type("Pending text");
+  await page.keyboard.press("Control+z");
+  expect(await stored(page)).toEqual(before);
+});
