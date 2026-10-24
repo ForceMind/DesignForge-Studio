@@ -223,3 +223,59 @@ PNG直接从该artifact保存，未裁剪或重画。断点图夹具刻意使图
 run37 在5a17130：190 Node通过；Chrome124/125、Firefox和WebKit各118/119交互通过。唯一新用例未接管“更新变体”prompt，被浏览器默认取消，因而根本未锁定定义；断言保持不变，补为明确选择既有base变体。修正提交 **47550d482f02b025964a792288d7f0186f9250b0**，[CI run38](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40115199604)四个job全success：**190 Node、Chrome125（1.3分钟）、Firefox119（1.2分钟）、WebKit119（2.5分钟）通过**；后两者各6项Chrome像素检查明确跳过。原5张像素基准和负向检出对照继续严格通过，不自动更新。
 
 新增3项Node、1项真实三引擎回归，证明锁定覆盖被阻止时，无关实例名称仍可独立恢复；候选工程和当前源锁定不变。此补验沿用前述run35/run36截图和基准来源，未把旧截图标成新run生成。
+
+
+### M1 alpha.7 · 专业属性与组件创作（2026-10-25 Asia/Shanghai）
+
+已通过检查点 **a5038a08a515925f8d855de622c9df5e8eb67c53**，[CI run45](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40117664682)四job全success：**200 Node + 134 Chrome + 128 Firefox + 128 WebKit通过**；Firefox/WebKit各6项Chrome专属像素检查明确跳过。Chrome1.3分钟、Firefox1.6分钟、WebKit2.7分钟。128项相同功能用例与6项Chrome像素用例分别统计，不把重复引擎执行算成独立场景。
+
+- 实测Inspector尺寸与参考值分离，Fill/Hug、缩放、预览、隐藏、数值编辑范围及另一轴模式、异步reflow保持一致；读取/预览不改项目或历史。
+- 明暗模式指定Inspector文字/画布帮助的实际计算色对比度至少4.5，仅限测试列出的文字，不是全面WCAG认证。工作台CSS不改变用户画板。
+- 完整历史值按需展开，恶意HTML样式长文本仅显示为文本；完整尾部、当前/恢复值和下载报告逐项核对。点击文字/展开/导出不改变撤回勾选或项目，不新增Undo步骤。
+- 组件与变体复制/重命名/删除、所有画板声明引用数、最后变体/被引用/源锁定保护、库包往返、名称转义及Undo/回读。
+- 源副本编辑后更新准确变体，保留实例后续覆盖和其他画板；删除已覆盖的源层会原子拒绝更新，不删用户覆盖；失败不新增历史。实际叶子根按钮保留BUTTON语义和源文字，解除关联后的普通按钮不带容器children字段，Undo/Redo/刷新均通过。
+
+历史失败和修正均保留：
+
+| Run / 提交 | 实际结果及修正 |
+|---|---|
+| run40 / 393db07 | 190 Node通过；Chrome127/130、Firefox/WebKit各123/124功能通过。新断言误把≤600范围的fixed写入当作应修改基础Fill；按真实编辑范围核对基础Fill保留及断点fixed。另两项Chrome工作台像素差异为预期UI改变，下载actual.png逐张查看后更新仅两张基准。 |
+| run41 / 78e2fd7 | 190 Node、Chrome130、Firefox/WebKit各124全部通过，严格像素比较及12px差异检出成功。 |
+| run42 / 7b63013 | 200 Node通过；Chrome132/133，历史details异步toggle尚未填入pre就被测试JSON.parse；改为等待完整尾部内容，不加固定等待。Firefox/WebKit各127交互通过；三项组件管理流程在三引擎通过。 |
+| run43 / c90bcc1 | 四job全success，叶子源按钮类型/文字和从Tokens转入源编辑通过；此轮还未覆盖解除关联。 |
+| run44 / cab86b7 | 200 Node通过；Chrome133/134，新增解除关联用例在隐藏的画板列表上等待超时。trace最后动作明确为组件页签内点击data-board；先切到图层页签再选择画板，断言和超时未放宽。 |
+| run45 / a5038a0 | 200/134/128/128通过，包含叶子源编辑、解除关联及完整Undo/Redo/回读。 |
+
+#### 原始PNG和基准变更来源
+
+- run40 Chrome artifact **12568551988**，SHA256 `1c41214552a4413b936affb23a9da8ef6cc0b23e67fb34f8bffeac8c7046c145`。两张工作台actual PNG和[实测尺寸](screenshots/m1-inspector-measurements.png)、[完整历史差异](screenshots/m1-history-full-review.png)均实际下载查看后直接保存，未裁剪或编辑。原三个Studio导出golden不改，常规CI一直禁止自动更新。
+- 完整历史图刻意使用超长且包含HTML样式标记的恶意文字，原夹具是固定60px文本盒，画板文字溢出是压力输入；该图证明安全展示和完整字段查看，不用于证明夹具排版无溢出。
+- run45 Chrome artifact **12570096646**，SHA256 `fc5538809a4e81c47f7317400acd00a1e1cb8b6a0814670701f380a10d26dd97`；该轮组件原图已下载查看，最终提交的组件图改取下述run47；版本文件证明Chrome155.0.8059.39、Playwright1.64.1、Linux x64。
+
+原Orbit验证仍为3画板/170节点/hash21a89182，当前CLI审计/三画板HTML导出完成。未运行用户Mac、生产环境或部署；没有将设计/密钥送入外部模型。
+
+
+#### alpha.7 最终视觉复核与验收
+
+`75d537283d22e34b3d452fda9a45a1209ce9cdad`显式观察border-box；[run46](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40118025162)通过200 Node、Chrome134（1.7分钟）、Firefox128（1.4分钟）、WebKit128（2.8分钟），后两者各6跳过。新增边框场景保持content box不变但增加16px外盒，读数须异步刷新，项目/历史不变。
+
+实际查看该轮Firefox组件和WebKit尺寸PNG，发现WebKit属性select的原生绘制使文字垂直裁切，虽然既有功能测试通过。`5dd72a46eb909a12a173f01f819214a42f1861a9`统一Inspector select的appearance、垂直留白与CSS箭头，保留原生select语义；增加明暗模式下用实测字体行盒比较每个属性下拉框可用高度的断言。
+
+最终产品代码 **5dd72a46eb909a12a173f01f819214a42f1861a9**，[CI run47](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40118816678)所有job成功：
+
+| 检查 | 实际结果 | 实际环境 |
+|---|---|---|
+| Node | 200通过，0失败 | Node22 CI |
+| Chrome | 134通过，0跳过，2.2分钟 | Chrome155.0.8059.39 / Linux x64 |
+| Firefox | 128通过，6明确跳过，1.4分钟 | Playwright Firefox157.0 / Linux x64 |
+| WebKit | 128通过，6明确跳过，2.8分钟 | Playwright WebKit27.2 / Linux x64 |
+
+三套artifact均实际下载、读取browser-version.json，Playwright1.64.1；下列原图逐张查看，确认WebKit下拉文字完整后直接保存，无裁剪/重画。WebKit的Macintosh UA不代表用户Mac或Safari真机。
+
+| Artifact | SHA256 | 保存的原始PNG |
+|---|---|---|
+| Chrome12569704171 | 2f55d9b7a4d1ecd5eb7ef674c4fc700b9ed3f6e6e7aefa506d6cafc5d674e91b | [组件管理/源副本](screenshots/m1-component-management.png) |
+| Firefox12569634006 | cc88a93ebad2025c6b0adc56a0e797841bb59e1283bd6b814aef33d49d1becd6 | [Firefox组件管理](screenshots/m1-component-management-firefox.png) |
+| WebKit12569259300 | b2bab53292fee01ad9856447c3e0fed71518e89bde0f1dd2bfa95f441f1b2c20 | [WebKit尺寸/下拉](screenshots/m1-inspector-measurements-webkit.png) |
+
+本轮没有调高像素阈值或再次自动更新；既有5个视图和12px负向对照继续通过。人工原图检查发现的UI缺陷与自动化通过结果分别记录，不把测试全绿等同视觉完美。最后文档/截图提交后仍须核对PR head的CI；功能代码与此检查点相同。

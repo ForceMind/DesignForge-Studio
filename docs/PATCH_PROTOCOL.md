@@ -123,3 +123,8 @@ v1 画板可携带 `guides: [{id,axis,position,hidden?,locked?}]`，每板最多
 节点时间线、局部撤回预览、整页断点来源报告是编辑器能力，不新增Patch操作或库管理权限。局部撤回通过三份状态计算并重新校验候选，不使用跳过baseHash的“强制Patch”。
 
 历史局部恢复同样复用组件源覆盖锁定保护，不提供绕过源图层/祖先锁定的新入口；只读历史报告也不属于可应用的Patch。
+
+
+### alpha.7 本地创作与只读历史报告
+
+组件/变体管理和源副本编辑是工作台本地操作，仍完整校验候选project；没有新增Agent Patch操作，也不允许通过报告格式绕过baseHash/字段白名单。`designforge.node-history-review` v1是只读JSON，携带projectId/baseHash、boardId/nodeId、来源步骤与前后hash、selected键、changes和error；不是`designforge.patch`，不能应用。完整内容以textContent显示，含HTML/脚本样式文字也只是文本；下载不会对外发送设计数据。

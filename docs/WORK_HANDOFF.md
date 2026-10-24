@@ -3,7 +3,8 @@
 ## 工程状态
 
 - Public / MIT，主分支 `main` 继续保留 M0 基线 `56a189bf929d09eb8b092a24674b717faba6e0cd`（后续会话必须重新核对）。
-- 开发分支：`codex/m1-editor-foundation`；[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。M1 基础交付增强版 `0.2.0-alpha.6`，用户第一阶段八项交付已验收；原路线增强项未全部完成。
+- 开发分支：`codex/m1-editor-foundation`；[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。M1 基础交付增强版 `0.2.0-alpha.7`，用户第一阶段八项交付已验收；原路线增强项未全部完成。
+- 最新已验收产品：`5dd72a46eb909a12a173f01f819214a42f1861a9`，[CI run47](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40118816678)通过200 Node、Chrome134、Firefox128、WebKit128；后两者各6项像素检查跳过。文档后续head以PR为准。
 - 运行：`npm start`，本地 loopback `127.0.0.1:4173`；运行时零外部依赖。测试工具使用 `npm ci` 安装。
 - 本轮已扩展树、原生布局、约束/断点、组件/变体/实例、Token alias/主题、本地资源、多选/组合/对齐/吸附、存档备份与恢复；保留 M0 的导出、评论、CLI、严格 Patch。
 
@@ -47,7 +48,7 @@ alpha.5 产品代码 `856471b0796ee179a25951d903844c56e7c97b26` 的 [CI run30](h
 - `8123413321f88e662c2015b5b33604159ab4aa6e`：整页断点，CI run33通过183 Node/115 Chrome。
 - `28dbfa8f5fd1f6670aefe758735423662ff48027`：三引擎矩阵，run34暴露Firefox坐标量化与WebKit测试手柄稳定性问题。
 - `c1337b0f12f7b04697da7b290fdeb3dc6aeab636`：增量坐标与原始像素基准捕获；run35 Chrome完成捕获，WebKit116交互全通过，Firefox剩两项精度问题。此轮的自动更新只用于初始参考图生成，不代表严格像素验收。
-- 当前产品代码`8b5dafa4abcabc1a74d55c312dcffd257cb2a1ad`：补齐吸附/实际事件精度回归、导入边界、v0.2.0-alpha.6；已提交5张人工查看的基准和两张功能截图，CI已恢复普通比较并禁止自动更新。[run36](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40113832454)已全绿：187 Node、Chrome124、Firefox118、WebKit118，后两引擎各跳过6项Chrome专属像素检查。最新结果以GitHub为准。
+- 该检查点产品代码`8b5dafa4abcabc1a74d55c312dcffd257cb2a1ad`：补齐吸附/实际事件精度回归、导入边界、v0.2.0-alpha.6；已提交5张人工查看的基准和两张功能截图，CI已恢复普通比较并禁止自动更新。[run36](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40113832454)已全绿：187 Node、Chrome124、Firefox118、WebKit118，后两引擎各跳过6项Chrome专属像素检查。最新结果以GitHub为准。
 
 下一阶段继续组件定义编辑/嵌套实例或专业属性反馈。先保留已通过的alpha.6检查点，完善文档及PR后直接接后续研发；不以“已有基础交付”代替仍未完成的功能。
 
@@ -55,3 +56,22 @@ alpha.5 产品代码 `856471b0796ee179a25951d903844c56e7c97b26` 的 [CI run30](h
 
 
 最终alpha.6安全补充：`5a17130`复用Patch源锁定保护阻止历史恢复绕过；run37新浏览器用例漏处理prompt而失败，产品保护的3项Node全通过。`47550d482f02b025964a792288d7f0186f9250b0`接管prompt选择base变体；[run38](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40115199604)四job全成功，190 Node、Chrome125、Firefox119、WebKit119通过，后两者各6项像素检查跳过。下一项属性反馈正在研发，未混入本检查点的通过统计。
+
+
+## alpha.7 连续研发检查点
+
+已连续完成实测尺寸/明暗文字可读性、完整历史查看与review下载、组件/变体管理及普通源副本编辑，无新的项目格式或Agent Patch操作。源副本是正常画板，会保存/导出；源ID保留，选中源根更新对应变体；不会清理无效覆盖来勉强通过。
+
+- `393db0761a2cfcdc48e4fb65be7493b79ad7e14f`：属性/历史体验；run40暴露新测试范围断言和两张预期视觉变更。
+- `78e2fd7d280318217f8de4a01783cb9294a163d9`：逐张查看actual图后更新两张工作台基准；run41严格通过190/130/124/124。
+- `7b630130d8349f2149b25bdc18b260c5800f8065`：组件库管理及稳定源副本；10项Node通过，3项组件真实流程三引擎通过；run42有一个details异步读取测试竞态。
+- `c90bcc1d1f7b88151bc5aeac2131d875cf945d55`：修复合法叶子组件根被强制frame导致内容/语义丢失；源编辑主动打开属性页签；等待真实details内容后核对完整值，run43全绿。
+- `cab86b7d151c5b91bc91f204d27a5b5c4736f20b`：叶子实例解除关联不附带children，保留普通按钮数据合法性。run44新用例漏切图层页签，trace确认是在隐藏画板列表等待，不是数据断言失败。
+- `a5038a08a515925f8d855de622c9df5e8eb67c53`：[run45](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40117664682)四job全success，200 Node、Chrome134、Firefox128、WebKit128，后两者各6像素检查跳过；真实源编辑/解除关联/Undo/Redo/回读通过。
+
+`75d537283d22e34b3d452fda9a45a1209ce9cdad`补充ResizeObserver显式观察border-box，避免content box不变但边框改变时实测读数滞后；对应回归不改AST、不加新用例计数，最终三引擎结果另记VALIDATION。
+
+后续优先独立定义编辑视图、嵌套实例依赖图/覆盖迁移与Token互操作；现有源副本不等于这些能力完成。M2用户授权模型/BYOK与可视化审批仍是后续阶段。继续遵守不合并main、不部署、不操作Mac/Cloudflare/生产、不向外部模型传设计/密钥。
+
+
+最终复核：run46在75d5372上四job通过，真实查看WebKit截图仍发现原生select文字裁切。`5dd72a46eb909a12a173f01f819214a42f1861a9`统一属性下拉绘制，新增实测字体行盒的空间断言；run47四job全success，200/134/128/128，未变像素阈值、未自动更新基准。三份artifact已下载、核对实际引擎版本；修复后Chrome/Firefox组件及WebKit尺寸原图逐张查看后保存。README补齐从M1独立分支克隆的真实运行命令，避免误运行main的M0。证据及历史失败见VALIDATION。

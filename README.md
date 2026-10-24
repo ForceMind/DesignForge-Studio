@@ -1,12 +1,14 @@
 # DesignForge Studio · 形界设计工作台
 
-> **v0.2.0-alpha.6 · M1 基础交付增强版**。Local-first、AI-native、Agent-friendly UI Design Studio。第一阶段八项交付已通过基础验收；完整范围见 [验收清单](docs/M1_ACCEPTANCE.md)，增强路线及M2/M3继续推进。
+> **v0.2.0-alpha.7 · M1 基础交付增强版**。Local-first、AI-native、Agent-friendly UI Design Studio。第一阶段八项交付已通过基础验收；完整范围见 [验收清单](docs/M1_ACCEPTANCE.md)，增强路线及M2/M3继续推进。
 
 ## 运行
 
-安装 Node.js 20+，克隆仓库后：
+安装 Node.js 20+。本轮M1在 `codex/m1-editor-foundation` 分支（[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)），新克隆请直接选择该分支：
 
 ```bash
+git clone --branch codex/m1-editor-foundation https://github.com/ForceMind/DesignForge-Studio.git
+cd DesignForge-Studio
 npm start
 ```
 
@@ -25,8 +27,8 @@ npm run format:check
 ## 本轮可用能力
 
 - **真实图层树**：Frame / Group 嵌套、展开折叠、父容器调整，图层、画布与属性面板同步。原 v1 平铺工程直接打开，不转换、不丢字段。
-- **原生布局**：Flex / Grid、方向、间距、内边距、对齐、列数，固定/填充/内容撑开尺寸；父相对位置、五类约束和按画板宽度生效的断点覆盖。预览宽度独立于工程尺寸，Inspector 提供本节点断点范围条、当前预览游标、任意受支持宽度输入、修改范围切换与逐字段恢复继承。
-- **组件库**：从选中容器创建组件，插入关联实例，切换变体，编辑实例文字覆盖，显式更新组件定义，解除关联后编辑子树。定义内暂不支持嵌套实例。
+- **原生布局**：Inspector 显示当前图层实际布局尺寸，区分参考W/H与Fill/Hug结果，随预览、缩放和异步布局更新。Flex / Grid、方向、间距、内边距、对齐、列数，固定/填充/内容撑开尺寸；父相对位置、五类约束和按画板宽度生效的断点覆盖。预览宽度独立于工程尺寸，Inspector 提供本节点断点范围条、当前预览游标、任意受支持宽度输入、修改范围切换与逐字段恢复继承。
+- **组件库**：创建/重命名/复制组件与变体、查看实例引用数；禁止删除仍被引用的组件/变体、最后一个变体或锁定源。创建保留源图层身份的普通画板副本，使用现有编辑器修改后更新指定变体；保留实例自定义内容，不兼容更新原子拒绝。副本会保存和导出，可按需删除。叶子根组件保留按钮等类型、文字及解除关联后的可编辑语义；定义内暂不支持嵌套实例。
 - **设计系统包**：本地导出/导入 Token、主题、组件和引用资源；冲突拒绝，命名空间隔离，支持不同字体的库复用，保留当前画板与实例。示例 [Studio.library.json](examples/Studio.library.json)。
 - **富文本与字体**：在文字框选择字符应用颜色/字号/字重/斜体/下划线/删除线，普通内容编辑保留未改片段格式；Unicode 字素保护。支持节点字体、字体 Token、行高和本地字体资源。
 - **设计系统**：颜色及数值 Token、自定义键、别名与循环检测、语义主题、字体与圆角引用。编辑器明暗模式独立于项目主题。
@@ -35,14 +37,14 @@ npm run format:check
 - **布局排序**：Flex 行/列、换行与 Grid 内直接拖动单选图层，插入线提示同父级位置；支持前后移位按钮、Alt + 方向键。松手一次提交，Esc/指针取消/失焦/拖出父容器回滚，顺序在所有断点共用，组件实例保持关联。
 - **本地资源**：PNG/JPEG/WebP/GIF、受限 SVG、WOFF/WOFF2/TTF；内嵌项目及 HTML 导出，无外链请求。单资源编码后最多 512 KB，总计 1 MB。SVG 拒绝脚本、外部引用、HTML、CSS、实体与未知标签/属性。
 - **保存与恢复**：当前项目自动保存、最多 8 个旧快照（并受总大小预算约束）、损坏存档回退、手动选择备份恢复、最多35份会话快照（含当前版本，至多34步Undo，并受序列化字符预算约束）。JSON/HTML/ZIP 原有导出保留。
-- **节点历史**：查看当前或已删除图层的会话修订，预览字段差异并选择性撤回。保留后来修改的其他字段；冲突、锁定、资源失效或 ID 碰撞拒绝覆盖。支持受保护的删除恢复、批注恢复和父容器子层排序恢复。
+- **节点历史**：查看当前或已删除图层的会话修订，预览字段差异并选择性撤回。保留后来修改的其他字段；冲突、锁定、资源失效或 ID 碰撞拒绝覆盖。支持受保护的删除恢复、批注恢复和父容器子层排序恢复；可展开完整值和下载只读差异报告，查看文字不会误切换撤回勾选。
 - **整页断点**：画板右下角“断点”汇总嵌套图层与组件源定义，支持搜索、分页、预览、定位编辑及 JSON 来源报告；实例投影始终定位到实际实例。
 - **Agent Patch**：保持 `designforge.patch` v1、必需 baseHash、字段白名单、原子应用与人工确认；扩展嵌套操作、受限布局编辑和移动节点，Diff 显示父级/顺序变化。
 - **示例**：原 Orbit 三画板 170 节点保持不变；新增 Studio 响应式双画板、Settings、Kanban、Messages、Pricing、SignIn、Storefront、Files、横竖屏游戏 HUD 共 10 个工程。顶部菜单可打开，打开操作可撤销。
 
 ## 实际验证
 
-CI 分开运行 Node 测试，以及 Chrome、Playwright Firefox/WebKit 三套真实引擎测试；截图/失败追踪和实际版本保存在 `browser-evidence-<engine>` artifact（保留14天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。本轮190项Node、Chrome125项、Firefox119项、WebKit119项全部通过；后两者各跳过6项Chrome专属像素检查；最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
+CI 分开运行 Node 测试，以及 Chrome、Playwright Firefox/WebKit 三套真实引擎测试；截图/失败追踪和实际版本保存在 `browser-evidence-<engine>` artifact（保留14天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。[CI run47](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40118816678) 中200项Node、Chrome134项、Firefox128项、WebKit128项全部通过；后两者各跳过6项Chrome专属像素检查；最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
 
 检查面板可运行实际DOM几何检查及约+30%文字膨胀预检（离屏副本，不改原稿），报告可导出并标记过期。
 
@@ -52,7 +54,7 @@ CI 分开运行 Node 测试，以及 Chrome、Playwright Firefox/WebKit 三套�
 
 ![深色设计工作台](tests/browser/visual-baselines.spec.mjs-snapshots/workbench-dark-chromium-linux.png)
 
-[节点历史](docs/screenshots/m1-node-history.png) · [整页断点](docs/screenshots/m1-board-breakpoints.png) · [布局拖动排序](docs/screenshots/m1-flow-reorder.png) · [断点总览](docs/screenshots/m1-breakpoint-overview.png) · [富文本](docs/screenshots/m1-richtext.png) · [多选缩放](docs/screenshots/m1-multiresize.png) · [设计系统包](docs/screenshots/m1-library.png) · [浏览器检测](docs/screenshots/m1-audit-final.png) · [文字膨胀预检](docs/screenshots/m1-text-expansion.png) · [浅色参考线](docs/screenshots/m1-guides-light.png) · [深色参考线](docs/screenshots/m1-guides-dark.png) · [等距分布](docs/screenshots/m1-distribution.png) · [尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
+[组件管理/源副本](docs/screenshots/m1-component-management.png) · [实测尺寸](docs/screenshots/m1-inspector-measurements.png) · [完整历史差异](docs/screenshots/m1-history-full-review.png) · [节点历史](docs/screenshots/m1-node-history.png) · [整页断点](docs/screenshots/m1-board-breakpoints.png) · [布局拖动排序](docs/screenshots/m1-flow-reorder.png) · [断点总览](docs/screenshots/m1-breakpoint-overview.png) · [富文本](docs/screenshots/m1-richtext.png) · [多选缩放](docs/screenshots/m1-multiresize.png) · [设计系统包](docs/screenshots/m1-library.png) · [浏览器检测](docs/screenshots/m1-audit-final.png) · [文字膨胀预检](docs/screenshots/m1-text-expansion.png) · [浅色参考线](docs/screenshots/m1-guides-light.png) · [深色参考线](docs/screenshots/m1-guides-dark.png) · [等距分布](docs/screenshots/m1-distribution.png) · [尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
 
 ## 使用 Agent
 
@@ -69,11 +71,11 @@ node tools/forge.mjs apply examples/Orbit.project.json examples/Rename-revenue.p
 
 ## 尚未完成
 
-当前节点历史限受预算约束的当前会话，不跨刷新；嵌套组件实例、组件定义直接编辑与跨项目在线库版本同步仍待补齐；多选缩放限同父级基础样式，Flow/断点模式会明确拒绝。当前导出为静态 HTML/CSS。自然语言生成、BYOK 模型、截图/HTML 重构和可视化审批属于 M2；React/Vue、交互原型与完整自动化视觉质量闭环属于 M3。不要把本版当作完整 Figma 替代品。
+当前节点历史限受预算约束的当前会话，不跨刷新；嵌套组件实例、独立组件定义编辑视图与跨项目在线库版本同步仍待补齐（已有普通源副本编辑及显式更新流程）；多选缩放限同父级基础样式，Flow/断点模式会明确拒绝。当前导出为静态 HTML/CSS。自然语言生成、BYOK 模型、截图/HTML 重构和可视化审批属于 M2；React/Vue、交互原型与完整自动化视觉质量闭环属于 M3。不要把本版当作完整 Figma 替代品。
 
 ## 工程与许可
 
-`src/core.mjs` 协议/渲染/补丁，`tree.mjs` 树编辑，`geometry.mjs` 尺寸/框选/分布/吸附，`guides.mjs` 参考线数据/刻度，`flow-layout.mjs` 实测插入目标/同父排序，`breakpoint-overview.mjs` 本节点范围总览，`responsive.mjs` 断点继承，`viewport.mjs` DOM 测量/预览，`assets.mjs` 资源边界，`storage.mjs` 本地恢复，`node-history.mjs` 局部撤回与冲突检查，`board-breakpoints.mjs` 全页来源聚合；`app.mjs`/`app.css` 工作台，`tools/` CLI/开发服务器，`tests/` 单元与浏览器测试，`examples/` 可编辑项目。
+`src/core.mjs` 协议/渲染/补丁，`tree.mjs` 树编辑，`geometry.mjs` 尺寸/框选/分布/吸附，`guides.mjs` 参考线数据/刻度，`flow-layout.mjs` 实测插入目标/同父排序，`breakpoint-overview.mjs` 本节点范围总览，`responsive.mjs` 断点继承，`viewport.mjs` DOM 测量/预览，`assets.mjs` 资源边界，`storage.mjs` 本地恢复，`node-history.mjs` 局部撤回与冲突检查，`board-breakpoints.mjs` 全页来源聚合，`component-library.mjs` 组件/变体管理及源副本；`app.mjs`/`app.css` 工作台，`tools/` CLI/开发服务器，`tests/` 单元与浏览器测试，`examples/` 可编辑项目。
 
 原创代码 MIT。独立实现，没有复制 BaoCut 受限源码或品牌资源，不是 BaoCut / Anthropic 官方产品。研究来源和许可说明见 [RESEARCH](docs/RESEARCH.md)。
 

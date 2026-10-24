@@ -9,7 +9,7 @@
 - `layout`：`mode: absolute/flex/grid`，方向、gap/padding、align/justify、columns、wrap。gap/padding 支持数值 Token。Flow 子节点不使用 x/y；顺序来自 children 数组。绝对布局图层树按数组顺序排列，最后一个节点绘制在最上层。
 - `sizing.w/h: fixed/fill/hug`。文字 hug 采用浏览器内容测量。Fill 会使用父容器空间；循环的 hug/fill 组合未做完整约束求解，见已知问题。
 - `constraints.horizontal/vertical: start/end/center/stretch/scale`，`referenceW/referenceH` 保存父容器的参考尺寸。修改宽高后仍可保持边距或比例。Inspector 首次配置约束时记录基准。
-- `responsive: [{maxWidth, changes}]` 使用**画板容器宽度**而非整个工作台宽度。宽断点先、窄断点后，变化可覆盖 w/h/layout/sizing/style/hidden；Inspector 目前提供简化的添加与清除入口。
+- `responsive: [{maxWidth, changes}]` 使用**画板容器宽度**而非整个工作台宽度。宽断点先、窄断点后，变化可覆盖 w/h/layout/sizing/style/hidden；Inspector 提供添加/改宽/删除、范围总览与逐字段恢复继承。
 - `board.autoHeight: true`：单根容器时按内容撑开高度，`board.h` 作为最小高度；多根元素或非容器根时回到固定高度。此规则用于避免响应式导出纵向截断，编辑器壳也读取真实 DOM 高度。
 
 ## 组件与设计系统
@@ -18,14 +18,14 @@
 {
   "components": [{
     "id": "action", "name": "Project action",
-    "variants": [{"id": "primary", "name": "Primary", "root": {"...": "完整容器节点"}}]
+    "variants": [{"id": "primary", "name": "Primary", "root": {"...": "完整源节点，通常为容器"}}]
   }],
   "themes": {"dark": {"surface":"#202938", "ink":"#F2F4F8"}},
   "activeTheme": "dark"
 }
 ```
 
-`instance` 节点持有 componentId、variantId 和 `overrides[sourceNodeId]: {text,style}`。渲染时从最新定义投影，先应用覆盖，再用实例根的尺寸/样式。投影子元素只有 `data-source-id`，不会冒充可持久化节点；画布选中整个实例。Inspector 可直接修改实例文字，解除关联会复制整棵树并重新生成 ID。组件定义禁止嵌套实例以避免循环引用。源容器与库定义显式更新，不暗中同步。
+`instance` 节点持有 componentId、variantId 和 `overrides[sourceNodeId]: {text,style}`。渲染时从最新定义投影，先应用覆盖，再用实例根的尺寸/样式。投影子元素只有 `data-source-id`，不会冒充可持久化节点；画布选中整个实例。Inspector 可修改源后代文字/样式覆盖；根样式由实例自身属性管理。解除关联复制源树、保留实例根ID并为后代生成新ID。组件定义禁止嵌套实例以避免循环引用。源容器与库定义显式更新，不暗中同步。
 
 Tokens 保留既有必需颜色、radius、fontFamily，允许额外颜色/数字键和 `$alias`。主题是基础 Token 的覆盖映射；每套主题分别校验别名及循环。颜色、布局间距、圆角、字号等渲染路径解析 Token。字体选项为内建栈或 `asset:<fontId>`。
 
@@ -119,3 +119,16 @@ End 定位的反解加入“实测尺寸 − 当前有效声明尺寸”差值�
 CI通过固定Playwright依赖启动Chrome、Firefox及WebKit，并在每份artifact记录实际启动的引擎/版本/平台。Chrome/Linux保留5张原始PNG参考图，常规比较禁止自动更新；额外的12px偏移对照验证差异检出。像素基准不跨引擎冒用，另两个引擎仍执行完整交互用例。
 
 历史恢复和Patch共用组件源覆盖锁定判定；计划逐字段给出blocked状态，应用候选工程前再次检查所有实例，避免从删除历史恢复覆盖到后续锁定的源层。
+
+
+## alpha.7 属性反馈与组件管理
+
+Inspector 保留当前编辑范围的W/H输入，同时从选中元素DOM的border box除以world缩放得到实测尺寸，最多显示两位小数。读取不修改AST或历史。ResizeObserver显式观察当前元素的border-box，字体/内容导致的异步reflow也会刷新；改选和重绘重新绑定，无可见盒子时明确显示“当前图层未显示”。尺寸数值编辑继续只把被修改轴写为fixed，且遵从当前基础/断点范围。
+
+历史差异卡片将勾选label与文本区域分开；完整值在原生details展开时惰性序列化并通过textContent显示。下载`designforge.node-history-review` v1包含当前baseHash、来源步骤与前后hash、选中键、完整前/后/当前值及冲突状态，不含可执行指令，也不进入Patch应用通道。展开和下载共用当前工程/来源快照有效性检查。
+
+`component-library.mjs`提供原子本地创作操作；先校验源工程，再克隆、修改并完整校验候选工程。组件/变体重命名保留ID，复制保留其作用域内源ID但不共享可变对象；统计所有画板的声明实例（含嵌套及锁定实例）。被引用对象不能删除，至少保留一个变体，锁定源也不能被删掉。
+
+源编辑采用明确的普通画板副本，无临时项目字段或假投影ID：克隆源根到新画板，源节点ID在不同画板作用域内可复用。用户使用原有图层/布局工具编辑，选中相同源根后显式更新对应变体。绑定更新检查根身份，通用“用当前容器更新变体”入口继续保留。更新不能自动清理悬空覆盖、嵌套实例或缺资源；候选校验失败则定义/实例/历史均不变。副本包含在文件/HTML导出中，用户可自行删除；不是自动同步主定义或协作分支，尚无更新前专用视觉Diff审批。
+
+实例解析继续沿用同一materializeInstance：容器源保持frame投影；非容器源保留button/text/image等类型和源文字，不给叶子根附加children。解除关联后仍能通过工程校验并保留语义；没有为此放宽公开工程、SVG、字体或Patch边界。明暗模式只调整工作台变量，不改用户画板内容。

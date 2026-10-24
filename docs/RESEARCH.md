@@ -85,3 +85,17 @@ DesignForge 长期不止要“输出漂亮页面”。要建立从 **设计系�
 | [BaoCut](https://github.com/JimLiu/baocut) / [第三方声明](https://github.com/JimLiu/baocut/blob/main/THIRD_PARTY_NOTICES.md) / [baoyu-design](https://github.com/JimLiu/baoyu-design) | 宿主能力与 Agent Skill 相互补充；许可需分项目核对 | 保留独立 AST、受限协议和本项目原创实现；不复制 BaoCut runtime |
 
 上表最后一列为本项目的设计决策，不是竞品实测性能结论。尚未进行同任务、同模型、同硬件的优劣基准测试。
+
+
+## 8. alpha.7 官方机制复查（2026-10-25 Asia/Shanghai）
+
+本节只依据当前官方文档；没有运行竞品、读取用户竞品账户或引入其源码。下表的工程选择是本项目推断/取舍，不是兼容或性能领先声明。
+
+| 官方来源 | 复查机制 | 本项目实现及边界 |
+|---|---|---|
+| [Figma variants](https://help.figma.com/hc/en-us/articles/360056440594-Create-and-use-variants) | 相似组件归入组件集，可复制变体并组织属性值 | 当前提供列表式命名/复制/引用保护，尚非多属性变体矩阵 |
+| [Penpot components](https://help.penpot.app/user-guide/design-systems/components/) / [variants](https://help.penpot.app/user-guide/design-systems/variants/) | 主源和实例覆盖分离，可从副本更新主源；变体关联参考层名、类型及层级 | 保留源ID作用域的普通源副本，显式更新；不兼容覆盖拒绝，不按名称猜测迁移 |
+| [Framer breakpoints](https://www.framer.com/academy/lessons/framer-fundamentals-breakpoints) | 新断点布局继承主断点，再覆盖差异 | 本项目画板容器查询与明确编辑范围共用同一树，实测尺寸反馈和像素回归核对结果 |
+| [Claude Design current guide](https://support.claude.com/en/articles/14604416-get-started-with-claude-design) / [design system](https://support.claude.com/en/articles/14604397-set-up-your-design-system-in-claude-design) | 对话生成、画布编辑及设计系统结合，当前文档把Design作为Artifact模板入口 | 借鉴从设计体系到局部迭代的产品闭环；当前仍是外部Agent+受限Patch，不虚构内置模型或逆向复制运行时 |
+
+官方文档中的入口、订阅与可用性会变化；不把4月发布稿当成永久当前状态。当前工作不涉及竞品付费/登录、第三方设计上传或部署。BaoCut/baoyu-design的原始研究与许可边界沿用前述章节。
