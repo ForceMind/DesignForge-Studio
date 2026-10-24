@@ -29,4 +29,6 @@ alpha.2 产品代码 452a628 的 [CI run 15](https://github.com/ForceMind/Design
 
 alpha.3 增加标尺/参考线及受限 v1 元数据，修正约束图层在实际预览几何中的移动。增加同父级图层水平/垂直等距分布，产品提交 cbad269 的 CI run 19 已通过 73 Node + 52 Chrome；三张新截图已下载、人工查看并存入 docs/screenshots。最新状态以 VALIDATION.md 及对应 head Actions 为准。
 
-alpha.4 当前集成多选尺寸事务、富文本/多字体、源子层实例属性、Token主题编辑、本地设计系统包、真实DOM几何检查，以及锁定/选区/组合约束缺陷修复。产品代码 d217355 的 CI run 22 已通过 141 Node + 72 Chrome，五张原始截图已实际复核并保存。逐项交付与边界见 M1_ACCEPTANCE.md；后续仍要重新查当前head CI。
+alpha.4 当前集成多选尺寸事务、富文本/多字体、源子层实例属性、Token主题编辑、本地设计系统包、真实DOM几何检查，以及锁定/选区/组合约束缺陷修复。产品代码 ecd52a3 的 CI run25已通过146 Node + 80 Chrome；文字预检/CLI保护已补齐，原始截图均实际下载复核并保存。逐项交付与边界见 M1_ACCEPTANCE.md；后续仍要重新查当前head CI。
+
+文字压力采用离屏副本，结果按hash/宽度过期，JSON区分renderedFindings与textExpansionFindings；clone前预算和finally清理有回归。下一步M1增强可做节点历史/断点总览/跨浏览器与像素回归；M2内置BYOK/视觉审批仍未实现。

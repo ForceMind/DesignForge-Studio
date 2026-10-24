@@ -142,3 +142,15 @@
 文字预检首轮 [CI run24](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40093115708) 在 af1cc2d 上：145 Node通过，Chrome78/79通过。唯一失败为正常Flow/Hug折行被TEXT_OVERFLOW误报；scrollWidth/clientWidth均256、scrollHeight/clientHeight均96，需修Range对行末空白的边界测量，保留严格断言。多尺寸中文长文、只读副本、清理和UI导出均已通过；不将该轮记为全绿。
 
 Range测量现按非空白连续内容段执行；scroll尺寸保留作证据，不再单独把无可见字形的悬挂空白当溢出。原Flow/Hug空结果断言保留，并增加真正nowrap长词必须报TEXT_OVERFLOW的同板对照。当前全套预期146 Node、80 Chrome，以实际执行为准。
+
+
+### M1 基础交付 · 最终扩展验收
+
+- 产品代码 **ecd52a30a9c24b64fc186c7ad4ae620060736d85**。
+- [CI run25](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40093595024) verify/browser均success：**146 Node + 80真实Chrome全部通过**。Google Chrome 155.0.8059.39，浏览器80项约1.2分钟。原成熟回归及失败场景断言保留。
+- 新增文字压力用例验证原DOM/存档不变、Flow/Hug自然长高、Unicode/分段/placeholder、clone前预算/异常清理，以及中文长内容Studio在390/768/1440px的原稿及约+30%场景边界。正常pre-wrap折行不误报，真实nowrap长词仍报告TEXT_OVERFLOW。
+- CLI新建/有界读测试通过；项目8MB、Patch1MB，init拒绝既存文件且保留bytes。
+- 下载artifact **12559624019**，实际查看 [文字膨胀预检](screenshots/m1-text-expansion.png) 和 [最终检测面板](screenshots/m1-audit-final.png)，原始PNG直接保存，不覆盖前述run22截图来源记录。
+- 文字模拟按分段字素向上取整，短段可能超过30%，是完整压力场景而非新增问题Diff。覆盖的是中文样本及字素压力；不是全语言、像素golden、WCAG或真机认证。
+
+至此，第一阶段八项基础交付具备代码、示例、验证、原始截图、文档与PR证据。广义M1增强路线和M2/M3的未实现项仍明确保留，不因本表验收而改写为已完成。

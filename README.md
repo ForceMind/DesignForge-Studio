@@ -39,7 +39,7 @@ npm run format:check
 
 ## 实际验证
 
-CI 分开运行 Node 测试和真实 Chrome（Chromium 引擎）测试，浏览器截图/失败追踪保存在对应 Actions 的 `browser-evidence` artifact（保留 14 天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
+CI 分开运行 Node 测试和真实 Chrome（Chromium 引擎）测试，浏览器截图/失败追踪保存在对应 Actions 的 `browser-evidence` artifact（保留 14 天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。本轮146项Node和80项真实Chrome通过；最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
 
 检查面板可运行实际DOM几何检查及约+30%文字膨胀预检（离屏副本，不改原稿），报告可导出并标记过期。
 
@@ -49,7 +49,7 @@ CI 分开运行 Node 测试和真实 Chrome（Chromium 引擎）测试，浏览�
 
 ![深色设计工作台](docs/screenshots/m1-workbench.png)
 
-[富文本](docs/screenshots/m1-richtext.png) · [多选缩放](docs/screenshots/m1-multiresize.png) · [设计系统包](docs/screenshots/m1-library.png) · [浏览器检测](docs/screenshots/m1-browser-audit.png) · [浅色参考线](docs/screenshots/m1-guides-light.png) · [深色参考线](docs/screenshots/m1-guides-dark.png) · [等距分布](docs/screenshots/m1-distribution.png) · [尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
+[富文本](docs/screenshots/m1-richtext.png) · [多选缩放](docs/screenshots/m1-multiresize.png) · [设计系统包](docs/screenshots/m1-library.png) · [浏览器检测](docs/screenshots/m1-audit-final.png) · [文字膨胀预检](docs/screenshots/m1-text-expansion.png) · [浅色参考线](docs/screenshots/m1-guides-light.png) · [深色参考线](docs/screenshots/m1-guides-dark.png) · [等距分布](docs/screenshots/m1-distribution.png) · [尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
 
 ## 使用 Agent
 
