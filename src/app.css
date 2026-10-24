@@ -1721,6 +1721,41 @@ select:focus-visible {
   z-index: 20;
   box-sizing: border-box;
 }
+.is-flow-reordering,
+.is-flow-reordering * {
+  cursor: grabbing !important;
+}
+#flow-drop-marker {
+  position: absolute;
+  pointer-events: none;
+  z-index: 23;
+  background: #9b88ff;
+  box-shadow: 0 0 0 1px #352461;
+  border-radius: 2px;
+}
+#flow-drop-marker.vertical {
+  transform: translateX(-1px);
+}
+#flow-drop-marker.horizontal {
+  transform: translateY(-1px);
+}
+#flow-reorder-status {
+  position: absolute;
+  left: 50%;
+  bottom: 72px;
+  transform: translateX(-50%);
+  z-index: 24;
+  pointer-events: none;
+  padding: 8px 12px;
+  border-radius: 7px;
+  color: #ffffff;
+  background: #31294b;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.flow-order-controls {
+  margin-top: 14px;
+}
 .resize-handle {
   position: absolute;
   width: 9px;

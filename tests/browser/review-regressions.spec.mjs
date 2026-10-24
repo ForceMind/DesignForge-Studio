@@ -101,8 +101,9 @@ for (const width of [800, 600]) {
       { steps: 6 },
     );
     const preview = await node.boundingBox();
-    expect((preview.x - nudged.x) / z).toBeCloseTo(31, 1);
-    expect((preview.y - nudged.y) / z).toBeCloseTo(22, 1);
+    // Free movement rounds the actual anchor to a CSS pixel, including intrinsic fractions.
+    expect(Math.abs((preview.x - nudged.x) / z - 31)).toBeLessThan(0.6);
+    expect(Math.abs((preview.y - nudged.y) / z - 22)).toBeLessThan(0.6);
     expect(await stored(page)).toEqual(saved);
     await page.mouse.up();
     const committed = await node.boundingBox();

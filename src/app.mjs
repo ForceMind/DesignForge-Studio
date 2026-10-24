@@ -29,6 +29,7 @@ import {
   RESPONSIVE_FIELDS,
 } from "./responsive.mjs";
 import { nodeElement, measureNode, paintResize } from "./viewport.mjs";
+import { flowDropTarget, reorderSibling } from "./flow-layout.mjs";
 import {
   addGuide,
   updateGuide,
@@ -151,6 +152,7 @@ function record() {
   saveLocal();
 }
 function commit(fn) {
+  if (gesture) cancelGesture();
   try {
     const next = clone(project);
     fn(next);
@@ -734,6 +736,7 @@ function updateHistoryButtons() {
   $("redo").disabled = historyIndex >= history.length - 1;
 }
 function travel(delta) {
+  if (gesture) cancelGesture();
   const next = historyIndex + delta;
   if (next < 0 || next >= history.length) return;
   historyIndex = next;
@@ -870,18 +873,36 @@ function removeNode() {
 function reorderNode(direction) {
   const n = activeNode();
   if (!n) return;
-  const id = n.id,
-    bid = activeBoardId;
-  commit((p) => {
-    const board = p.boards.find((x) => x.id === bid);
-    if (isNodeLocked(board, id)) throw Error("Locked layer");
-    const e = locateNode(board, id),
-      ns = e.siblings;
-    const i = ns.indexOf(e.node),
-      j = i + direction;
-    if (j < 0 || j >= ns.length) return;
-    [ns[i], ns[j]] = [ns[j], ns[i]];
-  });
+  const board = activeBoard(),
+    entry = locateNode(board, n.id),
+    anchor = entry.siblings[entry.siblings.indexOf(entry.node) + direction];
+  if (!anchor) return;
+  return commit((p) =>
+    reorderSibling(
+      p.boards.find((b) => b.id === board.id),
+      n.id,
+      anchor.id,
+      direction < 0 ? "before" : "after",
+    ),
+  );
+}
+function reorderFlow(direction) {
+  const board = activeBoard(),
+    node = activeNode(),
+    parent = node && locateNode(board, node.id)?.parent;
+  if (
+    !parent ||
+    !["flex", "grid"].includes(
+      effectiveNode(parent, previewWidth(board)).layout?.mode,
+    )
+  )
+    return false;
+  if (selected().length !== 1) {
+    toast("Auto Layout 排序请单选一个图层");
+    return true;
+  }
+  reorderNode(direction);
+  return true;
 }
 function newBoard() {
   let dims = prompt("新画板尺寸 (宽x高)", "390x844");
@@ -1196,6 +1217,17 @@ function structureControls(board, node) {
     html += componentPropertiesMarkup(node, project);
     html +=
       '<button class="btn-small" data-action="detach">解除实例关联</button><p class="property-help">实例继承组件定义；通过组件面板更新源容器。解除关联后可编辑子图层。</p>';
+  }
+  if (
+    parent &&
+    ["flex", "grid"].includes(
+      effectiveNode(parent, previewWidth(board)).layout?.mode,
+    )
+  ) {
+    const list = locateNode(board, node.id).siblings,
+      index = list.findIndex((n) => n.id === node.id),
+      disabled = isNodeLocked(board, node.id) || selected().length !== 1;
+    html += `<div class="flow-order-controls"><div class="panel-section-title">布局顺序 <small>${index + 1} / ${list.length}</small></div><div class="button-row"><button class="btn-small" data-action="flow-previous" ${disabled || index === 0 ? "disabled" : ""}>← 前一位</button><button class="btn-small" data-action="flow-next" ${disabled || index === list.length - 1 ? "disabled" : ""}>后一位 →</button></div><p class="property-help">拖动单选图层按插入线排序，或 Alt + 方向键前后移位。结构顺序在所有断点共用；拖出父容器、Esc 均取消。</p></div>`;
   }
   return html;
 }
@@ -1721,6 +1753,7 @@ function assetAction(e) {
 const previewWidths = new Map(),
   editScopes = new Map();
 function clearProjectView() {
+  if (gesture) cancelGesture();
   selectedIds.clear();
   previewWidths.clear();
   editScopes.clear();
@@ -1750,6 +1783,7 @@ function nodeScope(node = activeNode()) {
   return activeBreakpoint(node, previewWidth());
 }
 function setPreviewWidth(value) {
+  if (gesture) cancelGesture();
   const b = activeBoard();
   if (value === "") {
     previewWidths.delete(b.id);
@@ -2044,7 +2078,12 @@ function measuredSelection({ min = 1, base = false } = {}) {
 }
 function updateSelectionOverlay() {
   $("selection-overlay")?.remove();
-  if (!project || gesture?.kind === "marquee" || tool !== "select" || heldSpace)
+  if (
+    !project ||
+    ["marquee", "flow-reorder"].includes(gesture?.kind) ||
+    tool !== "select" ||
+    heldSpace
+  )
     return;
   const n = activeNode(),
     b = activeBoard();
@@ -2172,7 +2211,107 @@ function cancelGesture() {
     $("viewport").releasePointerCapture(g.pointerId);
   $("viewport").classList.remove("is-panning", "is-marquee");
   $("selection-marquee")?.remove();
+  clearFlowPreview();
   render();
+}
+function clearFlowPreview() {
+  $("flow-drop-marker")?.remove();
+  $("flow-reorder-status")?.remove();
+  $("viewport").classList.remove("is-flow-reordering");
+}
+function flowTarget(g, point) {
+  if (
+    !g.bounds.every(
+      (r) =>
+        point.x >= r.left &&
+        point.x <= r.right &&
+        point.y >= r.top &&
+        point.y <= r.bottom,
+    )
+  )
+    return null;
+  return flowDropTarget(g.items, point, g.layout);
+}
+function startFlowReorder(e, board, node, entry) {
+  if (e.shiftKey || selected().length !== 1 || !selectedIds.has(node.id))
+    return;
+  const element = nodeElement($("world"), board.id, node.id);
+  const items = entry.siblings
+    .filter((n) => n.id !== node.id)
+    .flatMap((n) => {
+      const el = nodeElement($("world"), board.id, n.id),
+        r = el?.getBoundingClientRect();
+      return r?.width > 0 && r.height > 0
+        ? [{ id: n.id, rect: { x: r.x, y: r.y, w: r.width, h: r.height } }]
+        : [];
+    });
+  if (!element || !items.length) return;
+  gesture = {
+    kind: "flow-reorder",
+    pointerId: e.pointerId,
+    boardId: board.id,
+    nodeId: node.id,
+    startX: e.clientX,
+    startY: e.clientY,
+    element,
+    items,
+    bounds: [
+      element.parentElement.getBoundingClientRect(),
+      boardMeasurement(board),
+      $("viewport").getBoundingClientRect(),
+    ],
+    layout: effectiveNode(entry.parent, previewWidth(board)).layout,
+    projectHash: hashProject(project),
+    moved: false,
+    target: null,
+  };
+  $("viewport").setPointerCapture(e.pointerId);
+  e.preventDefault();
+}
+function paintFlowReorder(e) {
+  const g = gesture,
+    dx = e.clientX - g.startX,
+    dy = e.clientY - g.startY;
+  if (!g.moved && Math.hypot(dx, dy) < 4) return;
+  g.moved = true;
+  g.target = flowTarget(g, { x: e.clientX, y: e.clientY });
+  g.element.style.setProperty(
+    "transform",
+    `translate(${dx / zoom}px,${dy / zoom}px)`,
+    "important",
+  );
+  g.element.style.setProperty("opacity", "0.5", "important");
+  $("viewport").classList.add("is-flow-reordering");
+  updateSelectionOverlay();
+  $("flow-drop-marker")?.remove();
+  if (g.target) {
+    const v = $("viewport").getBoundingClientRect(),
+      m = g.target.marker,
+      marker = document.createElement("div");
+    marker.id = "flow-drop-marker";
+    marker.className = m.w === 0 ? "vertical" : "horizontal";
+    marker.dataset.anchor = g.target.anchorId;
+    marker.dataset.placement = g.target.placement;
+    Object.assign(marker.style, {
+      left: m.x - v.left + "px",
+      top: m.y - v.top + "px",
+      width: Math.max(2, m.w) + "px",
+      height: Math.max(2, m.h) + "px",
+    });
+    $("viewport").appendChild(marker);
+  }
+  let status = $("flow-reorder-status");
+  if (!status) {
+    status = document.createElement("div");
+    status.id = "flow-reorder-status";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    $("viewport").appendChild(status);
+  }
+  const message = g.target
+    ? "松手调整全局顺序 · Esc 取消"
+    : "移回父容器完成排序 · 当前松手取消";
+  if (status.textContent !== message) status.textContent = message;
 }
 function startResize(e, handle) {
   const b = activeBoard(),
@@ -2583,6 +2722,12 @@ function bindStatic() {
         case "down":
           reorderNode(-1);
           break;
+        case "flow-previous":
+          reorderFlow(-1);
+          break;
+        case "flow-next":
+          reorderFlow(1);
+          break;
         case "duplicate-board":
           duplicateBoard();
           break;
@@ -2822,17 +2967,18 @@ function onPointerDown(e) {
       activeNodeId = n.id;
       render();
     }
+    if (isNodeLocked(b, n.id)) return;
+    const entry = locateNode(b, n.id);
     if (
-      isNodeLocked(b, n.id) ||
-      (locateNode(b, n.id).parent &&
-        ![undefined, "absolute"].includes(
-          effectiveNode(locateNode(b, n.id).parent, previewWidth(b)).layout
-            ?.mode,
-        ))
-    )
+      entry.parent &&
+      ["flex", "grid"].includes(
+        effectiveNode(entry.parent, previewWidth(b)).layout?.mode,
+      )
+    ) {
+      startFlowReorder(e, b, n, entry);
       return;
-    const entry = locateNode(b, n.id),
-      measured = measureNode($("world"), bid, n.id, zoom);
+    }
+    const measured = measureNode($("world"), bid, n.id, zoom);
     if (!measured) return;
     const parentRect = measured.parent.getBoundingClientRect(),
       boardRect = boardMeasurement(b),
@@ -2887,6 +3033,10 @@ function onPointerDown(e) {
 }
 function onPointerMove(e) {
   if (!gesture) return;
+  if (gesture.kind === "flow-reorder") {
+    paintFlowReorder(e);
+    return;
+  }
   const dx = e.clientX - gesture.startX,
     dy = e.clientY - gesture.startY;
   if (gesture.kind === "guide") {
@@ -3072,10 +3222,32 @@ function onPointerUp(e) {
   gesture = null;
   if (g.pointerId !== undefined && $("viewport").hasPointerCapture(g.pointerId))
     $("viewport").releasePointerCapture(g.pointerId);
+  clearFlowPreview();
   render();
   $("viewport").classList.remove("is-panning", "is-marquee");
   $("selection-marquee")?.remove();
   if (g.kind === "pan") return;
+  if (g.kind === "flow-reorder") {
+    const target = flowTarget(g, { x: e.clientX, y: e.clientY });
+    if (!g.moved || !target || hashProject(project) !== g.projectHash) return;
+    const board = project.boards.find((b) => b.id === g.boardId);
+    if (
+      !reorderSibling(clone(board), g.nodeId, target.anchorId, target.placement)
+    )
+      return;
+    if (
+      commit((p) =>
+        reorderSibling(
+          p.boards.find((b) => b.id === g.boardId),
+          g.nodeId,
+          target.anchorId,
+          target.placement,
+        ),
+      )
+    )
+      toast("已调整全局图层顺序");
+    return;
+  }
   if (g.kind === "guide") {
     const previous = activeBoard().guides?.find((line) => line.id === g.id);
     if (
@@ -3240,6 +3412,16 @@ function onKeyDown(e) {
     return;
   }
   if (isTyping()) return;
+  if (
+    e.altKey &&
+    !meta &&
+    ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)
+  ) {
+    if (reorderFlow(["ArrowLeft", "ArrowUp"].includes(e.key) ? -1 : 1)) {
+      e.preventDefault();
+      return;
+    }
+  }
   if (e.shiftKey && e.key.toLowerCase() === "r" && !meta) {
     e.preventDefault();
     toggleRulers();
