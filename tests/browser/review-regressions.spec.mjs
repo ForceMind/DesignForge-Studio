@@ -216,7 +216,7 @@ test("responsive icon strokes update in canvas and exported HTML including isola
   await expect(icon).toHaveCSS("stroke", "rgb(255, 0, 0)");
   await expect(first).toHaveCSS("stroke", "rgb(255, 0, 0)");
   await expect(second).toHaveCSS("stroke", "rgb(0, 170, 0)");
-  await page.locator("#preview-width").selectOption("800");
+  await page.locator("#preview-width").selectOption("");
   await expect(icon).toHaveCSS("stroke", "rgb(0, 0, 0)");
   const html = standaloneHtml(p.boards[0], p);
   await page.setViewportSize({ width: 600, height: 800 });
