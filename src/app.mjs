@@ -458,6 +458,15 @@ function renderProperties() {
   const b = activeBoard(),
     source = activeNode(),
     n = source ? effectiveNode(source, nodeScope(source) ?? Infinity) : null;
+  const owner = source ? locateNode(b, source.id)?.parent : null;
+  const flow =
+    owner &&
+    ["flex", "grid"].includes(
+      effectiveNode(owner, previewWidth(b)).layout?.mode,
+    );
+  const positionAttrs = flow
+    ? 'disabled title="位置由 Auto Layout 管理，请使用排序、间距与对齐"'
+    : "";
   if (!n) {
     $("right-content").innerHTML =
       `<div class="inspector-title">画板设置 <span class="safe-tag">EDITABLE</span></div><p class="property-help">选择画布中的元素，或在左侧点选图层，进行像素级调整。</p><div class="divider"></div><div class="panel-section-title">画板属性 <small>${esc(b.id)}</small></div>${wide("画板名称", "board.name", b.name)}${selectField(
@@ -498,7 +507,7 @@ function renderProperties() {
     ? `<div class="singlefield"><label for="prop-text">${n.type === "image" ? "图片替代文字" : "文字内容"}</label><textarea id="prop-text" data-prop="text">${esc(n.text)}</textarea></div>`
     : "";
   $("right-content").innerHTML =
-    `<div class="inspector-title"><span class="element-icon">◇</span> ${esc(n.name || n.type)} <span class="safe-tag">NODE</span></div><div class="selection-id">#${esc(n.id)} · ${esc(n.type)} · ${selected().length} selected</div>${wide("图层名称", "name", n.name || "")}${structureControls(b, n)}<div class="divider"></div><div class="panel-section-title">排列与尺寸</div><div class="fieldrow">${f("X 位置", "x", n.x, "number")}${f("Y 位置", "y", n.y, "number")}</div><div class="fieldrow">${f("宽度 W", "w", n.w, "number", 'min="1"')}${f("高度 H", "h", n.h, "number", 'min="1"')}</div><div class="divider"></div><div class="panel-section-title">外观与内容</div>${txtEdit}${richTextControls(n)}${styles}${fontControls(n)}${layoutControls(n)}<div class="divider"></div><div class="panel-section-title">操作</div><div class="button-row"><button data-action="duplicate" class="btn-small">复制图层</button><button data-action="up" class="btn-small">向上一层 ↑</button><button data-action="down" class="btn-small">向下一层 ↓</button><button data-action="delete" class="btn-small danger">删除</button></div><div class="button-row"><button data-action="add-comment" class="btn-small primary">✦ 给该元素写标注</button></div><div class="button-row"><button class="btn-small" data-action="group">组合 ⌘G</button><button class="btn-small" data-action="ungroup">解组</button><button class="btn-small" data-action="make-component">创建组件</button></div><div class="button-row">${["left", "center", "right", "top", "middle", "bottom"].map((a, i) => `<button class="btn-small" data-align="${a}">${["左", "水平中", "右", "上", "垂直中", "下"][i]}</button>`).join("")}</div><div class="button-row"><button class="btn-small" data-distribute="x">水平等距</button><button class="btn-small" data-distribute="y">垂直等距</button></div><p class="muted-tip">Shift 点击多选；Auto Layout 子元素由布局管理，使用图层排序调整顺序。</p>`;
+    `<div class="inspector-title"><span class="element-icon">◇</span> ${esc(n.name || n.type)} <span class="safe-tag">NODE</span></div><div class="selection-id">#${esc(n.id)} · ${esc(n.type)} · ${selected().length} selected</div>${wide("图层名称", "name", n.name || "")}${structureControls(b, n)}<div class="divider"></div><div class="panel-section-title">排列与尺寸</div><div class="fieldrow">${f("X 位置", "x", n.x, "number", positionAttrs)}${f("Y 位置", "y", n.y, "number", positionAttrs)}</div><div class="fieldrow">${f("宽度 W", "w", n.w, "number", 'min="1"')}${f("高度 H", "h", n.h, "number", 'min="1"')}</div><div class="divider"></div><div class="panel-section-title">外观与内容</div>${txtEdit}${richTextControls(n)}${styles}${fontControls(n)}${layoutControls(n)}<div class="divider"></div><div class="panel-section-title">操作</div><div class="button-row"><button data-action="duplicate" class="btn-small">复制图层</button><button data-action="up" class="btn-small">向上一层 ↑</button><button data-action="down" class="btn-small">向下一层 ↓</button><button data-action="delete" class="btn-small danger">删除</button></div><div class="button-row"><button data-action="add-comment" class="btn-small primary">✦ 给该元素写标注</button></div><div class="button-row"><button class="btn-small" data-action="group">组合 ⌘G</button><button class="btn-small" data-action="ungroup">解组</button><button class="btn-small" data-action="make-component">创建组件</button></div><div class="button-row">${["left", "center", "right", "top", "middle", "bottom"].map((a, i) => `<button class="btn-small" data-align="${a}">${["左", "水平中", "右", "上", "垂直中", "下"][i]}</button>`).join("")}</div><div class="button-row"><button class="btn-small" data-distribute="x">水平等距</button><button class="btn-small" data-distribute="y">垂直等距</button></div><p class="muted-tip">Shift 点击多选；Auto Layout 子元素由布局管理，使用图层排序调整顺序。</p>`;
 }
 function resolvedHex(value, fallback) {
   const resolved = resolveToken(value, effectiveTokens(project));
@@ -1026,6 +1035,8 @@ function propChange(field, raw) {
     )
       value = Number(raw);
     let changes = sub ? { [section]: { [sub]: value } } : { [section]: value };
+    if (section === "w" || section === "h")
+      changes.sizing = { [section]: "fixed" };
     if (
       section === "layout" &&
       !effectiveNode(n, nodeScope(n) ?? Infinity).layout?.mode

@@ -329,3 +329,38 @@ test("small files with excessive instance projections and oversized imports pres
   await expect(page.locator("#toast")).toContainText("8 MB");
   expect(await stored(page)).toEqual(before);
 });
+
+test("numeric dimensions change rendered Fill/Hug axes to fixed while Auto Layout owns coordinates", async ({
+  page,
+}) => {
+  const p = project(),
+    f = p.boards[0].nodes[0],
+    first = f.children[0];
+  f.layout = { mode: "flex", direction: "row" };
+  first.type = "text";
+  first.text = "Intrinsic content";
+  first.sizing = { w: "fill", h: "hug" };
+  await open(page, p);
+  await page.locator('[data-node="one"]').click();
+  await expect(page.locator('[data-prop="x"]')).toBeDisabled();
+  await expect(page.locator('[data-prop="y"]')).toBeDisabled();
+  await page.locator('[data-prop="w"]').fill("120");
+  await page.locator('[data-prop="w"]').press("Tab");
+  expect(child(await stored(page))[0].sizing).toEqual({ w: "fixed", h: "hug" });
+  await expect(page.locator('[data-node-id="one"]')).toHaveCSS(
+    "width",
+    "120px",
+  );
+  await page.locator('[data-prop="h"]').fill("64");
+  await page.locator('[data-prop="h"]').press("Tab");
+  expect(child(await stored(page))[0].sizing).toEqual({
+    w: "fixed",
+    h: "fixed",
+  });
+  await expect(page.locator('[data-node-id="one"]')).toHaveCSS(
+    "height",
+    "64px",
+  );
+  await page.locator("#undo").click();
+  expect(child(await stored(page))[0].sizing.h).toBe("hug");
+});

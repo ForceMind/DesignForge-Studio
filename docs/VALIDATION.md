@@ -116,3 +116,23 @@
 预算及组合兼容修复后，本地 Node 全套 141 项通过待复验；下一轮 Chrome 包含原 71 项及新增小文件投影放大/8MB拒绝回归。多选边缘缩放额外断言未修改轴的 Hug sizing 保留。
 
 预算接入后的全套 Node 首次为140/141：畸形textRuns被提前预算错误遮蔽，丢失字段级路径；修复BudgetFailure字段诊断并删除重复预算遍历，保留原断言后141/141通过。
+
+
+### alpha.4 第一阶段最终验收
+
+- 产品代码 `d2173558de731ba32451b0e74faccd632a3eba1d`，版本 `0.2.0-alpha.4`。
+- [CI run 22](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40091408166)：verify/browser 均 success，**141 Node + 72 真实 Chrome 测试全部通过**。Chrome **155.0.8059.39**，72 项约 1.1 分钟。原 52 项浏览器测试全部保留；组合用例仅更新中文提示断言，项目不变/后续组合解组复制断言均继续执行。
+- 新回归包括同父级多选盒子缩放/取消/单步撤销/回读、窄预览约束及未修改轴Hug、实测对齐/组合、锁定键盘与实例解除、富文本字素/格式保留/字体、组件断点覆盖与恢复、真实库下载与前缀导入、主题隔离、DOM检测导出/过期、相同ID状态隔离，以及小JSON投影放大/超大文件拒绝。
+- 下载 artifact `12558912285` 并实际查看五张原始截图，直接复制下列PNG到仓库，未裁剪或重新绘制。中文、分段文字、字体、选中框、组件库和检测结果可见。
+
+| 原始截图 | 验证范围 |
+|---|---|
+| [工作台](screenshots/m1-workbench.png) | 深色工作台、Desktop/Mobile、层级与参考线面板 |
+| [多选缩放](screenshots/m1-multiresize.png) | 两层共同手柄、630 × 450选区、活动图层数值 |
+| [富文本](screenshots/m1-richtext.png) | 受限分段样式、Unicode字素与行高入口 |
+| [设计系统包](screenshots/m1-library.png) | kit命名空间导入、真实组件实例和源后代属性 |
+| [浏览器检测](screenshots/m1-browser-audit.png) | 故意包含裁切/重叠/小按钮的样例与警告 |
+
+多选截图允许用户把图层缩放至父框外，证明操作与选区，不证明该测试设计无溢出。检测截图刻意包含设计问题，证明能发现并导出证据。截图人工复核不等于golden image、WCAG或Firefox/WebKit/真机验收。第一阶段八项交付的逐项证据见 [M1_ACCEPTANCE.md](M1_ACCEPTANCE.md)；原路线中的增强项仍以ROADMAP/KNOWN_ISSUES为准。
+
+验收复核补充：数值宽高输入此前只改参考值，Fill/Hug下可能不改变实际尺寸。现改为仅把输入轴切到fixed，保留另一轴；Auto Layout子项X/Y只读并说明布局管理。新增浏览器回归，待下一轮实际结果。

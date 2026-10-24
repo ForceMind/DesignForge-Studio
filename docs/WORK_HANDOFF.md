@@ -3,7 +3,7 @@
 ## 工程状态
 
 - Public / MIT，主分支 `main` 继续保留 M0 基线 `56a189bf929d09eb8b092a24674b717faba6e0cd`（后续会话必须重新核对）。
-- 开发分支：`codex/m1-editor-foundation`；[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。M1 core preview `0.2.0-alpha.4`，总阶段尚未全部验收。
+- 开发分支：`codex/m1-editor-foundation`；[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。M1 基础交付 `0.2.0-alpha.4`，用户第一阶段八项交付已验收；原路线增强项未全部完成。
 - 运行：`npm start`，本地 loopback `127.0.0.1:4173`；运行时零外部依赖。测试工具使用 `npm ci` 安装。
 - 本轮已扩展树、原生布局、约束/断点、组件/变体/实例、Token alias/主题、本地资源、多选/组合/对齐/吸附、存档备份与恢复；保留 M0 的导出、评论、CLI、严格 Patch。
 
@@ -21,7 +21,7 @@
 
 首轮 40 Node + 21 Chromium 全部通过；后续新增资产/拖动与纵向断言，曾发现初次打开尚未持久化导致读空存档，已修复。最终代码基线 1310e3b 的 CI 已通过 53 Node + 26 Chrome 测试；下载并复核截图，修复 CI 中文字体后，真实截图保存到 docs/screenshots。最新结果仍须以 VALIDATION.md 和对应 head 的 Actions 为准。
 
-alpha.2 产品代码 452a628 的 [CI run 15](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40055061632) 已通过 65 Node + 43 Chrome 用例；三张原始截图已下载、人工查看并保存。尺寸拖拽、断点修改范围/逐字段恢复、矩形框选已在 alpha.2 接入；下一步优先多选整体缩放、富文本、组件属性及通用几何检测。跨项目库、更多浏览器、M2 的 BYOK/局部 Agent 与可视化 Diff 尚未完成。
+alpha.2 产品代码 452a628 的 [CI run 15](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40055061632) 已通过 65 Node + 43 Chrome 用例；三张原始截图已下载、人工查看并保存。尺寸拖拽、断点修改范围/逐字段恢复、矩形框选已在 alpha.2 接入；当时待补的多选整体缩放、富文本、组件属性、几何检测及本地跨项目库已在 alpha.4 接入；更多浏览器、M2 的 BYOK/局部 Agent 与可视化 Diff 尚未完成。
 
 ## 边界
 
@@ -29,4 +29,4 @@ alpha.2 产品代码 452a628 的 [CI run 15](https://github.com/ForceMind/Design
 
 alpha.3 增加标尺/参考线及受限 v1 元数据，修正约束图层在实际预览几何中的移动。增加同父级图层水平/垂直等距分布，产品提交 cbad269 的 CI run 19 已通过 73 Node + 52 Chrome；三张新截图已下载、人工查看并存入 docs/screenshots。最新状态以 VALIDATION.md 及对应 head Actions 为准。
 
-alpha.4 当前集成多选尺寸事务、富文本/多字体、源子层实例属性、Token主题编辑、本地设计系统包、真实DOM几何检查，以及锁定/选区/组合约束缺陷修复。Node当前141项通过；浏览器新增用例待本轮CI核验，不得把文件存在当作通过。
+alpha.4 当前集成多选尺寸事务、富文本/多字体、源子层实例属性、Token主题编辑、本地设计系统包、真实DOM几何检查，以及锁定/选区/组合约束缺陷修复。产品代码 d217355 的 CI run 22 已通过 141 Node + 72 Chrome，五张原始截图已实际复核并保存。逐项交付与边界见 M1_ACCEPTANCE.md；后续仍要重新查当前head CI。

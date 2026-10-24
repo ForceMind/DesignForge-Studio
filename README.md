@@ -1,6 +1,6 @@
 # DesignForge Studio · 形界设计工作台
 
-> **v0.2.0-alpha.4 · M1 编辑器核心预览**。Local-first、AI-native、Agent-friendly UI Design Studio。M1 仍在推进，当前能力与限制分别列在下方。
+> **v0.2.0-alpha.4 · M1 基础交付版**。Local-first、AI-native、Agent-friendly UI Design Studio。第一阶段八项交付已通过基础验收；完整范围见 [验收清单](docs/M1_ACCEPTANCE.md)，增强路线及M2/M3继续推进。
 
 ## 运行
 
@@ -45,9 +45,9 @@ CI 分开运行 Node 测试和真实 Chrome（Chromium 引擎）测试，浏览�
 
 ## 真实浏览器截图
 
-![深色设计工作台](docs/screenshots/editor-dark.png)
+![深色设计工作台](docs/screenshots/m1-workbench.png)
 
-[浅色参考线](docs/screenshots/m1-guides-light.png) · [深色参考线](docs/screenshots/m1-guides-dark.png) · [等距分布](docs/screenshots/m1-distribution.png) · [尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
+[富文本](docs/screenshots/m1-richtext.png) · [多选缩放](docs/screenshots/m1-multiresize.png) · [设计系统包](docs/screenshots/m1-library.png) · [浏览器检测](docs/screenshots/m1-browser-audit.png) · [浅色参考线](docs/screenshots/m1-guides-light.png) · [深色参考线](docs/screenshots/m1-guides-dark.png) · [等距分布](docs/screenshots/m1-distribution.png) · [尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
 
 ## 使用 Agent
 
