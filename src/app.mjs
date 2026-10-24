@@ -22,6 +22,10 @@ import {
 } from "./design-library.mjs";
 import { auditRenderedBoard, auditTextExpansion } from "./browser-audit.mjs";
 import {
+  componentLibraryMarkup,
+  changeComponentLibrary,
+} from "./component-library.mjs";
+import {
   effectiveNode,
   activeBreakpoint,
   setScopedChanges,
@@ -307,14 +311,14 @@ function renderSidebar() {
       )
       .join("") ||
     '<p class="property-help">导入 PNG、JPEG、WebP、GIF、受限 SVG 或 WOFF/WOFF2/TTF。资源嵌入项目，无外部请求。单个编码后不超过 512 KB，总计不超过 1 MB。</p>';
-  $("component-list").innerHTML =
-    (project.components || [])
-      .map(
-        (c) =>
-          `<div class="library-card"><b>◇ ${esc(c.name)}</b>${c.variants.map((v) => `<button class="btn-small" data-insert-component="${esc(c.id)}" data-variant="${esc(v.id)}">＋ ${esc(v.name || v.id)}</button>`).join("")}<button class="btn-small" data-update-component="${esc(c.id)}">用当前容器更新变体</button></div>`,
-      )
-      .join("") ||
-    '<p class="property-help">选择容器并创建组件，即可插入关联实例。</p>';
+  $("component-list").innerHTML = componentLibraryMarkup(project, {
+    sourceReady:
+      !!activeNode() &&
+      activeNode().type !== "instance" &&
+      !isNodeLocked(activeBoard(), activeNodeId),
+    sourceId: activeNodeId,
+    openComponents: componentManagerOpen,
+  });
   $("comment-list").innerHTML = project.comments.length
     ? project.comments
         .map((c) => {
@@ -1767,20 +1771,73 @@ function insertComponent(id, variantId) {
   if (commit((p) => p.boards.find((b) => b.id === activeBoardId).nodes.push(n)))
     selectNode(n.id);
 }
-function updateComponent(id) {
+function updateComponent(id, specificVariant) {
   const n = activeNode();
-  if (!n || !CONTAINERS.has(n.type)) {
-    toast("先选择源容器");
+  if (
+    !n ||
+    (specificVariant === undefined
+      ? !CONTAINERS.has(n.type)
+      : n.type === "instance")
+  ) {
+    toast("先选择源容器或对应源图层");
     return;
   }
-  const variant = prompt("更新已有变体 ID，或输入新变体 ID", "default");
+  const variant =
+    specificVariant ?? prompt("更新已有变体 ID，或输入新变体 ID", "default");
   if (!variant) return;
   commit((p) => {
     const c = p.components.find((c) => c.id === id),
       v = c.variants.find((v) => v.id === variant);
-    if (v) v.root = clone(n);
+    if (v)
+      Object.assign(
+        p,
+        changeComponentLibrary(p, {
+          kind: "set-source",
+          componentId: id,
+          variantId: variant,
+          boardId: activeBoardId,
+          nodeId: n.id,
+          requireIdentity: specificVariant !== undefined,
+        }),
+      );
     else c.variants.push({ id: variant, name: variant, root: clone(n) });
   });
+}
+function componentLibraryAction(button) {
+  const kind = button.dataset.componentAction,
+    componentId = button.dataset.componentId,
+    variantId = button.dataset.variant,
+    component = project.components?.find((c) => c.id === componentId),
+    variant = component?.variants.find((v) => v.id === variantId);
+  if (!component) return;
+  const command = { kind, componentId, variantId };
+  const variantAction = kind.endsWith("variant");
+  if (kind.startsWith("rename-") || kind.startsWith("duplicate-")) {
+    command.name = prompt(
+      kind.startsWith("rename-") ? "新名称" : "副本名称",
+      (variantAction ? variant?.name || variantId : component.name) +
+        (kind.startsWith("duplicate-") ? " 副本" : ""),
+    );
+    if (command.name === null) return;
+    if (kind.startsWith("duplicate-"))
+      command.targetId = uid(variantAction ? "variant" : "component");
+  }
+  if (
+    kind.startsWith("remove-") &&
+    !confirm(
+      `删除${variantAction ? "变体" : "组件"}「${variantAction ? variant?.name || variantId : component.name}」？此操作可撤销。`,
+    )
+  )
+    return;
+  if (kind === "copy-source") command.targetId = uid("sourceBoard");
+  if (commit((p) => Object.assign(p, changeComponentLibrary(p, command)))) {
+    if (kind === "copy-source") {
+      leftTab = "layers";
+      selectNode(variant.root.id, command.targetId);
+      focusBoard(command.targetId, true);
+      toast("源副本已保存为普通画板；编辑后在组件面板更新对应变体");
+    } else toast("组件库已更新");
+  }
 }
 function detachInstance() {
   const n = activeNode();
@@ -1964,6 +2021,7 @@ function assetAction(e) {
 
 const previewWidths = new Map(),
   editScopes = new Map();
+const componentManagerOpen = new Set();
 function clearProjectView() {
   if (gesture) cancelGesture();
   historyFocusNode = null;
@@ -1973,6 +2031,7 @@ function clearProjectView() {
   selectedIds.clear();
   previewWidths.clear();
   editScopes.clear();
+  componentManagerOpen.clear();
   collapsed.clear();
   richRange = null;
   renderedAudit = null;
@@ -2860,12 +2919,34 @@ function bindStatic() {
     }
     e.target.value = "";
   };
+  $("component-list").addEventListener(
+    "toggle",
+    (e) => {
+      if (!e.target.matches("[data-component-manager]")) return;
+      const id = e.target.dataset.componentManager;
+      e.target.open
+        ? componentManagerOpen.add(id)
+        : componentManagerOpen.delete(id);
+    },
+    true,
+  );
   $("component-list").onclick = (e) => {
+    const action = e.target.closest("[data-component-action]");
+    if (action) {
+      componentLibraryAction(action);
+      return;
+    }
     const insert = e.target.closest("[data-insert-component]");
     if (insert)
       insertComponent(insert.dataset.insertComponent, insert.dataset.variant);
-    const update = e.target.closest("[data-update-component]");
-    if (update) updateComponent(update.dataset.updateComponent);
+    const update = e.target.closest(
+      "[data-update-component], [data-update-variant]",
+    );
+    if (update)
+      updateComponent(
+        update.dataset.updateComponent || update.dataset.updateVariant,
+        update.dataset.variant,
+      );
   };
   $("board-list").onclick = (e) => {
     const b = e.target.closest("[data-board]");

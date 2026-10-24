@@ -1979,6 +1979,39 @@ select:focus-visible {
   line-height: 1.7;
   color: var(--muted);
 }
+.component-manager {
+  margin: 10px 0;
+  font-size: 11px;
+}
+.component-manager summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.component-variant {
+  border-top: 1px solid var(--ui-line);
+  padding: 10px 0;
+}
+.component-variant > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: space-between;
+  color: var(--ui-ink);
+}
+.component-variant small {
+  color: var(--muted);
+  font-size: 10px;
+}
+.component-variant-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-top: 8px;
+}
+.component-variant strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .breakpoint-overview {
   border-top: 1px solid var(--ui-line);
   margin-top: 16px;
