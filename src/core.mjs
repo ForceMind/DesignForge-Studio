@@ -347,6 +347,11 @@ export function validateProject(project) {
       }
       if (!validId(node.id) || ids.has(node.id))
         error(n + ".id", "Invalid or duplicate node ID");
+      if (
+        node.name !== undefined &&
+        (typeof node.name !== "string" || node.name.length > 1000)
+      )
+        error(n + ".name", "Expected layer name up to 1000 chars");
       ids.add(node.id);
       if (!NODE_TYPES.has(node.type))
         error(n + ".type", "Unsupported element type");

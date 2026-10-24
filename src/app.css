@@ -1756,6 +1756,97 @@ select:focus-visible {
 .flow-order-controls {
   margin-top: 14px;
 }
+.right-tabs button {
+  flex: 1;
+  min-width: 0;
+  padding-inline: 5px;
+}
+.node-revision {
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  padding: 10px;
+  margin: 10px 0;
+}
+.node-revision > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+}
+.node-revision time {
+  color: var(--muted);
+  font-size: 10px;
+}
+.node-revision p {
+  font-size: 10px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+.history-preview {
+  border: 1px solid var(--primary);
+  border-radius: 7px;
+  padding: 10px;
+  margin: 12px 0;
+}
+.history-field {
+  display: block;
+  border-top: 1px solid var(--ui-line);
+  padding: 10px 0;
+  font-size: 11px;
+}
+.history-field > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.history-field strong {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+.history-field small {
+  font-size: 9px;
+  color: var(--muted);
+}
+.history-field.conflict small,
+.history-field.blocked small,
+.history-error {
+  color: #c04a4a;
+}
+.history-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+.history-values code {
+  font-size: 9px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  background: var(--ui-soft);
+  padding: 5px;
+  border-radius: 4px;
+}
+.history-values b {
+  align-self: center;
+  font-size: 9px;
+  color: var(--muted);
+}
+.history-field em {
+  display: block;
+  font-size: 10px;
+  font-style: normal;
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.history-error {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
 .breakpoint-overview {
   border-top: 1px solid var(--ui-line);
   margin-top: 16px;

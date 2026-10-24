@@ -32,6 +32,12 @@ import { nodeElement, measureNode, paintResize } from "./viewport.mjs";
 import { flowDropTarget, reorderSibling } from "./flow-layout.mjs";
 import { breakpointOverviewMarkup } from "./breakpoint-overview.mjs";
 import {
+  retainHistory,
+  historyNodeChoices,
+  nodeRevisionTimeline,
+  planNodeRevisionRevert,
+} from "./node-history.mjs";
+import {
   addGuide,
   updateGuide,
   removeGuide,
@@ -122,6 +128,8 @@ let toastTimer;
 let richRange = null,
   renderedAudit = null,
   expansionAudit = null;
+let historyFocusNode = null,
+  nodeHistoryPreview = null;
 function toast(message) {
   const t = $("toast");
   t.textContent = message;
@@ -146,9 +154,10 @@ function saveLocal() {
   }
 }
 function record() {
+  nodeHistoryPreview = null;
   history = history.slice(0, historyIndex + 1);
   history.push(clone(project));
-  if (history.length > 35) history.shift();
+  history = retainHistory(history);
   historyIndex = history.length - 1;
   saveLocal();
 }
@@ -180,6 +189,8 @@ const activeBoard = () =>
   project.boards.find((b) => b.id === activeBoardId) || project.boards[0];
 const activeNode = () => findNode(activeBoard(), activeNodeId) || null;
 function switchBoard(id) {
+  historyFocusNode = null;
+  nodeHistoryPreview = null;
   richRange = null;
   activeGuideId = null;
   activeBoardId = id;
@@ -188,6 +199,8 @@ function switchBoard(id) {
   render();
 }
 function selectNode(id, boardId = activeBoardId, add = false) {
+  historyFocusNode = null;
+  nodeHistoryPreview = null;
   richRange = null;
   activeGuideId = null;
   if (boardId !== activeBoardId) selectedIds.clear();
@@ -456,6 +469,7 @@ function renderRight() {
   if (rightTab === "tokens") renderTokens();
   else if (rightTab === "audit") renderAudit();
   else if (rightTab === "agent") renderAgent();
+  else if (rightTab === "history") renderNodeHistory();
   else renderProperties();
 }
 function renderProperties() {
@@ -732,12 +746,122 @@ function renderAgent() {
   $("right-content").innerHTML =
     `<div class="agent-hero"><small>THE NEXT DESIGN WORKFLOW</small><h3>设计交给 AI，<br>控制权留给你。</h3><p>通过版本哈希 + 精确补丁，让模型只修改你指定的元素。</p></div><div class="agent-steps"><strong>01</strong> 在画布选中元素，写下设计意图<br><strong>02</strong> 复制指令交给 Codex / Claude Code<br><strong>03</strong> 使用 CLI 审核并应用结构化 Patch</div><div class="singlefield"><label>设计修改需求</label><textarea id="agent-brief" placeholder="例如：把当前主按钮改为绿色，增加圆角，但不要影响其它元素。">${esc(briefText)}</textarea></div><div class="agent-actions"><button class="main" data-action="copy-agent">复制 Agent 指令</button><button data-action="download-patch">导出补丁模板</button><button data-action="import-patch">导入 + 审核补丁</button><button data-action="view-diff">查看本轮修改</button></div><div class="divider"></div><div class="panel-section-title">可验证的协作</div><div class="toggle-pill"><span class="safe-tag">PATCH</span> baseHash ${hashProject(project)}</div><p class="agent-note">当前版本未内置模型调用。AI 指令可以直接用于外部编码 Agent；CLI 严格校验补丁，不执行任意脚本。自动模型调用、Diff 审阅 UI 和多智能体协作属于后续研发。</p>`;
 }
+function historyValue(value) {
+  if (value === null || value === undefined) return "不存在";
+  if (value.exists === false) return "未设置";
+  const raw = value.exists === true ? value.value : value;
+  if (raw?.node)
+    return `${raw.node.type} #${raw.node.id} · ${flattenNodes([raw.node]).length} 层 · 父级 ${raw.location.parentId || "画板"}`;
+  if (raw?.children)
+    return `${raw.children.value?.length || 0} 个子层 · ${raw.comments?.length || 0} 条批注`;
+  const text = JSON.stringify(raw) ?? "未设置";
+  return [...text].slice(0, 180).join("") + (text.length > 180 ? "…" : "");
+}
+function renderNodeHistory() {
+  const board = activeBoard(),
+    id = historyFocusNode || activeNodeId,
+    choices = historyNodeChoices(history, historyIndex, board.id, project.id),
+    exists = id && findNode(board, id),
+    rows = id
+      ? nodeRevisionTimeline(history, historyIndex, board.id, id, project.id)
+      : [];
+  let preview = "";
+  if (
+    nodeHistoryPreview &&
+    nodeHistoryPreview.nodeId === id &&
+    nodeHistoryPreview.boardId === board.id
+  ) {
+    const p = nodeHistoryPreview.plan;
+    preview = `<section class="history-preview" aria-label="节点撤回预览"><div class="panel-section-title">撤回预览 <small>第 ${nodeHistoryPreview.index} 步</small></div><p class="property-help">只恢复勾选字段；冲突字段保留当前内容。先检查差异，再应用。</p>${p.changes.map((c, i) => `<label class="history-field ${c.status}"><span><input type="checkbox" data-history-field="${i}" ${p.selected.includes(c.key) ? "checked" : ""} ${c.status !== "ready" ? "disabled" : ""}><strong>${esc(c.key)}</strong><small>${{ ready: "可撤回", conflict: "冲突", blocked: "锁定", already: "已恢复" }[c.status]}</small></span><span class="history-values"><code title="当前">${esc(historyValue(c.current))}</code><b>→</b><code title="恢复为">${esc(historyValue(c.before))}</code></span>${c.reason ? `<em>${esc(c.reason)}</em>` : ""}</label>`).join("")}${p.error ? `<p class="history-error" role="alert">无法应用：${esc(p.error)}</p>` : ""}<div class="button-row"><button class="btn-small primary" data-history-apply ${!p.project || !p.selected.length ? "disabled" : ""}>撤回 ${p.selected.length} 项字段</button><button class="btn-small" data-history-close>关闭预览</button></div></section>`;
+  }
+  $("right-content").innerHTML =
+    `<div class="inspector-title">节点修订历史 <span class="safe-tag">LOCAL</span></div><p class="property-help">会话内最近最多35份快照，并受总大小预算约束。导入文件或刷新会重新开始；文件备份请用顶部“恢复”。Token与组件源变更用整体Undo，子层排序请选父容器。</p><div class="singlefield"><label for="history-node">当前或已删除的图层</label><select id="history-node"><option value="">请选择图层</option>${choices.map((n) => `<option value="${esc(n.id)}" ${n.id === id ? "selected" : ""}>${esc([...n.name].slice(0, 40).join(""))} · #${esc(n.id)}${findNode(board, n.id) ? "" : " · 已删除"}</option>`).join("")}</select></div>${id ? `<p class="selection-id">#${esc(id)} · ${exists ? "当前图层" : "已删除图层"} · ${rows.length} 次修订</p>` : ""}${preview}<div class="node-revision-list">${rows.map((row) => `<article class="node-revision" data-node-revision="${row.index}"><div><strong>第 ${row.index} 步</strong><time>${Number.isFinite(Date.parse(row.time)) ? new Date(row.time).toLocaleTimeString("zh-CN", { hour12: false }) : "未记时"}</time></div><p>${esc(row.error || row.fields.join(" · "))}</p><button class="btn-small" data-history-preview="${row.index}" ${row.error ? "disabled" : ""}>预览撤回</button></article>`).join("") || '<p class="property-help">保留的会话历史中没有该图层的修改。选中图层编辑后，可在这里查看和局部撤回。</p>'}</div>`;
+}
+function openNodeHistoryPreview(index, keys) {
+  const id = historyFocusNode || activeNodeId;
+  if (!id || !Number.isInteger(index) || index < 1 || index > historyIndex)
+    throw Error("该历史步骤已不可用");
+  const plan = planNodeRevisionRevert(
+    project,
+    history[index - 1],
+    history[index],
+    { boardId: activeBoardId, nodeId: id, keys },
+  );
+  nodeHistoryPreview = {
+    index,
+    boardId: activeBoardId,
+    nodeId: id,
+    beforeHash: hashProject(history[index - 1]),
+    afterHash: hashProject(history[index]),
+    plan,
+  };
+  renderNodeHistory();
+}
+function updateNodeHistoryPreview() {
+  if (!nodeHistoryPreview) return;
+  try {
+    const keys = [
+      ...$("right-content").querySelectorAll("[data-history-field]:checked"),
+    ].map(
+      (el) =>
+        nodeHistoryPreview.plan.changes[Number(el.dataset.historyField)]?.key,
+    );
+    openNodeHistoryPreview(nodeHistoryPreview.index, keys);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+function nodeHistoryAction(e) {
+  const preview = e.target.closest("[data-history-preview]"),
+    close = e.target.closest("[data-history-close]"),
+    apply = e.target.closest("[data-history-apply]");
+  if (!preview && !close && !apply) return false;
+  try {
+    if (preview) openNodeHistoryPreview(Number(preview.dataset.historyPreview));
+    else if (close) {
+      nodeHistoryPreview = null;
+      renderNodeHistory();
+    } else {
+      const p = nodeHistoryPreview;
+      if (
+        !p ||
+        p.boardId !== activeBoardId ||
+        p.plan.baseHash !== hashProject(project) ||
+        !history[p.index] ||
+        p.beforeHash !== hashProject(history[p.index - 1]) ||
+        p.afterHash !== hashProject(history[p.index])
+      )
+        throw Error("工程或历史已改变，请重新预览");
+      const plan = planNodeRevisionRevert(
+        project,
+        history[p.index - 1],
+        history[p.index],
+        { boardId: p.boardId, nodeId: p.nodeId, keys: p.plan.selected },
+      );
+      if (!plan.project || !plan.selected.length)
+        throw Error(plan.error || "没有可撤回字段");
+      historyFocusNode = p.nodeId;
+      if (commit((next) => Object.assign(next, plan.project))) {
+        if (!activeNode()) {
+          activeNodeId = null;
+          selectedIds.clear();
+          render();
+        }
+        toast(`已局部撤回 ${plan.selected.length} 项；其他内容保留`);
+      }
+    }
+  } catch (error) {
+    toast(error.message);
+  }
+  return true;
+}
 function updateHistoryButtons() {
   $("undo").disabled = historyIndex <= 0;
   $("redo").disabled = historyIndex >= history.length - 1;
 }
 function travel(delta) {
   if (gesture) cancelGesture();
+  nodeHistoryPreview = null;
   const next = historyIndex + delta;
   if (next < 0 || next >= history.length) return;
   historyIndex = next;
@@ -1755,6 +1879,8 @@ const previewWidths = new Map(),
   editScopes = new Map();
 function clearProjectView() {
   if (gesture) cancelGesture();
+  historyFocusNode = null;
+  nodeHistoryPreview = null;
   selectedIds.clear();
   previewWidths.clear();
   editScopes.clear();
@@ -2568,6 +2694,20 @@ function bindStatic() {
     if (e.target.closest("[data-rich-format]")) e.preventDefault();
   });
   $("right-content").addEventListener("change", (e) => {
+    if (e.target.id === "history-node") {
+      richRange = null;
+      activeGuideId = null;
+      historyFocusNode = e.target.value;
+      activeNodeId = findNode(activeBoard(), historyFocusNode)?.id ?? null;
+      selectedIds = new Set(activeNodeId ? [activeNodeId] : []);
+      nodeHistoryPreview = null;
+      render();
+      return;
+    }
+    if (e.target.matches("[data-history-field]")) {
+      updateNodeHistoryPreview();
+      return;
+    }
     if (e.target.matches("[data-breakpoint-preview]")) {
       setPreviewWidth(e.target.value);
       const field = $("breakpoint-preview-value");
@@ -2664,6 +2804,7 @@ function bindStatic() {
     if (e.target.id === "agent-brief") briefText = e.target.value;
   });
   $("right-content").addEventListener("click", (e) => {
+    if (nodeHistoryAction(e)) return;
     if (richTextAction(e)) return;
     const resetComponent = e.target.closest("[data-component-reset]");
     if (resetComponent) {
