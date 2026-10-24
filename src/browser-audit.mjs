@@ -20,6 +20,18 @@ const limit = (value, fallback, max) =>
     ? Math.max(1, Math.min(max, Math.floor(value)))
     : fallback;
 
+/** Browser line ranges may include hanging whitespace with no painted glyphs. */
+export function nonWhitespaceTextRanges(text, maxRanges = 512) {
+  if (typeof text !== "string") throw Error("Expected text content");
+  maxRanges = limit(maxRanges, 512, 2048);
+  const ranges = [];
+  for (const match of text.matchAll(/\S+/gu)) {
+    if (ranges.length >= maxRanges) return { ranges, truncated: true };
+    ranges.push({ start: match.index, end: match.index + match[0].length });
+  }
+  return { ranges, truncated: false };
+}
+
 /** Portable geometry analysis; all coordinates must already use board CSS pixels. */
 export function auditGeometry(
   records,
@@ -264,7 +276,7 @@ export function auditRenderedBoard(
     const isInput = el.matches("input,textarea");
     if (isInput) {
       const text = el.value || el.getAttribute("placeholder") || "";
-      if (text) {
+      if (text.trim()) {
         const s = style(el),
           ctx = doc.createElement("canvas").getContext("2d");
         if (ctx) {
@@ -297,20 +309,25 @@ export function auditRenderedBoard(
         break;
       }
       const range = doc.createRange();
-      range.selectNodeContents(text);
-      for (const rect of range.getClientRects()) {
-        if (rect.width > 0 && rect.height > 0) glyphs.push(glyphRect(rect));
-        if (glyphs.length >= 512) {
-          limitedText = true;
-          break;
+      const content = nonWhitespaceTextRanges(text.textContent);
+      if (content.truncated) limitedText = true;
+      for (const { start, end } of content.ranges) {
+        range.setStart(text, start);
+        range.setEnd(text, end);
+        for (const rect of range.getClientRects()) {
+          if (rect.width > 0 && rect.height > 0) glyphs.push(glyphRect(rect));
+          if (glyphs.length >= 512) {
+            limitedText = true;
+            break;
+          }
         }
+        if (glyphs.length >= 512) break;
       }
       if (glyphs.length >= 512) break;
     }
-    const textOverflow =
-      el.scrollWidth > el.clientWidth + 1 ||
-      el.scrollHeight > el.clientHeight + 1 ||
-      glyphs.some((r) => outside(r, own));
+    // Scroll extents also include blank lines/advances. Only painted-content ranges
+    // determine overflow; keep scroll metrics below as supporting evidence.
+    const textOverflow = glyphs.some((r) => outside(r, own));
     const textClipped = glyphs.some((r) =>
       clips.some(
         (c) =>

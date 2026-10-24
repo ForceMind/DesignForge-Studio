@@ -394,3 +394,33 @@ test("localized long-content Studio exports retain real boundaries at 390, 768 a
     await expect(page.locator("[data-text-expansion-stage]")).toHaveCount(0);
   }
 });
+
+test("hanging pre-wrap spaces stay clean while real unbroken text overflow remains visible to the audit", async ({
+  page,
+}) => {
+  await fixture(
+    page,
+    '<div class="df-node df-text whitespace" data-node-id="wrap">AAAA AAAA AAAA    </div><div class="df-node df-text longword" data-node-id="long">ABCDEFGHIJKLMNOPQRSTUV</div>',
+    ".whitespace{left:20px;top:20px;width:114px;height:auto;white-space:pre-wrap;font:20px/24px monospace;overflow-wrap:anywhere}.longword{left:20px;top:180px;width:114px;height:24px;white-space:nowrap;font:20px/24px monospace;overflow:visible}",
+  );
+  const issues = await audit(page);
+  expect(
+    issues.filter(
+      (i) =>
+        i.nodeId === "wrap" && ["TEXT_OVERFLOW", "TEXT_CLIP"].includes(i.code),
+    ),
+  ).toEqual([]);
+  expect(
+    issues.some((i) => i.nodeId === "long" && i.code === "TEXT_OVERFLOW"),
+  ).toBe(true);
+  const stressed = await expansion(page);
+  expect(
+    stressed.filter(
+      (i) =>
+        i.nodeId === "wrap" && ["TEXT_OVERFLOW", "TEXT_CLIP"].includes(i.code),
+    ),
+  ).toEqual([]);
+  expect(
+    stressed.some((i) => i.nodeId === "long" && i.code === "TEXT_OVERFLOW"),
+  ).toBe(true);
+});

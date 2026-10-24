@@ -24,3 +24,30 @@ test("text expansion rejects invalid factors, broken Unicode and oversized text 
   assert.throws(() => expandTextByGraphemes("\uD83D", 1.3), /Unicode/);
   assert.throws(() => expandTextByGraphemes("a".repeat(200001), 1.3), /budget/);
 });
+
+test("visible text ranges exclude hanging wrap whitespace while keeping full long words and emoji offsets", async () => {
+  const { nonWhitespaceTextRanges } = await import("../src/browser-audit.mjs");
+  assert.deepEqual(nonWhitespaceTextRanges("AB   \n👩‍💻  Z "), {
+    ranges: [
+      { start: 0, end: 2 },
+      { start: 6, end: 11 },
+      { start: 13, end: 14 },
+    ],
+    truncated: false,
+  });
+  assert.deepEqual(nonWhitespaceTextRanges("  \n\t\u00A0"), {
+    ranges: [],
+    truncated: false,
+  });
+  assert.deepEqual(nonWhitespaceTextRanges("averylongunbrokenword"), {
+    ranges: [{ start: 0, end: 21 }],
+    truncated: false,
+  });
+  assert.deepEqual(nonWhitespaceTextRanges("one two three", 2), {
+    ranges: [
+      { start: 0, end: 3 },
+      { start: 4, end: 7 },
+    ],
+    truncated: true,
+  });
+});

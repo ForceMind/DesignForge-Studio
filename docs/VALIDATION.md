@@ -138,3 +138,7 @@
 验收复核补充：数值宽高输入此前只改参考值，Fill/Hug下可能不改变实际尺寸。现改为仅把输入轴切到fixed，保留另一轴；Auto Layout子项X/Y只读并说明布局管理。新增浏览器回归，待下一轮实际结果。
 
 [CI run23](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40091994281) 在4a96933上通过141 Node + 73 Chrome（57.8秒），包含数值宽高与未改轴模式、Flow坐标只读。随后接入只读文字膨胀预检及CLI有界读/init保护，新增测试待下一轮实际执行。
+
+文字预检首轮 [CI run24](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40093115708) 在 af1cc2d 上：145 Node通过，Chrome78/79通过。唯一失败为正常Flow/Hug折行被TEXT_OVERFLOW误报；scrollWidth/clientWidth均256、scrollHeight/clientHeight均96，需修Range对行末空白的边界测量，保留严格断言。多尺寸中文长文、只读副本、清理和UI导出均已通过；不将该轮记为全绿。
+
+Range测量现按非空白连续内容段执行；scroll尺寸保留作证据，不再单独把无可见字形的悬挂空白当溢出。原Flow/Hug空结果断言保留，并增加真正nowrap长词必须报TEXT_OVERFLOW的同板对照。当前全套预期146 Node、80 Chrome，以实际执行为准。
