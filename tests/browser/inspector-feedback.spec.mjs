@@ -109,10 +109,15 @@ test("inspector distinguishes reference dimensions from actual Fill/Hug across p
   await page.locator('[data-prop="w"]').press("Tab");
   expect((await assertMeasured(page)).width).toBeCloseTo(300, 1);
   const after = await stored(page);
+  await expect(page.locator("#breakpoint-scope")).toHaveValue("600");
+  // Numeric resizing belongs to the active breakpoint; base Fill stays intact.
   expect(after.boards[0].nodes[0].children[0].sizing).toEqual({
-    w: "fixed",
+    w: "fill",
     h: "hug",
   });
+  expect(
+    after.boards[0].nodes[0].children[0].responsive[0].changes.sizing,
+  ).toEqual({ w: "fixed" });
   await page.locator("#undo").click();
   expect((await assertMeasured(page)).width).toBeCloseTo(narrow.width, 1);
   expect((await stored(page)).boards).toEqual(before.boards);
