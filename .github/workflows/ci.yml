@@ -28,9 +28,15 @@ jobs:
         run: npm run export
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
     env:
-      DESIGNFORGE_BROWSER_CHANNEL: chrome
+      DESIGNFORGE_BROWSER: ${{ matrix.engine }}
+      DESIGNFORGE_BROWSER_CHANNEL: ${{ matrix.engine == 'chromium' && 'chrome' || '' }}
+      PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT: 45000
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,18 +50,21 @@ jobs:
           sudo apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends fonts-unifont
           fc-list :lang=zh
       - name: Verify runner Chrome installation
+        if: matrix.engine == 'chromium'
         run: google-chrome --version
+      - name: Install the exact Firefox or WebKit build required by Playwright
+        if: matrix.engine != 'chromium'
+        run: npx playwright install --with-deps ${{ matrix.engine }}
+      - name: Record the actual launched engine and version
+        run: node tools/browser-version.mjs > browser-version.json
       - run: npm run test:browser
-      - name: Record actual browser version
-        if: always()
-        run: google-chrome --version > browser-version.txt
       - name: Preserve real browser screenshots and traces
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-evidence
+          name: browser-evidence-${{ matrix.engine }}
           path: |
             test-results/
             playwright-report/
-            browser-version.txt
+            browser-version.json
           retention-days: 14

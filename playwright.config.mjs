@@ -1,10 +1,16 @@
 import { defineConfig } from "@playwright/test";
+const browserName = process.env.DESIGNFORGE_BROWSER || "chromium";
+if (!["chromium", "firefox", "webkit"].includes(browserName))
+  throw Error("DESIGNFORGE_BROWSER must be chromium, firefox or webkit");
 export default defineConfig({
   testDir: "./tests/browser",
   fullyParallel: true,
   timeout: 30000,
   use: {
-    channel: process.env.DESIGNFORGE_BROWSER_CHANNEL || undefined,
+    channel:
+      browserName === "chromium"
+        ? process.env.DESIGNFORGE_BROWSER_CHANNEL || undefined
+        : undefined,
     baseURL: "http://127.0.0.1:4173",
     viewport: { width: 1440, height: 1000 },
     trace: "retain-on-failure",
@@ -16,5 +22,5 @@ export default defineConfig({
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
   },
-  projects: [{ name: "chromium", use: { browserName: "chromium" } }],
+  projects: [{ name: browserName, use: { browserName } }],
 });
