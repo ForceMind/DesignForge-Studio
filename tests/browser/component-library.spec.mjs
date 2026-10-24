@@ -241,4 +241,21 @@ test("leaf component roots retain their semantic content and can be edited as so
     .click();
   await expect(instance).toHaveText("Updated leaf control");
   expect(await instance.evaluate((el) => el.tagName)).toBe("BUTTON");
+  await page.locator('[data-board="work"]').click();
+  await page.locator('[data-lefttab="layers"]').click();
+  await page.locator('[data-node="instance"]').click();
+  await page.locator('[data-action="detach"]').click();
+  const detached = (await stored(page)).boards[0].nodes[0];
+  expect(detached).toMatchObject({
+    type: "button",
+    text: "Updated leaf control",
+  });
+  expect(detached).not.toHaveProperty("componentId");
+  expect(detached).not.toHaveProperty("children");
+  await page.locator("#undo").click();
+  expect((await stored(page)).boards[0].nodes[0].type).toBe("instance");
+  await page.locator("#redo").click();
+  await page.reload();
+  await expect(instance).toHaveText("Updated leaf control");
+  expect((await stored(page)).boards[0].nodes[0].type).toBe("button");
 });

@@ -311,4 +311,14 @@ test("valid leaf component roots can be copied, edited and updated without forci
   assert.equal(next.components[0].variants[0].root.text, "Proceed");
   assert.equal(p.components[0].variants[0].root.text, "Continue");
   assert.match(standaloneHtml(next.boards[0], next), />Proceed<\/button>/);
+  const detachedProject = structuredClone(next),
+    detached = materializeInstance(
+      detachedProject.boards[0].nodes[0],
+      detachedProject,
+    );
+  assert.equal(Object.hasOwn(detached, "children"), false);
+  for (const key of ["componentId", "variantId", "overrides", "$sourceId"])
+    delete detached[key];
+  detachedProject.boards[0].nodes[0] = detached;
+  assert.deepEqual(validateProject(detachedProject), []);
 });
