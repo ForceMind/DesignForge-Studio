@@ -1,4 +1,9 @@
-import { clone, hashProject, validateProject } from "./core.mjs";
+import {
+  clone,
+  hashProject,
+  validateProject,
+  assertOverrideEditAllowed,
+} from "./core.mjs";
 import { CONTAINERS, flattenNodes, locateNode, isNodeLocked } from "./tree.mjs";
 
 export const HISTORY_LIMIT = 35;
@@ -507,6 +512,37 @@ export function planNodeRevisionRevert(
       }
       if (status === "conflict" && !reason)
         reason = "此字段有后续修改，保留当前内容";
+      if (status === "ready" && entry?.node.type === "instance") {
+        const original = locateNode(
+          boardOf(before, boardId) || { nodes: [] },
+          nodeId,
+        )?.node;
+        let incoming;
+        if (change.kind === "variant")
+          incoming = {
+            ...entry.node,
+            variantId: change.before.variantId.value,
+            overrides: change.before.overrides.value,
+          };
+        if (change.kind === "field" && change.path[0] === "overrides") {
+          const id = change.path[1];
+          incoming = {
+            ...entry.node,
+            overrides: {
+              ...entry.node.overrides,
+              [id]: original?.overrides?.[id],
+            },
+          };
+        }
+        if (incoming) {
+          try {
+            assertOverrideEditAllowed(current, entry.node, incoming);
+          } catch {
+            status = "blocked";
+            reason = "组件源层或其祖先已锁定，保留当前实例覆盖";
+          }
+        }
+      }
       return { ...change, current: clone(actual), status, reason };
     },
   );
@@ -534,6 +570,15 @@ export function planNodeRevisionRevert(
       project = clone(current);
       for (const change of changes.filter((c) => selected.includes(c.key)))
         applyChange(project, before, boardId, nodeId, change);
+      for (const { node } of flattenNodes(boardOf(project, boardId).nodes)) {
+        if (node.type !== "instance") continue;
+        const previous = locateNode(board, node.id)?.node;
+        assertOverrideEditAllowed(
+          project,
+          previous?.type === "instance" ? previous : null,
+          node,
+        );
+      }
       assertValid(project);
     } catch (cause) {
       project = null;

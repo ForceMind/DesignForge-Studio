@@ -313,3 +313,76 @@ test("history labels and before/after values escape hostile text", async ({
   );
   expect(await page.evaluate(() => window.historyInjected)).toBeUndefined();
 });
+test("source locks added after an instance edit also guard the history restore path", async ({
+  page,
+}) => {
+  const p = project(),
+    source = {
+      id: "sourceRoot",
+      name: "Source container",
+      type: "frame",
+      x: 40,
+      y: 350,
+      w: 200,
+      h: 100,
+      text: "",
+      style: {},
+      children: [
+        {
+          id: "sourceLabel",
+          name: "Source label",
+          type: "text",
+          x: 10,
+          y: 10,
+          w: 180,
+          h: 40,
+          text: "Source",
+          style: {},
+        },
+      ],
+    };
+  p.components = [
+    {
+      id: "symbol",
+      name: "Symbol",
+      variants: [{ id: "base", name: "Base", root: structuredClone(source) }],
+    },
+  ];
+  p.boards[0].nodes.push(source, {
+    id: "instance",
+    name: "Original instance",
+    type: "instance",
+    componentId: "symbol",
+    variantId: "base",
+    x: 420,
+    y: 180,
+    w: 200,
+    h: 100,
+    text: "",
+    style: {},
+  });
+  await open(page, p);
+  await patch(page, [
+    set(
+      {
+        name: "Revised instance",
+        overrides: { sourceLabel: { text: "Revised override" } },
+      },
+      "instance",
+    ),
+  ]);
+  await page.locator('[data-node="sourceLabel"]').click();
+  await page.locator('[data-prop="locked"]').selectOption("true");
+  await page.locator('[data-node="sourceRoot"]').click();
+  await page.locator('[data-lefttab="components"]').click();
+  await page.locator('[data-update-component="symbol"]').click();
+  await history(page, "instance");
+  await expect(page.locator(".history-field.blocked")).toHaveCount(1);
+  await expect(page.locator("[data-history-apply]")).toContainText("1");
+  await page.locator("[data-history-apply]").click();
+  const result = await stored(page),
+    instance = result.boards[0].nodes.find((n) => n.id === "instance");
+  expect(instance.name).toBe("Original instance");
+  expect(instance.overrides.sourceLabel.text).toBe("Revised override");
+  expect(result.components[0].variants[0].root.children[0].locked).toBe(true);
+});

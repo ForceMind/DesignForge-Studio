@@ -803,7 +803,7 @@ function sameOverride(a, b) {
     (key) => left[key] === right[key],
   );
 }
-function assertOverrideEditAllowed(project, previous, incoming) {
+export function assertOverrideEditAllowed(project, previous, incoming) {
   const before = isObject(previous?.overrides) ? previous.overrides : {},
     after = isObject(incoming.overrides) ? incoming.overrides : {};
   const variants = [previous, incoming].filter(Boolean).flatMap((instance) => {

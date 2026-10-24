@@ -474,3 +474,86 @@ test("untrusted layer labels cannot crash the history view or enter saved revisi
     assert.doesNotThrow(() => historyNodeChoices([p], 0, "work", p.id));
   }
 });
+function instanceFixture() {
+  const p = fixture(),
+    root = {
+      id: "sourceRoot",
+      type: "component",
+      x: 0,
+      y: 0,
+      w: 200,
+      h: 80,
+      text: "",
+      style: {},
+      children: [
+        {
+          id: "sourceLabel",
+          type: "text",
+          x: 10,
+          y: 10,
+          w: 180,
+          h: 40,
+          text: "Source",
+          style: {},
+        },
+      ],
+    };
+  p.components = [
+    {
+      id: "symbol",
+      name: "Symbol",
+      variants: [
+        { id: "one", name: "One", root: copy(root) },
+        { id: "two", name: "Two", root: copy(root) },
+      ],
+    },
+  ];
+  Object.assign(node(p), {
+    type: "instance",
+    componentId: "symbol",
+    variantId: "one",
+    text: "",
+    overrides: { sourceLabel: { text: "Original override" } },
+  });
+  return valid(p);
+}
+test("variant and instance overrides revert as a single validated unit and preserve later manual overrides", () => {
+  const before = instanceFixture(),
+    after = copy(before);
+  node(after).variantId = "two";
+  node(after).overrides.sourceLabel.text = "Second override";
+  const result = plan(after, before, after);
+  assert.deepEqual(result.selected, ["variantId + overrides"]);
+  assert.equal(node(result.project).variantId, "one");
+  assert.deepEqual(node(result.project).overrides, node(before).overrides);
+  const current = copy(after);
+  node(current).overrides.sourceLabel.text = "Manual";
+  assert.equal(plan(current, before, after).changes[0].status, "conflict");
+});
+test("a later source lock blocks history overrides while unrelated instance fields can revert", () => {
+  const before = instanceFixture(),
+    after = copy(before);
+  node(after).overrides.sourceLabel.text = "New override";
+  node(after).name = "New instance name";
+  const current = copy(after);
+  current.components[0].variants[0].root.children[0].locked = true;
+  const result = plan(current, before, after);
+  assert.equal(
+    result.changes.find((c) => c.key === "overrides.sourceLabel.text").status,
+    "blocked",
+  );
+  assert.deepEqual(result.selected, ["name"]);
+  assert.equal(node(result.project).name, "Alpha");
+  assert.equal(node(result.project).overrides.sourceLabel.text, "New override");
+});
+test("restoring a removed instance cannot introduce overrides onto a now-locked component source", () => {
+  const before = instanceFixture(),
+    after = copy(before);
+  node(after, "parent").children.shift();
+  const current = copy(after);
+  current.components[0].variants[0].root.locked = true;
+  const result = plan(current, before, after);
+  assert.equal(result.project, null);
+  assert.match(result.error, /Locked component source/);
+  assert.equal(node(current), null);
+});
