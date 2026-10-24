@@ -666,9 +666,10 @@ select:focus-visible {
 .artboard-frame {
   position: relative;
   box-shadow:
+    0 0 0 1px #dfe2ed,
     0 16px 50px #29304820,
     0 3px 12px #2930480c;
-  border: 1px solid #dfe2ed;
+  border: 0;
   overflow: hidden;
   background: var(--ui-bg);
   isolation: isolate;

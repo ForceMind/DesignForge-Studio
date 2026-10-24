@@ -82,3 +82,9 @@
 | [矩形框选](screenshots/m1-marquee.png) | 两个兄弟图层的树/画布多选同步 |
 
 断点截图的测试容器刻意保持 fixed 640px，在 500px 预览中可见溢出；它用于验证范围编辑和继承，不作为响应式页面无溢出的证据。截图不是 golden image Diff；Firefox/WebKit、真机、触屏和完整 WCAG 仍未验收。完整 M1 仍有富文本、标尺/参考线、多选整体缩放等缺口。
+
+## 2026-10-24 · alpha.3 标尺与参考线
+
+- 原 65 Node、43 Chrome 回归保留；新增 6 Node、8 Chrome，用例覆盖受限参考线数据、hash/Diff/导出隔离、锁定原子性、刻度/投影、参考线事务和实际几何吸附。
+- [CI run 17](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40083797212)：71 Node 通过；Chrome 49/51 通过。两个严格坐标用例分别收到 302 而非 303、369 而非 370。排查发现编辑器 artboard-frame 的 1px border 占用内容宽度，main 的 max-width 被压缩 2px，设计宽与实际 CSS 宽不符。
+- 修复为不占布局空间的装饰描边；保留原精确坐标断言，另加真实 main 宽度 / world scale 为 800px 的检查。最终浏览器结果待下轮记录，不把该轮写作全绿。

@@ -113,6 +113,16 @@ test("rulers create both axes transactionally, undo/redo and persist without tou
 }) => {
   await open(page);
   const before = await stored(page);
+  const contentWidth = await page
+    .locator('[data-artboard="work"] .df-board')
+    .evaluate(
+      (el) =>
+        el.getBoundingClientRect().width /
+        new DOMMatrix(
+          getComputedStyle(document.getElementById("world")).transform,
+        ).a,
+    );
+  expect(contentWidth).toBeCloseTo(800, 2);
   await create(page, "x", 303, { finish: false });
   expect(await stored(page)).toEqual(before);
   await expect(page.locator(".design-guide.x")).toBeVisible();

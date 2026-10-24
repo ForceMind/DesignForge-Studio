@@ -1574,7 +1574,7 @@ function updateGuideOverlay() {
       })
       .join("") +
     (g?.outside
-      ? '<span class="guide-drop-hint">松手删除参考线 · Esc 取消</span>'
+      ? `<span class="guide-drop-hint">${g.isNew ? "拖入画板创建参考线" : "松手删除参考线"} · Esc 取消</span>`
       : "");
   $("viewport").appendChild(overlay);
 }
@@ -1582,6 +1582,7 @@ function toggleRulers() {
   rulersVisible = !rulersVisible;
   if (!rulersVisible) activeGuideId = null;
   updateGuideOverlay();
+  if (project) renderRight();
 }
 function startGuide(e, axis, id = null) {
   const b = activeBoard(),
@@ -2483,6 +2484,7 @@ function onPointerMove(e) {
       el.style.left = `${Math.round(gesture.x + dx / zoom)}px`;
       el.style.top = `${Math.round(gesture.y + dy / zoom)}px`;
     }
+    updateGuideOverlay();
   }
 }
 function onPointerUp(e) {
