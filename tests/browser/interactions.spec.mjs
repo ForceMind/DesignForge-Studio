@@ -1,3 +1,4 @@
+import { standaloneHtml } from "../../src/core.mjs";
 import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 const fixture = JSON.parse(
@@ -183,6 +184,7 @@ test("breakpoint editor scopes changes and field resets restore larger-width inh
     updated.boards[0].nodes[0].responsive.find((r) => r.maxWidth === 500)
       .changes.layout.gap,
   ).toBe(8);
+  await page.locator("#breakpoint-scope").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "test-results/m1-breakpoint-editor.png" });
   await page.locator('[data-reset-override="layout.gap"]').click();
   await expect(page.locator('[data-prop="layout.gap"]')).toHaveValue("20");
@@ -432,4 +434,44 @@ test("native text-field undo does not undo an already committed design change", 
   await page.keyboard.type("Pending text");
   await page.keyboard.press("Control+z");
   expect(await stored(page)).toEqual(before);
+});
+
+test("exported responsive component descendants are isolated by instance despite shared source IDs", async ({
+  page,
+}) => {
+  const p = project(),
+    [primary, secondary] = p.components[0].variants,
+    sourceId = primary.root.children[0].id;
+  primary.root.children[0].responsive = [
+    { maxWidth: 600, changes: { style: { color: "#000000" } } },
+  ];
+  secondary.root.children[0].responsive = [
+    { maxWidth: 600, changes: { style: { color: "#FFFFFF" } } },
+  ];
+  const instance = (id, variantId, x) => ({
+    id,
+    name: id,
+    type: "instance",
+    componentId: "action",
+    variantId,
+    x,
+    y: 40,
+    w: 150,
+    h: 48,
+    text: "",
+    style: {},
+  });
+  p.boards[0].w = 390;
+  p.boards[0].nodes = [
+    instance("first", "primary", 20),
+    instance("second", "secondary", 200),
+  ];
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.setContent(standaloneHtml(p.boards[0], p));
+  await expect(
+    page.locator(`[data-node-id="first"] [data-source-id="${sourceId}"]`),
+  ).toHaveCSS("color", "rgb(0, 0, 0)");
+  await expect(
+    page.locator(`[data-node-id="second"] [data-source-id="${sourceId}"]`),
+  ).toHaveCSS("color", "rgb(255, 255, 255)");
 });

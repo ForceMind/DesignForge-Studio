@@ -40,7 +40,7 @@
 [Chrome 执行轮次](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39988049824) 在 `773e16d` 上通过 53 Node + 26 浏览器测试（Chrome 155.0.8059.39）。实际下载并查看截图后发现 runner 无 CJK 字体，中文显示方框，因此该轮仅计功能通过，视觉未通过。随后为 CI 添加有界超时的 fonts-unifont 安装及字体清单输出，再跑原套件和截图。这不修改产品字体或上传任何第三方字体到工程。
 
 
-## 最终验收记录
+## 2026-10-23 · alpha.1 验收记录
 
 - 代码与环境基线：`1310e3ba91f5ac8538b4d13c03658c63b69f4733`。
 - [最终验收 CI](https://github.com/ForceMind/DesignForge-Studio/actions/runs/39988482554)：verify 和 browser 均 success；53 项 Node、26 项真实 Chrome 测试全部通过。
@@ -55,3 +55,13 @@
 | [390px 响应式页面](screenshots/studio-mobile.png) | 三列变单列、内容撑开、完整 checklist/footer |
 
 最终文档/截图提交没有继续修改产品逻辑。后续 commit 的 CI 结果仍须以其 Actions 为准。
+
+
+## 2026-10-24 · alpha.2 交互研发
+
+- 基线：PR #1 / a111d1d；原 53 项 Node、26 项 Chrome 回归继续保留。
+- 第一阶段：[CI run 10](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40053806900)，61 Node + 33 真实浏览器用例通过，覆盖尺寸手柄、取消、撤销/回读、约束反解、断点编辑/继承/重置及父布局重排。
+- 第二阶段：[CI run 11](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40054204854)，64 Node 通过，浏览器 34/37 通过。三个框选用例发现容器背景被误判为移动操作，已调整优先级；不删除断言，保留该轮失败记录。
+- 后续补充跨项目临时状态隔离、锁定动作边界、文本输入原生撤销，以及组件响应式投影隔离；当前 64 Node 本地通过，浏览器共 41 项。最终结果在实际完成后记录。
+
+- [CI run 12](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40054449008)：64 Node 通过，浏览器 39/40 通过。框选数据与选区已正确；后续快捷键用例发现焦点仍停在吸附复选框，导致组合快捷键被当作输入控件操作忽略。画布操作现在显式聚焦 viewport，再运行原测试核对。

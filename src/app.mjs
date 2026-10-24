@@ -2026,6 +2026,8 @@ function onPointerDown(e) {
   if (!project) return;
   if (gesture) return;
   if (e.target.closest("[data-preview-control]")) return;
+  if (e.button === 0 || e.button === 1)
+    $("viewport").focus({ preventScroll: true });
   const handle = e.target.closest("[data-resize-handle]");
   if (handle && tool === "select" && !heldSpace && e.button === 0) {
     startResize(e, handle.dataset.resizeHandle);
