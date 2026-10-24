@@ -561,7 +561,7 @@ function observeInspectorSize() {
   inspectorSizeObserver.disconnect();
   const node = activeNode();
   const element = node && nodeElement($("world"), activeBoardId, node.id);
-  if (element) inspectorSizeObserver.observe(element);
+  if (element) inspectorSizeObserver.observe(element, { box: "border-box" });
   updateInspectorSize();
 }
 function updateInspectorSize() {

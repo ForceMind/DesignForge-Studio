@@ -135,6 +135,14 @@ test("browser-driven layout changes refresh measured sizes without creating proj
   const smaller = await assertMeasured(page);
   expect(smaller.width).toBeLessThan(initial.width);
   expect(smaller.height).toBeGreaterThan(initial.height);
+  // Border-only changes leave the content box unchanged; observe the measured border box.
+  await page.locator('[data-node-id="label"]').evaluate((el) => {
+    el.style.boxSizing = "content-box";
+    el.style.border = "8px solid #333333";
+  });
+  const bordered = await assertMeasured(page);
+  expect(bordered.width).toBeCloseTo(smaller.width + 16, 1);
+  expect(bordered.height).toBeCloseTo(smaller.height + 16, 1);
   expect(await stored(page)).toEqual(before);
   await expect(page.locator("#undo")).toBeDisabled();
   await page.locator('[data-prop="hidden"]').selectOption("true");
