@@ -219,3 +219,76 @@ export function distributeBoxes(entries, axis) {
     return { id: e.id, [axis]: position };
   });
 }
+
+export function boundsOfBoxes(entries) {
+  if (
+    !entries.length ||
+    entries.some(
+      (e) =>
+        ![e.x, e.y, e.w, e.h].every(Number.isFinite) || e.w <= 0 || e.h <= 0,
+    )
+  )
+    throw Error("Invalid selection geometry");
+  const x = Math.min(...entries.map((e) => e.x)),
+    y = Math.min(...entries.map((e) => e.y));
+  return {
+    x,
+    y,
+    w: Math.max(...entries.map((e) => e.x + e.w)) - x,
+    h: Math.max(...entries.map((e) => e.y + e.h)) - y,
+  };
+}
+/** Resize layer boxes and their gaps; typography/descendants retain their own layout rules. */
+export function resizeSelectionBoxes(entries, handle, dx, dy, options = {}) {
+  if (
+    entries.length < 2 ||
+    new Set(entries.map((e) => e.id)).size !== entries.length
+  )
+    throw Error("Select at least two unique layers");
+  const bounds = boundsOfBoxes(entries);
+  if (bounds.w > 2400 || bounds.h > 3200)
+    throw Error("Selection exceeds resize bounds");
+  const target = resizeBox(bounds, handle, dx, dy, options);
+  let sx = target.w / bounds.w,
+    sy = target.h / bounds.h;
+  const minX = Math.max(...entries.map((e) => 1 / e.w)),
+    minY = Math.max(...entries.map((e) => 1 / e.h));
+  const maxX = Math.min(...entries.map((e) => 2400 / e.w)),
+    maxY = Math.min(...entries.map((e) => 3200 / e.h));
+  if (options.ratio && /[ew]/.test(handle) && /[ns]/.test(handle)) {
+    sx = sy = Math.max(minX, minY, Math.min(sx, maxX, maxY));
+  } else {
+    sx = Math.max(minX, Math.min(sx, maxX));
+    sy = Math.max(minY, Math.min(sy, maxY));
+  }
+  const w = bounds.w * sx,
+    h = bounds.h * sy;
+  const x =
+    bounds.x +
+    (/[ew]/.test(handle)
+      ? options.center
+        ? (bounds.w - w) / 2
+        : handle.includes("w")
+          ? bounds.w - w
+          : 0
+      : 0);
+  const y =
+    bounds.y +
+    (/[ns]/.test(handle)
+      ? options.center
+        ? (bounds.h - h) / 2
+        : handle.includes("n")
+          ? bounds.h - h
+          : 0
+      : 0);
+  return {
+    bounds: { x, y, w, h },
+    boxes: entries.map((e) => ({
+      id: e.id,
+      x: x + (e.x - bounds.x) * sx,
+      y: y + (e.y - bounds.y) * sy,
+      w: e.w * sx,
+      h: e.h * sy,
+    })),
+  };
+}

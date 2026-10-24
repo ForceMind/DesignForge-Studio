@@ -104,3 +104,8 @@
 | [等距分布](screenshots/m1-distribution.png) | 三层多选、不同尺寸、水平等距结果与操作入口 |
 
 本地 `format:check`、原 Orbit validate/audit/export 通过，Orbit hash 仍为 `21a89182`。参考线不进入 HTML 导出；静态导出相等性有 Node 断言。辅助线当前只支持移动吸附，尺寸拖拽仍按网格；没有完成多选整体缩放、富文本、通用碰撞/截断审计、像素差异或其他浏览器/真机验收。
+
+
+## 2026-10-24 · alpha.4 编辑与设计系统闭环
+
+本地 Node 套件扩大到 131 项并通过；原 Orbit validate/audit/export 通过（hash 21a89182），HTTP smoke 工作台及五个新模块均返回 200。新增实际浏览器用例覆盖多选缩放、富文本、组件样式/字体隔离、本地库下载/导入、主题 Token、DOM 审计及过期状态。浏览器结果待 CI 实际执行后补录，不能将新增测试文件当作通过结果。

@@ -1,5 +1,6 @@
 /** Original editable examples. Regenerate without changing the M0 fixture/hash. */
 import fs from "node:fs";
+import { exportDesignLibrary } from "../src/design-library.mjs";
 import { newProject, clone, validateProject } from "../src/core.mjs";
 let seq = 0;
 const id = () => `m${++seq}`;
@@ -12,6 +13,14 @@ const text = (name, content, size = 16, h = 28) => ({
   w: 260,
   h,
   text: content,
+  ...(name === "Page title"
+    ? {
+        textRuns: [
+          { text: content.slice(0, 9), style: { color: "$primary" } },
+          { text: content.slice(9) },
+        ],
+      }
+    : {}),
   style: { fontSize: size, fontWeight: size > 20 ? 700 : 500, color: "$ink" },
   sizing: { w: "fill", h: "hug" },
 });
@@ -516,3 +525,8 @@ for (const [name, project] of examples) {
   );
 }
 console.log(`Wrote ${examples.length} M1 examples`);
+
+fs.writeFileSync(
+  new URL("../examples/Studio.library.json", import.meta.url),
+  JSON.stringify(exportDesignLibrary(p), null, 2) + "\n",
+);

@@ -152,6 +152,31 @@
             </div>
             <div id="components-pane" hidden>
               <div class="section-head">本地组件库</div>
+              <div class="library-transfer">
+                <label for="library-prefix">导入命名空间（可选）</label>
+                <input
+                  id="library-prefix"
+                  placeholder="例如 kit"
+                  maxlength="16"
+                />
+                <div class="button-row">
+                  <button class="btn-small" id="export-library">
+                    导出设计系统</button
+                  ><button class="btn-small" id="import-library">
+                    导入设计系统
+                  </button>
+                </div>
+                <input
+                  id="upload-library"
+                  type="file"
+                  accept=".json,application/json"
+                  hidden
+                />
+                <p class="property-help">
+                  本地 JSON 包包含
+                  Token、主题、组件和资源。冲突会拒绝；填写命名空间可隔离导入。
+                </p>
+              </div>
               <div id="component-list"></div>
             </div>
             <div id="comments-pane" hidden>

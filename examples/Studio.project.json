@@ -115,6 +115,17 @@
               "w": 260,
               "h": 52,
               "text": "Make room for your next idea.",
+              "textRuns": [
+                {
+                  "text": "Make room",
+                  "style": {
+                    "color": "$primary"
+                  }
+                },
+                {
+                  "text": " for your next idea."
+                }
+              ],
               "style": {
                 "fontSize": 32,
                 "fontWeight": 700,
@@ -1079,6 +1090,17 @@
               "w": 260,
               "h": 52,
               "text": "Make room for your next idea.",
+              "textRuns": [
+                {
+                  "text": "Make room",
+                  "style": {
+                    "color": "$primary"
+                  }
+                },
+                {
+                  "text": " for your next idea."
+                }
+              ],
               "style": {
                 "fontSize": 32,
                 "fontWeight": 700,

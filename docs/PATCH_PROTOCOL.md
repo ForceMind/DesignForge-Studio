@@ -102,3 +102,10 @@ Diff 新增后代、父级 `$parent`、同父顺序 `$order`、布局/断点/实
 ### 编辑辅助参考线（alpha.3）
 
 v1 画板可携带 `guides: [{id,axis,position,hidden?,locked?}]`，每板最多 100 项，axis 为 x/y，position 为 0..10000 的有限数值；id 在该画板的参考线集合内唯一，未知字段拒绝。省略时沿用旧工程行为。它参与项目 hash 和板级 Diff，不进入静态 HTML/CSS 导出。现有 Patch 操作不允许编辑参考线；Agent 必须保留它们，也不能用未知 `set-guides` 操作扩权。
+
+
+### 富文本与字体（alpha.4）
+
+节点可选 textRuns: [{text,style?}]，最多 256 段且拼接必须等于 node.text，仅 text/button/pill 支持。分段 style 白名单为 color/fontSize/fontWeight/italic/underline/strike，禁止 HTML/原始 CSS。set-node.changes.textRuns 可替换完整分段，null 清格式；只传 text 则显式改纯文本并清旧分段，传 text+textRuns 必须同步。
+
+节点 style 增加 lineHeight（0.8..4 或数值 Token）与 fontFamily（安全系统字体、本地 font asset 或字体 Token）。原 v1 纯文本继续有效。designforge.library 的导入、主题/组件库定义与资产管理仍由编辑器负责，不扩展 Agent Patch 的权限。

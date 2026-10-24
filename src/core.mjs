@@ -2,6 +2,11 @@ import { effectiveNode } from "./responsive.mjs";
 import { validateAssets } from "./assets.mjs";
 import { validateGuides } from "./guides.mjs";
 import {
+  validateTextRuns,
+  renderRichText,
+  replacePlainText,
+} from "./richtext.mjs";
+import {
   CONTAINERS,
   flattenNodes,
   findNode,
@@ -104,6 +109,37 @@ const safeColor = (value) =>
   )
     ? value
     : null;
+const FONT_VALUES = new Set([
+  "system-ui",
+  "ui-sans-serif",
+  "Georgia",
+  "Verdana",
+  "Arial",
+]);
+const fontAssetId = (value) =>
+  typeof value === "string" && /^asset:asset[a-zA-Z0-9_-]{1,64}$/.test(value)
+    ? value.slice(6)
+    : null;
+/** Font values are concrete enums or references to imported font assets, never arbitrary CSS. */
+export function validFontValue(project, value) {
+  if (FONT_VALUES.has(value)) return true;
+  const id = fontAssetId(value);
+  return (
+    !!id &&
+    Array.isArray(project?.assets) &&
+    project.assets.some((asset) => asset?.id === id && asset.type === "font")
+  );
+}
+function cssFont(value) {
+  if (value === "Georgia") return "Georgia,serif";
+  if (value === "Verdana") return "Verdana,sans-serif";
+  if (value === "Arial") return "Arial,sans-serif";
+  if (value === "ui-sans-serif") return "ui-sans-serif,system-ui,sans-serif";
+  if (value === "system-ui")
+    return "system-ui,-apple-system,BlinkMacSystemFont,sans-serif";
+  const id = fontAssetId(value);
+  return id ? `df-${id},system-ui,sans-serif` : null;
+}
 export function resolveToken(value, tokens, seen = new Set()) {
   if (typeof value !== "string" || !value.startsWith("$")) return value;
   const key = value.slice(1);
@@ -166,32 +202,20 @@ export function validateProject(project) {
         error(path + "." + key, "Unsafe token name");
       const resolved = resolveToken(value, tokens);
       if (key === "fontFamily") {
-        if (
-          ![
-            "system-ui",
-            "ui-sans-serif",
-            "Georgia",
-            "Verdana",
-            "Arial",
-          ].includes(resolved) &&
-          !(
-            typeof resolved === "string" &&
-            resolved.startsWith("asset:") &&
-            Array.isArray(project.assets) &&
-            project.assets.some(
-              (a) => a?.type === "font" && a.id === resolved.slice(6),
-            )
-          )
-        )
+        if (!validFontValue(project, resolved))
           error(path + ".fontFamily", "Unsupported font stack");
       } else if (TOKEN_KEYS.includes(key)) {
         if (!safeColor(resolved))
           error(path + "." + key, "Expected hex color or resolvable alias");
       } else if (!(
         safeColor(resolved) ||
-        (Number.isFinite(resolved) && resolved >= 0 && resolved <= 3200)
+        (Number.isFinite(resolved) && resolved >= 0 && resolved <= 3200) ||
+        validFontValue(project, resolved)
       ))
-        error(path + "." + key, "Expected color, number or resolvable alias");
+        error(
+          path + "." + key,
+          "Expected color, number, font or resolvable alias",
+        );
     }
     for (const key of TOKEN_KEYS)
       if (!safeColor(resolveToken(tokens[key], tokens)))
@@ -335,6 +359,16 @@ export function validateProject(project) {
       else checkStyle(node.style, n + ".style");
       if (typeof node.text !== "string" || node.text.length > 10000)
         error(n + ".text", "Expected text up to 10000 chars");
+      for (const palette of [
+        project.tokens,
+        ...Object.values(isObject(project.themes) ? project.themes : {})
+          .filter(isObject)
+          .map((t) => ({ ...project.tokens, ...t })),
+      ])
+        for (const reason of validateTextRuns(node, (value) =>
+          resolveToken(value, palette || {}),
+        ))
+          error(n + ".textRuns", reason);
       if (node.children !== undefined) {
         if (!CONTAINERS.has(node.type) || !Array.isArray(node.children))
           error(n + ".children", "Only containers may have children");
@@ -445,7 +479,8 @@ export function validateProject(project) {
                   (k) => !["text", "style"].includes(k),
                 ) ||
                 (changes.text !== undefined &&
-                  typeof changes.text !== "string") ||
+                  (typeof changes.text !== "string" ||
+                    changes.text.length > 10000)) ||
                 (changes.style !== undefined &&
                   (!isObject(changes.style) ||
                     Object.keys(changes.style).some(
@@ -472,6 +507,7 @@ export function validateProject(project) {
       opacity: [0, 1],
       strokeWidth: [0, 20],
       letterSpacing: [-3, 20],
+      lineHeight: [0.8, 4],
     };
     for (const [key, value] of Object.entries(style)) {
       if (!editStyleKeys.has(key)) {
@@ -487,6 +523,12 @@ export function validateProject(project) {
             !safeColor(resolved)
           )
             error(path + "." + key, "Expected hex color or color token");
+        } else if (key === "fontFamily") {
+          if (!validFontValue(project, resolved))
+            error(
+              path + ".fontFamily",
+              "Expected supported font or imported font token",
+            );
         } else if (key === "align") {
           if (!["left", "center", "right"].includes(value))
             error(path + ".align", "Unsupported text alignment");
@@ -687,6 +729,7 @@ function requireString(v, name) {
 const editableKeys = new Set([
   "name",
   "text",
+  "textRuns",
   "x",
   "y",
   "w",
@@ -712,6 +755,8 @@ const editStyleKeys = new Set([
   "align",
   "opacity",
   "letterSpacing",
+  "lineHeight",
+  "fontFamily",
 ]);
 function getBoard(project, id) {
   const b = project.boards.find((x) => x.id === id);
@@ -722,6 +767,30 @@ function getNode(board, id) {
   const n = findNode(board, id);
   if (!n) throw Error("Unknown node " + id);
   return n;
+}
+function sameOverride(a, b) {
+  if (a?.text !== b?.text) return false;
+  const left = isObject(a?.style) ? a.style : {},
+    right = isObject(b?.style) ? b.style : {};
+  return [...new Set([...Object.keys(left), ...Object.keys(right)])].every(
+    (key) => left[key] === right[key],
+  );
+}
+function assertOverrideEditAllowed(project, previous, incoming) {
+  const before = isObject(previous?.overrides) ? previous.overrides : {},
+    after = isObject(incoming.overrides) ? incoming.overrides : {};
+  const variants = [previous, incoming].filter(Boolean).flatMap((instance) => {
+    const c = project.components?.find((c) => c?.id === instance.componentId),
+      variant = c?.variants?.find((v) => v?.id === instance.variantId);
+    return isObject(variant?.root) ? [{ nodes: [variant.root] }] : [];
+  });
+  for (const id of new Set([...Object.keys(before), ...Object.keys(after)])) {
+    if (sameOverride(before[id], after[id])) continue;
+    if (
+      variants.some((board) => findNode(board, id) && isNodeLocked(board, id))
+    )
+      throw Error("Locked component source");
+  }
 }
 export function applyPatch(project, patch) {
   if (
@@ -770,6 +839,13 @@ export function applyPatch(project, patch) {
       )
         throw Error("Locked layer");
       if (!isObject(op.changes)) throw Error("changes object required");
+      if (n.type === "instance" && Object.hasOwn(op.changes, "overrides"))
+        assertOverrideEditAllowed(next, n, { ...n, ...op.changes });
+      if (
+        Object.hasOwn(op.changes, "text") &&
+        !Object.hasOwn(op.changes, "textRuns")
+      )
+        delete n.textRuns;
       for (const [key, value] of Object.entries(op.changes)) {
         if (["layout", "sizing", "constraints"].includes(key)) {
           if (!isObject(value)) throw Error("Expected " + key + " object");
@@ -781,7 +857,8 @@ export function applyPatch(project, patch) {
           )
             throw Error("Unsafe style keys");
           n.style = { ...n.style, ...clone(value) };
-        } else if (editableKeys.has(key)) n[key] = clone(value);
+        } else if (key === "textRuns" && value === null) delete n.textRuns;
+        else if (editableKeys.has(key)) n[key] = clone(value);
         else throw Error("Property not editable: " + key);
       }
     } else if (op.kind === "add-node") {
@@ -792,6 +869,8 @@ export function applyPatch(project, patch) {
       if (parent && isNodeLocked(b, parent.id)) throw Error("Locked layer");
       if (parent && !CONTAINERS.has(parent.type))
         throw Error("Parent must be container");
+      if (op.node.type === "instance" && op.node.overrides !== undefined)
+        assertOverrideEditAllowed(next, null, op.node);
       (parent ? (parent.children ||= []) : b.nodes).push(clone(op.node));
     } else if (op.kind === "remove-node") {
       const b = getBoard(next, op.boardId);
@@ -840,7 +919,7 @@ function colorStyle(node, tokens, board, parent = board) {
   parts.push(`background:${fill}`);
   if (s.stroke && s.stroke !== "none")
     parts.push(
-      `border:${clamp(s.strokeWidth ?? 1, 0, 20, 1)}px solid ${cssColor(s.stroke, tokens, "#000000")}`,
+      `border:${clamp(scalar(s.strokeWidth, tokens, 1), 0, 20, 1)}px solid ${cssColor(s.stroke, tokens, "#000000")}`,
     );
   else parts.push("border:0");
   const radius = resolveToken(s.radius, tokens);
@@ -855,18 +934,13 @@ function colorStyle(node, tokens, board, parent = board) {
       `letter-spacing:${px(clamp(scalar(s.letterSpacing, tokens, 0), -3, 20, 0))}`,
       `text-align:${["left", "center", "right"].includes(s.align) ? s.align : "left"}`,
     );
-    parts.push(
-      `font-family:${resolveToken(tokens.fontFamily, tokens) === "Georgia" ? "Georgia,serif" : resolveToken(tokens.fontFamily, tokens) === "Verdana" ? "Verdana,sans-serif" : resolveToken(tokens.fontFamily, tokens) === "Arial" ? "Arial,sans-serif" : "system-ui,-apple-system,BlinkMacSystemFont,sans-serif"}`,
-    );
-    if (
-      typeof resolveToken(tokens.fontFamily, tokens) === "string" &&
-      /^asset:asset[a-zA-Z0-9_-]{1,64}$/.test(
-        resolveToken(tokens.fontFamily, tokens),
-      )
-    )
+    if (s.lineHeight !== undefined)
       parts.push(
-        `font-family:df-${resolveToken(tokens.fontFamily, tokens).slice(6)},system-ui,sans-serif`,
+        `line-height:${clamp(scalar(s.lineHeight, tokens, 1.35), 0.8, 4, 1.35)}`,
       );
+    parts.push(
+      `font-family:${cssFont(resolveToken(s.fontFamily, tokens)) || cssFont(resolveToken(tokens.fontFamily, tokens)) || cssFont("system-ui")}`,
+    );
     parts.push("white-space:pre-wrap", "overflow-wrap:anywhere");
   }
   parts.push(layoutStyle(node, tokens, parent));
@@ -961,8 +1035,19 @@ export function materializeInstance(instance, project) {
   const root = clone(v.root);
   for (const { node } of flattenNodes([root])) {
     const changes = instance.overrides?.[node.id];
-    if (changes?.text !== undefined) node.text = changes.text;
-    if (changes?.style) node.style = { ...node.style, ...changes.style };
+    if (changes?.text !== undefined)
+      Object.assign(node, replacePlainText(node, changes.text));
+    if (changes?.text !== undefined) delete node.textRuns;
+    if (changes?.style) {
+      node.style = { ...node.style, ...changes.style };
+      // Instance properties are global; remove only their shadowing source fields.
+      for (const rule of node.responsive || []) {
+        if (!rule.changes?.style) continue;
+        for (const key of Object.keys(changes.style))
+          delete rule.changes.style[key];
+        if (!Object.keys(rule.changes.style).length) delete rule.changes.style;
+      }
+    }
     node.$sourceId = node.id;
   }
   return {
@@ -1057,7 +1142,7 @@ export function renderNode(
     ? (node.children || [])
         .map((n) => renderNode(n, board, tokens, node, project))
         .join("")
-    : escapeHtml(node.text || "");
+    : renderRichText(node, (value) => resolveToken(value, tokens));
   const wrap = `<div class="df-node df-${node.type}" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}">${content}</div>`;
   if (node.type === "image") {
     const asset = validateAssets(project?.assets).length
@@ -1072,7 +1157,7 @@ export function renderNode(
   if (node.type === "icon")
     return `<div class="df-node df-icon" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="${cssColor(node.style?.color, tokens, "#202238")}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${Object.hasOwn(ICONS, node.icon) ? ICONS[node.icon] : ICONS.grid}</svg></div>`;
   if (node.type === "line")
-    return `<div class="df-node df-line" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st};border-top:${clamp(node.style?.strokeWidth ?? 1, 1, 10, 1)}px solid ${cssColor(node.style?.stroke, tokens, "#E4E7F0")}"></div>`;
+    return `<div class="df-node df-line" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st};border-top:${clamp(scalar(node.style?.strokeWidth, tokens, 1), 1, 10, 1)}px solid ${cssColor(node.style?.stroke, tokens, "#E4E7F0")}"></div>`;
   return wrap;
 }
 export const exportStyles = `*{box-sizing:border-box}body{margin:0}.df-board{position:relative;overflow:hidden;margin:0 auto}.df-node{margin:0;padding:0}.df-button,.df-pill{display:flex;align-items:center;justify-content:center;cursor:pointer;border:0}.df-input{padding:0 14px;outline:0}.df-icon{display:flex;align-items:center;justify-content:center}.df-icon svg{width:100%;height:100%}.df-text{line-height:1.35}.df-line{pointer-events:none}`;
@@ -1191,6 +1276,7 @@ export function diffProjects(before, after) {
       const keys = [
         "name",
         "text",
+        "textRuns",
         "x",
         "y",
         "w",

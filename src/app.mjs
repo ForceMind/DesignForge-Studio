@@ -1,4 +1,27 @@
 import {
+  applyTextStyle,
+  replacePlainText,
+  replaceTextPreservingRuns,
+  RICH_TEXT_TYPES,
+} from "./richtext.mjs";
+import {
+  componentPropertiesMarkup,
+  applyComponentProperty,
+  resetComponentProperty,
+} from "./component-properties.mjs";
+import {
+  tokenRowsMarkup,
+  setDesignToken,
+  resetThemeToken,
+  deleteDesignToken,
+} from "./token-editor.mjs";
+import {
+  exportDesignLibrary,
+  importDesignLibrary,
+  summarizeDesignLibraryImport,
+} from "./design-library.mjs";
+import { auditRenderedBoard } from "./browser-audit.mjs";
+import {
   effectiveNode,
   activeBreakpoint,
   setScopedChanges,
@@ -18,6 +41,8 @@ import {
   positionChanges,
   distributeBoxes,
   resizeBox,
+  boundsOfBoxes,
+  resizeSelectionBoxes,
   geometryChanges,
   boxFromPoints,
   selectionInBox,
@@ -92,6 +117,8 @@ const selected = () =>
   [...selectedIds].filter((id) => findNode(activeBoard(), id));
 const saveStatus = $("save-status");
 let toastTimer;
+let richRange = null,
+  renderedAudit = null;
 function toast(message) {
   const t = $("toast");
   t.textContent = message;
@@ -149,6 +176,7 @@ const activeBoard = () =>
   project.boards.find((b) => b.id === activeBoardId) || project.boards[0];
 const activeNode = () => findNode(activeBoard(), activeNodeId) || null;
 function switchBoard(id) {
+  richRange = null;
   activeGuideId = null;
   activeBoardId = id;
   activeNodeId = null;
@@ -156,6 +184,7 @@ function switchBoard(id) {
   render();
 }
 function selectNode(id, boardId = activeBoardId, add = false) {
+  richRange = null;
   activeGuideId = null;
   if (boardId !== activeBoardId) selectedIds.clear();
   activeBoardId = boardId;
@@ -460,7 +489,7 @@ function renderProperties() {
   )
     styles += `<div class="fieldrow">${colorField("填充色 / $token", "style.fill", st.fill, b.bg)}${colorField("文字颜色 / $token", "style.color", st.color || "$ink", "#202238")}</div>`;
   if (["text", "button", "pill", "input"].includes(n.type))
-    styles += `<div class="fieldrow">${f("字号 / $token", "style.fontSize", st.fontSize ?? 16)}${f("字重", "style.fontWeight", st.fontWeight ?? 500, "number", 'min="100" max="900" step="100"')}</div>`;
+    styles += `<div class="fieldrow">${f("字号 / $token", "style.fontSize", st.fontSize ?? 16)}${f("字重", "style.fontWeight", st.fontWeight ?? 500, "number", 'min="100" max="900" step="100"')}</div><div class="fieldrow">${f("行高倍率 / $token", "style.lineHeight", st.lineHeight ?? 1.35)}${f("字距 / $token", "style.letterSpacing", st.letterSpacing ?? 0)}</div>`;
   if (n.type !== "line" && n.type !== "icon")
     styles += `<div class="fieldrow">${f("圆角 / $token", "style.radius", st.radius ?? 0)}${f("透明度", "style.opacity", st.opacity ?? 1, "number", 'min="0" max="1" step="0.1"')}</div>`;
   if (n.type === "icon")
@@ -469,31 +498,169 @@ function renderProperties() {
     ? `<div class="singlefield"><label for="prop-text">${n.type === "image" ? "图片替代文字" : "文字内容"}</label><textarea id="prop-text" data-prop="text">${esc(n.text)}</textarea></div>`
     : "";
   $("right-content").innerHTML =
-    `<div class="inspector-title"><span class="element-icon">◇</span> ${esc(n.name || n.type)} <span class="safe-tag">NODE</span></div><div class="selection-id">#${esc(n.id)} · ${esc(n.type)} · ${selected().length} selected</div>${wide("图层名称", "name", n.name || "")}${structureControls(b, n)}<div class="divider"></div><div class="panel-section-title">排列与尺寸</div><div class="fieldrow">${f("X 位置", "x", n.x, "number")}${f("Y 位置", "y", n.y, "number")}</div><div class="fieldrow">${f("宽度 W", "w", n.w, "number", 'min="1"')}${f("高度 H", "h", n.h, "number", 'min="1"')}</div><div class="divider"></div><div class="panel-section-title">外观与内容</div>${txtEdit}${styles}${layoutControls(n)}<div class="divider"></div><div class="panel-section-title">操作</div><div class="button-row"><button data-action="duplicate" class="btn-small">复制图层</button><button data-action="up" class="btn-small">向上一层 ↑</button><button data-action="down" class="btn-small">向下一层 ↓</button><button data-action="delete" class="btn-small danger">删除</button></div><div class="button-row"><button data-action="add-comment" class="btn-small primary">✦ 给该元素写标注</button></div><div class="button-row"><button class="btn-small" data-action="group">组合 ⌘G</button><button class="btn-small" data-action="ungroup">解组</button><button class="btn-small" data-action="make-component">创建组件</button></div><div class="button-row">${["left", "center", "right", "top", "middle", "bottom"].map((a, i) => `<button class="btn-small" data-align="${a}">${["左", "水平中", "右", "上", "垂直中", "下"][i]}</button>`).join("")}</div><div class="button-row"><button class="btn-small" data-distribute="x">水平等距</button><button class="btn-small" data-distribute="y">垂直等距</button></div><p class="muted-tip">Shift 点击多选；Auto Layout 子元素由布局管理，使用图层排序调整顺序。</p>`;
+    `<div class="inspector-title"><span class="element-icon">◇</span> ${esc(n.name || n.type)} <span class="safe-tag">NODE</span></div><div class="selection-id">#${esc(n.id)} · ${esc(n.type)} · ${selected().length} selected</div>${wide("图层名称", "name", n.name || "")}${structureControls(b, n)}<div class="divider"></div><div class="panel-section-title">排列与尺寸</div><div class="fieldrow">${f("X 位置", "x", n.x, "number")}${f("Y 位置", "y", n.y, "number")}</div><div class="fieldrow">${f("宽度 W", "w", n.w, "number", 'min="1"')}${f("高度 H", "h", n.h, "number", 'min="1"')}</div><div class="divider"></div><div class="panel-section-title">外观与内容</div>${txtEdit}${richTextControls(n)}${styles}${fontControls(n)}${layoutControls(n)}<div class="divider"></div><div class="panel-section-title">操作</div><div class="button-row"><button data-action="duplicate" class="btn-small">复制图层</button><button data-action="up" class="btn-small">向上一层 ↑</button><button data-action="down" class="btn-small">向下一层 ↓</button><button data-action="delete" class="btn-small danger">删除</button></div><div class="button-row"><button data-action="add-comment" class="btn-small primary">✦ 给该元素写标注</button></div><div class="button-row"><button class="btn-small" data-action="group">组合 ⌘G</button><button class="btn-small" data-action="ungroup">解组</button><button class="btn-small" data-action="make-component">创建组件</button></div><div class="button-row">${["left", "center", "right", "top", "middle", "bottom"].map((a, i) => `<button class="btn-small" data-align="${a}">${["左", "水平中", "右", "上", "垂直中", "下"][i]}</button>`).join("")}</div><div class="button-row"><button class="btn-small" data-distribute="x">水平等距</button><button class="btn-small" data-distribute="y">垂直等距</button></div><p class="muted-tip">Shift 点击多选；Auto Layout 子元素由布局管理，使用图层排序调整顺序。</p>`;
 }
 function resolvedHex(value, fallback) {
   const resolved = resolveToken(value, effectiveTokens(project));
   return /^#[0-9a-f]{6}$/i.test(resolved || "") ? resolved : fallback;
 }
+function fontControls(node) {
+  if (!["text", "button", "pill", "input"].includes(node.type)) return "";
+  const builtins = [
+      "system-ui",
+      "ui-sans-serif",
+      "Georgia",
+      "Verdana",
+      "Arial",
+    ],
+    tokens = effectiveTokens(project);
+  const fontValues = [
+    ...builtins,
+    ...(project.assets || [])
+      .filter((a) => a.type === "font")
+      .map((a) => "asset:" + a.id),
+  ];
+  const aliases = Object.keys(tokens)
+    .filter((k) => fontValues.includes(resolveToken(tokens[k], tokens)))
+    .map((k) => "$" + k);
+  const values = [...new Set(["$fontFamily", ...fontValues, ...aliases])];
+  return selectField(
+    "字体 / 字体 Token",
+    "style.fontFamily",
+    node.style?.fontFamily || "$fontFamily",
+    values.map((v) => [v, v === "$fontFamily" ? "继承项目字体" : v]),
+  );
+}
+function richTextControls(node) {
+  if (!RICH_TEXT_TYPES.has(node.type)) return "";
+  return `<section class="rich-controls"><div class="panel-section-title">分段文字样式 <small>${node.textRuns?.length || 1} 段</small></div><p class="property-help">在上方文字框选中字符，再应用样式。内容编辑保留未改前后格式；新增内容继承相邻样式。</p><div class="button-row">${[
+    ["bold", "粗体"],
+    ["italic", "斜体"],
+    ["underline", "下划线"],
+    ["strike", "删除线"],
+    ["reset", "选区清格式"],
+  ]
+    .map(
+      ([key, label]) =>
+        `<button class="btn-small" data-rich-format="${key}">${label}</button>`,
+    )
+    .join(
+      "",
+    )}</div><div class="rich-value"><input id="rich-color" aria-label="选区文字颜色" value="$primary"><button class="btn-small" data-rich-format="color">应用颜色</button></div><div class="rich-value"><input id="rich-size" aria-label="选区字号" value="20"><button class="btn-small" data-rich-format="size">应用字号</button></div><button class="btn-small" data-rich-format="plain">全文清除分段格式</button></section>`;
+}
+function rememberRichRange(e) {
+  if (e.target.id !== "prop-text") return;
+  richRange = {
+    boardId: activeBoardId,
+    nodeId: activeNodeId,
+    start: e.target.selectionStart,
+    end: e.target.selectionEnd,
+  };
+}
+function richTextAction(e) {
+  const button = e.target.closest("[data-rich-format]");
+  if (!button) return false;
+  const node = activeNode(),
+    text = $("prop-text"),
+    kind = button.dataset.richFormat;
+  if (!node || !text) return true;
+  const range =
+    richRange?.nodeId === node.id && richRange?.boardId === activeBoardId
+      ? richRange
+      : { start: text.selectionStart, end: text.selectionEnd };
+  const value =
+    kind === "color"
+      ? $("rich-color").value
+      : kind === "size"
+        ? $("rich-size").value
+        : null;
+  const style = {
+    bold: { fontWeight: 700 },
+    italic: { italic: true },
+    underline: { underline: true },
+    strike: { strike: true },
+    reset: {
+      fontWeight: null,
+      fontSize: null,
+      color: null,
+      italic: null,
+      underline: null,
+      strike: null,
+    },
+    color: { color: value },
+    size: { fontSize: value?.startsWith("$") ? value : Number(value) },
+  }[kind];
+  commit((p) => {
+    const board = p.boards.find((b) => b.id === activeBoardId),
+      target = findNode(board, node.id);
+    if (isNodeLocked(board, node.id)) throw Error("Locked layer");
+    let next = replaceTextPreservingRuns(target, text.value);
+    next =
+      kind === "plain"
+        ? replacePlainText(next, next.text)
+        : applyTextStyle(next, range.start, range.end, style);
+    delete target.textRuns;
+    Object.assign(target, next);
+  });
+  return true;
+}
 function renderTokens() {
   let tokens = effectiveTokens(project);
   $("right-content").innerHTML =
-    `<div class="inspector-title">Design tokens <span class="safe-tag">GLOBAL</span></div><p class="token-help">全局色彩变量 · 修改后所有引用该 Token 的画板同步更新。</p><div class="theme-preview"><div class="swatch-line">${["primary", "primarySoft", "success", "ink", "surfaceAlt"].map((k) => `<div style="background:${esc(resolvedHex(tokens[k], "#000000"))}"></div>`).join("")}</div><p>${esc(project.title.split("—")[0].trim())} · Local tokens</p></div>${themeControls()}<div class="panel-section-title">颜色基础</div>${TOKEN_KEYS.map((k) => `<div class="token-item"><input type="color" data-token="${k}" value="${esc(resolvedHex(tokens[k], "#000000"))}"><div><b>${esc(k)}</b><span>${esc(tokens[k])}</span></div></div>`).join("")}<div class="divider"></div><div class="panel-section-title">形态与字族</div><div class="fieldrow">${f("默认圆角", "token.radius", resolveToken(tokens.radius, tokens), "number", 'min="0" max="100"')}<div class="fieldcol"><label>字体</label><select data-prop="token.fontFamily">${["system-ui", "ui-sans-serif", "Georgia", "Verdana", "Arial", ...(project.assets || []).filter((a) => a.type === "font").map((a) => "asset:" + a.id)].map((font) => `<option value="${font}" ${font === tokens.fontFamily ? "selected" : ""}>${font}</option>`).join("")}</select></div></div><div class="note-panel"><b>设计系统继承</b><p>当前项目可切换语义主题，别名和间距 Token 随主题解析。跨项目库版本同步仍待实现。</p></div>`;
+    `<div class="inspector-title">Design tokens <span class="safe-tag">GLOBAL</span></div><p class="token-help">全局色彩变量 · 修改后所有引用该 Token 的画板同步更新。</p><div class="theme-preview"><div class="swatch-line">${["primary", "primarySoft", "success", "ink", "surfaceAlt"].map((k) => `<div style="background:${esc(resolvedHex(tokens[k], "#000000"))}"></div>`).join("")}</div><p>${esc(project.title.split("—")[0].trim())} · Local tokens</p></div>${themeControls()}${tokenRowsMarkup(project)}<div class="panel-section-title">颜色基础</div>${TOKEN_KEYS.map((k) => `<div class="token-item"><input type="color" data-token="${k}" value="${esc(resolvedHex(tokens[k], "#000000"))}"><div><b>${esc(k)}</b><span>${esc(tokens[k])}</span></div></div>`).join("")}<div class="divider"></div><div class="panel-section-title">形态与字族</div><div class="fieldrow">${f("默认圆角", "token.radius", resolveToken(tokens.radius, tokens), "number", 'min="0" max="100"')}<div class="fieldcol"><label>字体</label><select data-prop="token.fontFamily">${["system-ui", "ui-sans-serif", "Georgia", "Verdana", "Arial", ...(project.assets || []).filter((a) => a.type === "font").map((a) => "asset:" + a.id)].map((font) => `<option value="${font}" ${font === tokens.fontFamily ? "selected" : ""}>${font}</option>`).join("")}</select></div></div><div class="note-panel"><b>设计系统继承</b><p>当前项目可切换语义主题，别名和间距 Token 随主题解析。跨项目库版本同步仍待实现。</p></div>`;
+}
+const auditViewSignature = () =>
+  project.boards.map((b) => b.id + ":" + previewWidth(b)).join("|");
+const renderedAuditCurrent = () =>
+  renderedAudit?.hash === hashProject(project) &&
+  renderedAudit?.view === auditViewSignature();
+async function runBrowserAudit() {
+  const hash = hashProject(project),
+    view = auditViewSignature();
+  toast("正在测量当前浏览器布局…");
+  await document.fonts.ready;
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  if (hash !== hashProject(project) || view !== auditViewSignature()) {
+    toast("设计已变化，请重新检测");
+    return;
+  }
+  const findings = project.boards.flatMap((b) => {
+    const main = $("world").querySelector(
+      `[data-artboard="${b.id}"] .df-board`,
+    );
+    return main ? auditRenderedBoard(main, { scale: zoom }) : [];
+  });
+  renderedAudit = {
+    hash,
+    view,
+    findings,
+    checkedAt: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    widths: project.boards.map((b) => ({
+      boardId: b.id,
+      width: previewWidth(b),
+    })),
+  };
+  if (rightTab === "audit") renderRight();
+  toast(`浏览器检查完成：${findings.length} 项提示`);
 }
 function renderAudit() {
-  const issues = auditProject(project);
-  const score = Math.max(0, 100 - issues.length * 4);
+  const staticIssues = auditProject(project),
+    current = renderedAuditCurrent(),
+    browserIssues = current ? renderedAudit.findings : [],
+    issues = [...staticIssues, ...browserIssues];
+  const score = Math.max(0, 100 - staticIssues.length * 4);
   $("right-content").innerHTML =
-    `<div class="inspector-title">设计质量检查 <span class="safe-tag">ON DEVICE</span></div><p class="property-help">静态检测：尺寸越界、触控热区、字级和明确声明的对比度；不假装替代真实浏览器验证。</p><div class="audit-top"><div class="audit-score">${score}</div><div><b>${issues.length ? "找到 " + issues.length + " 项建议" : "没有发现规则级问题"}</b><p>启发式评分 / 100<br>不是通过 WCAG 认证</p></div></div>${
+    `<div class="inspector-title">设计质量检查 <span class="safe-tag">ON DEVICE</span></div><p class="property-help">静态规则与当前浏览器实测分开记录。碰撞属于建议，不能自动判定设计错误，也不等同完整 WCAG 或视觉差异验收。</p><div class="button-row"><button class="btn-small primary" data-action="run-browser-audit">运行浏览器几何检查</button></div><p class="property-help" data-rendered-findings data-audit-stale="${renderedAudit && !current ? "true" : "false"}">${current ? `实测 ${browserIssues.length} 项 · ${esc(renderedAudit.checkedAt)}` : renderedAudit ? "上次浏览器结果已过期，请重新检测。" : "尚未检测当前浏览器布局。"}</p><div class="audit-top"><div class="audit-score">${score}</div><div><b>${issues.length ? `找到 ${issues.length} 项建议` : "没有发现静态规则问题"}</b><p>仅静态启发式评分 / 100<br>不是通过 WCAG 认证</p></div></div>${
       issues.length
         ? `<div class="audit-group"><h4>需要关注的元素 (${issues.length})</h4>${issues
-            .slice(0, 50)
+            .slice(0, 100)
             .map(
               (i) =>
                 `<button class="issue-row" data-auditnode="${esc(i.nodeId || "")}" data-auditboard="${esc(i.boardId)}"><strong class="issue-code">${esc(i.code)}</strong><span>${esc(i.message)}</span><small>${esc(project.boards.find((b) => b.id === i.boardId)?.name || i.boardId)} · #${esc(i.nodeId || "")}</small></button>`,
             )
             .join("")}</div>`
-        : `<div class="audit-good"><b>✓ 当前没有检测到静态规则问题</b><p>建议进一步进行截图对比、响应式测试和真实设备交互检查。</p></div>`
+        : '<div class="audit-good"><p>请进一步检查多尺寸、真实设备及视觉差异。</p></div>'
     }<div class="divider"></div><div class="button-row"><button class="btn-small primary" data-action="download-audit">导出检测报告</button><button class="btn-small" data-action="open-agent">交给 Agent 修复</button></div>`;
 }
 function agentInstruction() {
@@ -792,6 +959,22 @@ async function copyText(s) {
 function propChange(field, raw) {
   const b = activeBoard(),
     n = activeNode();
+  if (field === "text" && n && RICH_TEXT_TYPES.has(n.type)) {
+    if (isNodeLocked(b, n.id)) {
+      toast("图层或父容器已锁定");
+      return;
+    }
+    commit((p) => {
+      const target = findNode(
+        p.boards.find((q) => q.id === b.id),
+        n.id,
+      );
+      const next = replaceTextPreservingRuns(target, raw);
+      delete target.textRuns;
+      Object.assign(target, next);
+    });
+    return;
+  }
   if (field.startsWith("board.")) {
     const k = field.slice(6);
     commit((p) => {
@@ -837,6 +1020,7 @@ function propChange(field, raw) {
         "opacity",
         "strokeWidth",
         "letterSpacing",
+        "lineHeight",
       ].includes(sub) &&
       !raw.startsWith("$")
     )
@@ -950,15 +1134,7 @@ function structureControls(board, node) {
       node.variantId,
       c.variants.map((v) => [v.id, v.name || v.id]),
     );
-    const variant = c.variants.find((v) => v.id === node.variantId);
-    html += flattenNodes([variant.root])
-      .filter((e) => ["text", "button", "pill", "input"].includes(e.node.type))
-      .slice(0, 20)
-      .map(
-        ({ node: source }) =>
-          `<div class="singlefield"><label>实例文字 · ${esc(source.name)}</label><input data-instance-text="${esc(source.id)}" value="${esc(node.overrides?.[source.id]?.text ?? source.text)}"></div>`,
-      )
-      .join("");
+    html += componentPropertiesMarkup(node, project);
     html +=
       '<button class="btn-small" data-action="detach">解除实例关联</button><p class="property-help">实例继承组件定义；通过组件面板更新源容器。解除关联后可编辑子图层。</p>';
   }
@@ -1064,18 +1240,47 @@ function addToken() {
   if (!key) return;
   const raw = prompt("颜色、数字或 $alias", "16");
   if (raw === null) return;
-  commit(
-    (p) => (p.tokens[key] = /^\d+(\.\d+)?$/.test(raw) ? Number(raw) : raw),
-  );
+  commit((p) => setDesignToken(p, key, raw));
 }
 function addTheme() {
   const name = prompt("主题名称（英文 ID）", "dark");
   if (!name) return;
   commit((p) => {
+    if (Object.hasOwn(p.themes || {}, name))
+      throw Error("主题已存在，请使用新名称");
     p.themes ||= {};
     p.themes[name] = clone(effectiveTokens(p));
     p.activeTheme = name;
   });
+}
+async function importLibraryFile(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try {
+    if (file.size > 2 * 1024 * 1024) throw Error("设计系统包最多 2 MB");
+    const bundle = JSON.parse(await file.text()),
+      opts = { prefix: $("library-prefix").value.trim() };
+    const summary = summarizeDesignLibraryImport(project, bundle, opts);
+    const details = ["tokens", "themes", "components", "assets"]
+      .map(
+        (key) =>
+          `${key}: 新增 ${summary[key].added} / 已有相同 ${summary[key].reused}`,
+      )
+      .join("\n");
+    if (
+      !confirm(
+        `导入设计系统 ${summary.name}？\n${details}\n命名空间：${summary.prefix || "无"}\n保留当前画板与已有定义；可撤销。`,
+      )
+    )
+      return;
+    const next = importDesignLibrary(project, bundle, opts);
+    if (commit((p) => Object.assign(p, next)))
+      toast("设计系统已导入，可在组件/Token 面板使用");
+  } catch (error) {
+    toast("导入未保存：" + error.message);
+  } finally {
+    e.target.value = "";
+  }
 }
 function addFrame() {
   const n = {
@@ -1104,32 +1309,97 @@ function addFrame() {
     selectNode(n.id);
 }
 function groupSelection() {
-  let id = uid("group");
-  if (
-    commit((p) =>
-      groupNodes(
-        p.boards.find((b) => b.id === activeBoardId),
-        selected(),
-        id,
-      ),
+  try {
+    const data = measuredSelection({ min: 2, base: true }),
+      id = uid("group");
+    if (
+      commit((p) =>
+        groupNodes(
+          p.boards.find((b) => b.id === activeBoardId),
+          data.boxes.map((b) => b.id),
+          id,
+          { boxes: data.boxes, parentSize: data.measurements[0].parentSize },
+        ),
+      )
     )
-  )
-    selectNode(id);
+      selectNode(id);
+  } catch (error) {
+    toast(error.message);
+  }
 }
 function ungroupSelection() {
-  let ids = [];
-  if (
+  try {
+    const b = activeBoard(),
+      n = activeNode();
+    if (!n) return;
+    if (nodeScope(n) !== null) throw Error("解组前请切换基础样式");
+    const m = measureNode($("world"), b.id, n.id, zoom);
+    if (!m) throw Error("无法测量容器");
+    const style = getComputedStyle(m.element),
+      left = parseFloat(style.borderLeftWidth) || 0,
+      top = parseFloat(style.borderTopWidth) || 0;
+    const boxes = (n.children || []).map((child) => {
+      const c = measureNode($("world"), b.id, child.id, zoom);
+      if (!c || c.box.w <= 0 || c.box.h <= 0) throw Error("解组包含不可见图层");
+      return {
+        id: child.id,
+        ...c.box,
+        x: m.box.x + left + c.box.x,
+        y: m.box.y + top + c.box.y,
+      };
+    });
+    let ids = [];
+    if (
+      commit((p) => {
+        const board = p.boards.find((q) => q.id === b.id);
+        ids = ungroupNode(board, n.id, { boxes, parentSize: m.parentSize });
+        p.comments = p.comments.filter(
+          (c) => c.boardId !== b.id || c.nodeId !== n.id,
+        );
+      })
+    ) {
+      selectedIds = new Set(ids);
+      activeNodeId = ids.at(-1) || null;
+      render();
+    }
+  } catch (error) {
+    toast(error.message);
+  }
+}
+function alignSelection(alignment) {
+  try {
+    const data = measuredSelection(),
+      bounds = boundsOfBoxes(data.boxes),
+      horizontal = ["left", "center", "right"].includes(alignment),
+      axis = horizontal ? "x" : "y",
+      size = horizontal ? "w" : "h";
+    const area =
+      data.boxes.length === 1
+        ? { x: 0, y: 0, ...data.measurements[0].parentSize }
+        : bounds;
+    const positions = data.boxes.map((box) => ({
+      id: box.id,
+      [axis]:
+        alignment === "left" || alignment === "top"
+          ? area[axis]
+          : alignment === "right" || alignment === "bottom"
+            ? area[axis] + area[size] - box[size]
+            : area[axis] + (area[size] - box[size]) / 2,
+    }));
     commit((p) => {
-      const b = p.boards.find((b) => b.id === activeBoardId);
-      ids = ungroupNode(b, activeNodeId);
-      p.comments = p.comments.filter(
-        (c) => c.boardId !== b.id || c.nodeId !== activeNodeId,
-      );
-    })
-  ) {
-    selectedIds = new Set(ids);
-    activeNodeId = ids.at(-1) || null;
-    render();
+      const board = p.boards.find((b) => b.id === data.board.id);
+      positions.forEach((pos, i) => {
+        const node = findNode(board, pos.id);
+        node[axis] = positionChanges(
+          node,
+          { ...data.boxes[i], ...pos },
+          data.parent || data.board,
+          data.measurements[i].parentSize,
+        )[axis];
+      });
+    });
+  } catch (error) {
+    toast(error.message);
   }
 }
 function addBreakpoint() {
@@ -1203,6 +1473,10 @@ function updateComponent(id) {
 function detachInstance() {
   const n = activeNode();
   if (n?.type !== "instance") return;
+  if (isNodeLocked(activeBoard(), n.id)) {
+    toast("图层或父容器已锁定");
+    return;
+  }
   commit((p) => {
     const e = locateNode(
         p.boards.find((b) => b.id === activeBoardId),
@@ -1379,9 +1653,12 @@ function assetAction(e) {
 const previewWidths = new Map(),
   editScopes = new Map();
 function clearProjectView() {
+  selectedIds.clear();
   previewWidths.clear();
   editScopes.clear();
   collapsed.clear();
+  richRange = null;
+  renderedAudit = null;
   activeGuideId = null;
 }
 const scopeKey = (id = activeNodeId) => activeBoardId + ":" + id;
@@ -1664,28 +1941,82 @@ function startGuide(e, axis, id = null) {
   $("viewport").setPointerCapture(e.pointerId);
   e.preventDefault();
 }
+function measuredSelection({ min = 1, base = false } = {}) {
+  const board = activeBoard(),
+    ids = rootSelection(board, selected());
+  if (ids.length < min) throw Error(`请选择至少 ${min} 个图层`);
+  const entries = ids.map((id) => locateNode(board, id)),
+    parent = entries[0].parent;
+  if (entries.some((e) => e.parent?.id !== parent?.id))
+    throw Error("操作要求同父级图层");
+  if (entries.some((e) => isNodeLocked(board, e.node.id)))
+    throw Error("选区包含锁定图层");
+  if (
+    parent &&
+    ![undefined, "absolute"].includes(
+      effectiveNode(parent, previewWidth(board)).layout?.mode,
+    )
+  )
+    throw Error("Auto Layout 请使用 gap、排序和对齐");
+  if (base && entries.some((e) => nodeScope(e.node) !== null))
+    throw Error("多选几何操作请先切换为基础样式");
+  const measurements = entries.map((e) =>
+    measureNode($("world"), board.id, e.node.id, zoom),
+  );
+  if (measurements.some((m) => !m || m.box.w <= 0 || m.box.h <= 0))
+    throw Error("选区包含不可见图层");
+  return {
+    board,
+    entries,
+    parent,
+    measurements,
+    boxes: measurements.map((m, i) => ({ id: ids[i], ...m.box })),
+  };
+}
 function updateSelectionOverlay() {
   $("selection-overlay")?.remove();
-  if (!project) return;
-  if (gesture?.kind === "marquee") return;
+  if (!project || gesture?.kind === "marquee" || tool !== "select" || heldSpace)
+    return;
   const n = activeNode(),
     b = activeBoard();
-  if (!n || selected().length !== 1 || tool !== "select" || heldSpace) return;
-  const el = nodeElement($("world"), b.id, n.id);
-  if (!el) return;
-  const r = el.getBoundingClientRect(),
-    v = $("viewport").getBoundingClientRect();
-  if (!r.width || !r.height) return;
-  const entry = locateNode(b, n.id),
-    scope = nodeScope(n),
-    parent = entry.parent ? effectiveNode(entry.parent, previewWidth(b)) : null,
-    flow = parent?.layout?.mode && parent.layout.mode !== "absolute";
-  const handles = isNodeLocked(b, n.id)
-    ? []
-    : flow || scope !== null
-      ? ["e", "se", "s"]
-      : ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
-  const overlay = document.createElement("div");
+  if (!n || !selected().length) return;
+  let r,
+    handles = [],
+    scope = null,
+    multi = selected().length > 1;
+  if (multi) {
+    try {
+      const data = measuredSelection({ min: 2, base: true });
+      const rects = data.measurements.map((m) => {
+        const q = m.element.getBoundingClientRect();
+        return { x: q.x, y: q.y, w: q.width, h: q.height };
+      });
+      const bounds = boundsOfBoxes(rects);
+      r = { left: bounds.x, top: bounds.y, width: bounds.w, height: bounds.h };
+      if (bounds.w / zoom <= 2400 && bounds.h / zoom <= 3200)
+        handles = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+    } catch {
+      return;
+    }
+  } else {
+    const el = nodeElement($("world"), b.id, n.id);
+    if (!el) return;
+    r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const entry = locateNode(b, n.id);
+    scope = nodeScope(n);
+    const parent = entry.parent
+      ? effectiveNode(entry.parent, previewWidth(b))
+      : null;
+    const flow = parent?.layout?.mode && parent.layout.mode !== "absolute";
+    handles = isNodeLocked(b, n.id)
+      ? []
+      : flow || scope !== null
+        ? ["e", "se", "s"]
+        : ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+  }
+  const v = $("viewport").getBoundingClientRect(),
+    overlay = document.createElement("div");
   overlay.id = "selection-overlay";
   overlay.className = "selection-overlay";
   Object.assign(overlay.style, {
@@ -1698,10 +2029,10 @@ function updateSelectionOverlay() {
     handles
       .map(
         (h) =>
-          `<button type="button" tabindex="-1" class="resize-handle ${h}" data-resize-handle="${h}" aria-label="调整 ${esc(n.name || n.type)} ${h}" title="拖动调整尺寸；Shift 等比，Alt 从中心（自由布局）"></button>`,
+          `<button type="button" tabindex="-1" class="resize-handle ${h}" data-resize-handle="${h}" aria-label="调整 ${multi ? "多选" : esc(n.name || n.type)} ${h}" title="拖动调整图层盒子；Shift 等比，Alt 从中心"></button>`,
       )
       .join("") +
-    `<span class="selection-size">${Math.round(r.width / zoom)} × ${Math.round(r.height / zoom)}${scope !== null ? " · ≤" + scope : ""}</span>`;
+    `<span class="selection-size">${multi ? selected().length + " 层 · " : ""}${Math.round(r.width / zoom)} × ${Math.round(r.height / zoom)}${scope !== null ? " · ≤" + scope : ""}</span>`;
   $("viewport").appendChild(overlay);
 }
 function startMarquee(e, boardId, clickNodeId = null) {
@@ -1777,6 +2108,26 @@ function cancelGesture() {
 function startResize(e, handle) {
   const b = activeBoard(),
     n = activeNode();
+  if (selected().length > 1) {
+    try {
+      const data = measuredSelection({ min: 2, base: true });
+      gesture = {
+        kind: "multi-resize",
+        boardId: b.id,
+        startX: e.clientX,
+        startY: e.clientY,
+        pointerId: e.pointerId,
+        handle,
+        ...data,
+        result: { boxes: data.boxes, bounds: boundsOfBoxes(data.boxes) },
+      };
+      $("viewport").setPointerCapture(e.pointerId);
+      e.preventDefault();
+    } catch (error) {
+      toast(error.message);
+    }
+    return;
+  }
   if (!n || isNodeLocked(b, n.id) || selected().length !== 1) return;
   const measured = measureNode($("world"), b.id, n.id, zoom);
   if (!measured) return;
@@ -1814,6 +2165,14 @@ function bindStatic() {
   $("tool-select").onclick = () => setTool("select");
   $("tool-hand").onclick = () => setTool("hand");
   $("upload-asset").onchange = importAsset;
+  $("upload-library").onchange = importLibraryFile;
+  $("export-library").onclick = () =>
+    download(
+      JSON.stringify(exportDesignLibrary(project), null, 2),
+      safeName(project.title) + ".library.json",
+      "application/json",
+    );
+  $("import-library").onclick = () => $("upload-library").click();
   $("asset-list").onclick = assetAction;
   $("add-frame").onclick = () => addFrame();
   $("theme-toggle").onclick = toggleEditorTheme;
@@ -1977,7 +2336,34 @@ function bindStatic() {
       commit((p) => (p.comments = p.comments.filter((c) => c.id !== id)));
     }
   };
+  $("right-content").addEventListener("select", rememberRichRange, true);
+  $("right-content").addEventListener("pointerdown", (e) => {
+    if (e.target.closest("[data-rich-format]")) e.preventDefault();
+  });
   $("right-content").addEventListener("change", (e) => {
+    const component = e.target.closest("[data-component-field]");
+    if (component) {
+      commit((p) => {
+        const b = p.boards.find((b) => b.id === activeBoardId);
+        if (isNodeLocked(b, activeNodeId)) throw Error("Locked layer");
+        applyComponentProperty(
+          findNode(b, activeNodeId),
+          p,
+          component.dataset.componentSource,
+          component.dataset.componentField,
+          component.value,
+        );
+      });
+      return;
+    }
+    const designToken = e.target.closest("[data-design-token]");
+    if (designToken) {
+      commit((p) =>
+        setDesignToken(p, designToken.dataset.designToken, designToken.value),
+      );
+      return;
+    }
+
     if (e.target.matches("[data-guide-position]")) {
       const id = e.target.dataset.guidePosition,
         value = Number(e.target.value);
@@ -2045,6 +2431,32 @@ function bindStatic() {
     if (e.target.id === "agent-brief") briefText = e.target.value;
   });
   $("right-content").addEventListener("click", (e) => {
+    if (richTextAction(e)) return;
+    const resetComponent = e.target.closest("[data-component-reset]");
+    if (resetComponent) {
+      commit((p) => {
+        const b = p.boards.find((b) => b.id === activeBoardId);
+        if (isNodeLocked(b, activeNodeId)) throw Error("Locked layer");
+        resetComponentProperty(
+          findNode(b, activeNodeId),
+          resetComponent.dataset.componentSource,
+          resetComponent.dataset.componentReset,
+          p,
+        );
+      });
+      return;
+    }
+    const resetToken = e.target.closest("[data-token-reset]"),
+      deleteToken = e.target.closest("[data-token-delete]");
+    if (resetToken || deleteToken) {
+      commit((p) =>
+        resetToken
+          ? resetThemeToken(p, resetToken.dataset.tokenReset)
+          : deleteDesignToken(p, deleteToken.dataset.tokenDelete),
+      );
+      return;
+    }
+
     if (guideAction(e)) return;
     const distribute = e.target.closest("[data-distribute]");
     if (distribute) {
@@ -2054,13 +2466,7 @@ function bindStatic() {
     if (breakpointAction(e)) return;
     const al = e.target.closest("[data-align]");
     if (al) {
-      commit((p) =>
-        alignNodes(
-          p.boards.find((b) => b.id === activeBoardId),
-          selected(),
-          al.dataset.align,
-        ),
-      );
+      alignSelection(al.dataset.align);
       return;
     }
     const a = e.target.closest("[data-action]");
@@ -2153,10 +2559,26 @@ function bindStatic() {
           );
           toast("Patch 模板已导出，按需编辑再用 CLI 应用");
           break;
+        case "run-browser-audit":
+          runBrowserAudit().catch((error) => toast(error.message));
+          break;
         case "download-audit":
           download(
             JSON.stringify(
-              { project: project.title, findings: auditProject(project) },
+              {
+                project: project.title,
+                findings: auditProject(project),
+                renderedFindings: renderedAuditCurrent()
+                  ? renderedAudit.findings
+                  : null,
+                renderedContext: renderedAuditCurrent()
+                  ? {
+                      checkedAt: renderedAudit.checkedAt,
+                      userAgent: renderedAudit.userAgent,
+                      widths: renderedAudit.widths,
+                    }
+                  : null,
+              },
               null,
               2,
             ),
@@ -2221,13 +2643,17 @@ function bindStatic() {
     ) {
       const change = prompt("修改元素文字", n.text);
       if (change !== null)
-        commit(
-          (p) =>
-            (findNode(
-              p.boards.find((q) => q.id === bid),
-              n.id,
-            ).text = change),
-        );
+        commit((p) => {
+          const target = findNode(
+            p.boards.find((q) => q.id === bid),
+            n.id,
+          );
+          if (RICH_TEXT_TYPES.has(target.type)) {
+            const next = replaceTextPreservingRuns(target, change);
+            delete target.textRuns;
+            Object.assign(target, next);
+          } else target.text = change;
+        });
     }
   });
   window.addEventListener("resize", () =>
@@ -2438,6 +2864,22 @@ function onPointerMove(e) {
     $("selection-path").textContent = ids.length + " 个图层";
     return;
   }
+  if (gesture.kind === "multi-resize") {
+    const g = gesture;
+    g.result = resizeSelectionBoxes(g.boxes, g.handle, dx / zoom, dy / zoom, {
+      ratio: e.shiftKey,
+      center: e.altKey,
+      grid: $("snap-toggle").checked && !e.altKey ? 8 : 1,
+    });
+    g.result.boxes.forEach((box, i) =>
+      paintResize(g.measurements[i].element, box, {
+        width: /[ew]/.test(g.handle),
+        height: /[ns]/.test(g.handle),
+      }),
+    );
+    updateSelectionOverlay();
+    return;
+  }
   if (gesture.kind === "resize") {
     const g = gesture,
       width = /[ew]/.test(g.handle),
@@ -2574,6 +3016,26 @@ function onPointerUp(e) {
     dy = e.clientY - g.startY;
   if (Math.abs(dx) + Math.abs(dy) < 3) {
     render();
+    return;
+  }
+  if (g.kind === "multi-resize") {
+    commit((p) => {
+      const board = p.boards.find((b) => b.id === g.boardId);
+      g.result.boxes.forEach((box, i) => {
+        if (isNodeLocked(board, box.id)) throw Error("Locked layer");
+        const node = findNode(board, box.id);
+        Object.assign(
+          node,
+          geometryChanges(
+            node,
+            box,
+            g.parent || g.board,
+            g.measurements[i].parentSize,
+            { width: /[ew]/.test(g.handle), height: /[ns]/.test(g.handle) },
+          ),
+        );
+      });
+    });
     return;
   }
   if (g.kind === "resize") {
@@ -2754,9 +3216,7 @@ function onKeyDown(e) {
     ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key) &&
     activeNode()
   ) {
-    const delta = e.shiftKey ? 10 : 1,
-      n = activeNode(),
-      bid = activeBoardId;
+    const delta = e.shiftKey ? 10 : 1;
     const direction = {
       ArrowUp: ["y", -delta],
       ArrowDown: ["y", delta],
@@ -2764,13 +3224,28 @@ function onKeyDown(e) {
       ArrowRight: ["x", delta],
     }[e.key];
     e.preventDefault();
-    commit((p) => {
-      const cur = findNode(
-        p.boards.find((q) => q.id === bid),
-        n.id,
-      );
-      cur[direction[0]] += direction[1];
-    });
+    try {
+      const data = measuredSelection();
+      commit((p) => {
+        const board = p.boards.find((b) => b.id === data.board.id);
+        data.entries.forEach((entry, i) => {
+          const node = findNode(board, entry.node.id),
+            box = data.measurements[i].box;
+          const actual = {
+            ...box,
+            [direction[0]]: box[direction[0]] + direction[1],
+          };
+          node[direction[0]] = positionChanges(
+            node,
+            actual,
+            data.parent || data.board,
+            data.measurements[i].parentSize,
+          )[direction[0]];
+        });
+      });
+    } catch (error) {
+      toast(error.message);
+    }
   }
 }
 async function init() {
