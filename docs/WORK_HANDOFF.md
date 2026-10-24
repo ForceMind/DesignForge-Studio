@@ -21,7 +21,7 @@
 
 首轮 40 Node + 21 Chromium 全部通过；后续新增资产/拖动与纵向断言，曾发现初次打开尚未持久化导致读空存档，已修复。最终代码基线 1310e3b 的 CI 已通过 53 Node + 26 Chrome 测试；下载并复核截图，修复 CI 中文字体后，真实截图保存到 docs/screenshots。最新结果仍须以 VALIDATION.md 和对应 head 的 Actions 为准。
 
-尺寸拖拽、断点修改范围/逐字段恢复、矩形框选已在 alpha.2 接入；下一步优先参考线/标尺、多选整体缩放、富文本、组件属性及通用几何检测。跨项目库、更多浏览器、M2 的 BYOK/局部 Agent 与可视化 Diff 尚未完成。
+alpha.2 产品代码 452a628 的 [CI run 15](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40055061632) 已通过 65 Node + 43 Chrome 用例；三张原始截图已下载、人工查看并保存。尺寸拖拽、断点修改范围/逐字段恢复、矩形框选已在 alpha.2 接入；下一步优先参考线/标尺、多选整体缩放、富文本、组件属性及通用几何检测。跨项目库、更多浏览器、M2 的 BYOK/局部 Agent 与可视化 Diff 尚未完成。
 
 ## 边界
 

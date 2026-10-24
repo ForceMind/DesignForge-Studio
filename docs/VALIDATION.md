@@ -62,6 +62,23 @@
 - 基线：PR #1 / a111d1d；原 53 项 Node、26 项 Chrome 回归继续保留。
 - 第一阶段：[CI run 10](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40053806900)，61 Node + 33 真实浏览器用例通过，覆盖尺寸手柄、取消、撤销/回读、约束反解、断点编辑/继承/重置及父布局重排。
 - 第二阶段：[CI run 11](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40054204854)，64 Node 通过，浏览器 34/37 通过。三个框选用例发现容器背景被误判为移动操作，已调整优先级；不删除断言，保留该轮失败记录。
-- 后续补充跨项目临时状态隔离、锁定动作边界、文本输入原生撤销，以及组件响应式投影隔离；当前 64 Node 本地通过，浏览器共 41 项。最终结果在实际完成后记录。
+- 后续补充跨项目临时状态隔离、锁定动作边界、文本输入原生撤销，以及组件响应式投影隔离；该阶段本地 64 Node 通过，浏览器扩大到 41 项；最终结果见下方。
 
 - [CI run 12](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40054449008)：64 Node 通过，浏览器 39/40 通过。框选数据与选区已正确；后续快捷键用例发现焦点仍停在吸附复选框，导致组合快捷键被当作输入控件操作忽略。画布操作现在显式聚焦 viewport，再运行原测试核对。
+
+
+### alpha.2 最终验收
+
+- 产品代码：`452a6287a4e700bcecb0f85d56cf4ab3e6b059be`，版本 `0.2.0-alpha.2`。
+- [CI run 15](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40055061632)：verify / browser 均 success；**65 Node + 43 真实 Chrome 测试通过**，原用例保留。浏览器为 Google Chrome 155.0.8059.39，43 项约 40.1 秒。
+- 新增回归包含约束反解、断点字段继承/恢复、父布局切换、框选、锁定及输入焦点、同 ID 项目切换、组件投影隔离、Flex 主轴切换，以及父级宽度覆盖时未显式填写 referenceW 的右边距保持。
+- 响应式规则只为受影响节点及后代生成。100 个独立节点/200 个不同宽度的压力用例断言规则为 200 条、输出小于 180 KB，防止无关断点形成平方级 CSS；这不是大型项目性能基准。
+- 下载 artifact `12544882139` 并实际查看以下三张原始 PNG，未加工：尺寸手柄/Inspector 数值可见；断点编辑范围和字段恢复入口可见；多选图层与画布高亮同步。截图中文可读。
+
+| 原始截图 | 证明的范围 |
+|---|---|
+| [尺寸交互](screenshots/m1-resize.png) | 单选手柄、206 × 106 实际尺寸及 Inspector 同步 |
+| [断点编辑](screenshots/m1-breakpoints.png) | 500px 独立预览、修改范围、700/500px 断点与字段恢复 |
+| [矩形框选](screenshots/m1-marquee.png) | 两个兄弟图层的树/画布多选同步 |
+
+断点截图的测试容器刻意保持 fixed 640px，在 500px 预览中可见溢出；它用于验证范围编辑和继承，不作为响应式页面无溢出的证据。截图不是 golden image Diff；Firefox/WebKit、真机、触屏和完整 WCAG 仍未验收。完整 M1 仍有富文本、标尺/参考线、多选整体缩放等缺口。

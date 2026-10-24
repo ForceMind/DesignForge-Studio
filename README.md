@@ -44,7 +44,7 @@ CI 分开运行 Node 测试和真实 Chrome（Chromium 引擎）测试，浏览�
 
 ![深色设计工作台](docs/screenshots/editor-dark.png)
 
-[1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
+[尺寸手柄](docs/screenshots/m1-resize.png) · [断点编辑](docs/screenshots/m1-breakpoints.png) · [框选](docs/screenshots/m1-marquee.png) · [1024px 编辑器](docs/screenshots/editor-1024.png) · [390px 响应式导出](docs/screenshots/studio-mobile.png) · [验收范围及限制](docs/VALIDATION.md)
 
 ## 使用 Agent
 
@@ -65,7 +65,7 @@ M1 的富文本、断点可视化范围条、参考线/标尺、复杂组件属�
 
 ## 工程与许可
 
-`src/core.mjs` 协议/渲染/补丁，`tree.mjs` 树编辑，`geometry.mjs` 吸附，`assets.mjs` 资源边界，`storage.mjs` 本地恢复；`app.mjs`/`app.css` 工作台，`tools/` CLI/开发服务器，`tests/` 单元与浏览器测试，`examples/` 可编辑项目。
+`src/core.mjs` 协议/渲染/补丁，`tree.mjs` 树编辑，`geometry.mjs` 尺寸/框选/吸附，`responsive.mjs` 断点继承，`viewport.mjs` DOM 测量/预览，`assets.mjs` 资源边界，`storage.mjs` 本地恢复；`app.mjs`/`app.css` 工作台，`tools/` CLI/开发服务器，`tests/` 单元与浏览器测试，`examples/` 可编辑项目。
 
 原创代码 MIT。独立实现，没有复制 BaoCut 受限源码或品牌资源，不是 BaoCut / Anthropic 官方产品。研究来源和许可说明见 [RESEARCH](docs/RESEARCH.md)。
 
