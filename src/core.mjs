@@ -933,6 +933,8 @@ function colorStyle(node, tokens, board, parent = board) {
   if (Number.isFinite(radius))
     parts.push(`border-radius:${px(clamp(radius, 0, 200))}`);
   if (node.type === "circle") parts.push("border-radius:50%");
+  if (node.type === "icon")
+    parts.push(`color:${cssColor(s.color, tokens, "#202238")}`);
   if (["text", "button", "pill", "input"].includes(node.type)) {
     parts.push(
       `color:${cssColor(s.color, tokens, "#202238")}`,
@@ -1162,7 +1164,7 @@ export function renderNode(
   if (node.type === "input")
     return `<input class="df-node df-input" aria-label="${content}" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}" placeholder="${content}" readonly />`;
   if (node.type === "icon")
-    return `<div class="df-node df-icon" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="${cssColor(node.style?.color, tokens, "#202238")}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${Object.hasOwn(ICONS, node.icon) ? ICONS[node.icon] : ICONS.grid}</svg></div>`;
+    return `<div class="df-node df-icon" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${Object.hasOwn(ICONS, node.icon) ? ICONS[node.icon] : ICONS.grid}</svg></div>`;
   if (node.type === "line")
     return `<div class="df-node df-line" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st};border-top:${clamp(scalar(node.style?.strokeWidth, tokens, 1), 1, 10, 1)}px solid ${cssColor(node.style?.stroke, tokens, "#E4E7F0")}"></div>`;
   return wrap;

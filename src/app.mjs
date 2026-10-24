@@ -1459,7 +1459,7 @@ function alignSelection(alignment) {
       positions.forEach((pos, i) => {
         const node = findNode(board, pos.id);
         node[axis] = positionChanges(
-          node,
+          effectiveNode(node, previewWidth(data.board)),
           { ...data.boxes[i], ...pos },
           data.parent || data.board,
           data.measurements[i].parentSize,
@@ -1878,7 +1878,7 @@ function distributeSelection(axis) {
         const i = ids.indexOf(position.id),
           n = findNode(board, position.id);
         n[axis] = positionChanges(
-          n,
+          effectiveNode(n, previewWidth(b)),
           { ...measured[i].box, ...position },
           parent || b,
           measured[i].parentSize,
@@ -2869,6 +2869,8 @@ function onPointerDown(e) {
             id,
             x: m?.box.x ?? entry.node.x,
             y: m?.box.y ?? entry.node.y,
+            w: m?.box.w ?? entry.node.w,
+            h: m?.box.h ?? entry.node.h,
             parentId: entry.parent?.id || null,
           };
         })
@@ -3030,8 +3032,11 @@ function onPointerMove(e) {
     for (const start of gesture.positions) {
       const el = shell.querySelector(`[data-node-id="${start.id}"]`);
       if (el) {
-        el.style.left = start.x + pos.x - gesture.x + "px";
-        el.style.top = start.y + pos.y - gesture.y + "px";
+        paintResize(
+          el,
+          { x: start.x + pos.x - gesture.x, y: start.y + pos.y - gesture.y },
+          { width: false, height: false },
+        );
       }
     }
     shell.querySelectorAll(".snap-guide").forEach((el) => el.remove());
@@ -3155,8 +3160,12 @@ function onPointerUp(e) {
           Object.assign(
             n,
             positionChanges(
-              n,
-              { x: start.x + pos.x - g.x, y: start.y + pos.y - g.y },
+              effectiveNode(n, previewWidth(board)),
+              {
+                ...start,
+                x: start.x + pos.x - g.x,
+                y: start.y + pos.y - g.y,
+              },
               g.parentDesign,
               g.measured.parentSize,
             ),
@@ -3320,7 +3329,7 @@ function onKeyDown(e) {
             [direction[0]]: box[direction[0]] + direction[1],
           };
           node[direction[0]] = positionChanges(
-            node,
+            effectiveNode(node, previewWidth(data.board)),
             actual,
             data.parent || data.board,
             data.measurements[i].parentSize,

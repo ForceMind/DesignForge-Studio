@@ -43,7 +43,7 @@ export function snapPosition(
     sy = axis(y, node.h, targetsY);
   return { x: sx.value, y: sy.value, guideX: sx.guide, guideY: sy.guide };
 }
-/** Translate actual geometry back into the unchanged design constraint space. */
+/** Invert positioning without changing sizing; node is the effective preview node. */
 export function positionChanges(node, position, parentDesign, parentActual) {
   const changes = {};
   for (const [axis, pos, size, reference] of [
@@ -54,7 +54,8 @@ export function positionChanges(node, position, parentDesign, parentActual) {
       actual = parentActual[size],
       rule = node.constraints?.[axis] || "start";
     let value = position[pos];
-    if (rule === "end") value += baseline - actual;
+    if (rule === "end")
+      value += baseline - actual + (position[size] ?? node[size]) - node[size];
     if (rule === "center") value += (baseline - actual) / 2;
     if (rule === "scale") value *= baseline / actual;
     changes[pos] = Math.round(value * 100) / 100;
