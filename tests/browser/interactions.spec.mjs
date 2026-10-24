@@ -475,3 +475,20 @@ test("exported responsive component descendants are isolated by instance despite
     page.locator(`[data-node-id="second"] [data-source-id="${sourceId}"]`),
   ).toHaveCSS("color", "rgb(255, 255, 255)");
 });
+
+test("row-to-column breakpoint clears inherited flex growth on fixed-height children", async ({
+  page,
+}) => {
+  const p = project(),
+    frame = p.boards[0].nodes[0];
+  frame.layout = { mode: "flex", direction: "row", padding: 20, gap: 12 };
+  frame.children[0].sizing = { w: "fill", h: "fixed" };
+  frame.responsive = [
+    { maxWidth: 500, changes: { layout: { direction: "column" } } },
+  ];
+  await open(page, p);
+  await page.locator("#preview-width").selectOption("390");
+  const el = page.locator('[data-node-id="one"]');
+  await expect(el).toHaveCSS("flex-grow", "0");
+  await expect(el).toHaveCSS("height", "80px");
+});

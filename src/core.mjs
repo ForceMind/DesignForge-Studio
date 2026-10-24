@@ -879,6 +879,7 @@ function layoutStyle(node, tokens, parent) {
   if (flow)
     p.push(
       "position:relative",
+      "flex:0 0 auto",
       "left:auto",
       "top:auto",
       "flex-shrink:0",
@@ -987,18 +988,23 @@ function responsiveStyles(board, tokens, project) {
     };
   }
   const entries = flattenNodes(board.nodes.map((n) => expand(n))),
-    widths = [
-      ...new Set(
-        entries.flatMap(({ node }) =>
-          (node.responsive || []).map((r) => r.maxWidth),
-        ),
-      ),
-    ].sort((a, b) => b - a);
+    affected = new Map();
+  // A node needs a new rule only for its own override or its immediate layout owner.
+  // This bounds emitted CSS by tree edges × scopes instead of all nodes × all widths.
+  for (const entry of entries)
+    for (const rule of [
+      ...(entry.node.responsive || []),
+      ...(entry.parent?.responsive || []),
+    ]) {
+      if (!affected.has(rule.maxWidth)) affected.set(rule.maxWidth, new Set());
+      affected.get(rule.maxWidth).add(entry);
+    }
+  const widths = [...affected.keys()].sort((a, b) => b - a);
   return widths.length
     ? `<style>${widths
         .map(
           (width) =>
-            `@container (max-width:${px(width)}){${entries
+            `@container (max-width:${px(width)}){${[...affected.get(width)]
               .map(({ node, parent }) => {
                 const current = effectiveNode(node, width),
                   owner = parent ? effectiveNode(parent, width) : board;

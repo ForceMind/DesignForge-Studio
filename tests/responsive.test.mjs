@@ -7,7 +7,7 @@ import {
   resetScopedField,
   activeBreakpoint,
 } from "../src/responsive.mjs";
-import { validateProject } from "../src/core.mjs";
+import { validateProject, renderBoard } from "../src/core.mjs";
 const node = () => ({
   id: "node",
   w: 400,
@@ -77,4 +77,31 @@ test("scopes reject structural edits, and project validation rejects duplicate w
   assert.ok(
     validateProject(p).some((i) => i.reason.includes("Duplicate breakpoint")),
   );
+});
+
+test("many independent breakpoint widths do not multiply CSS across unrelated siblings", () => {
+  const p = JSON.parse(
+      fs.readFileSync(
+        new URL("../examples/Studio.project.json", import.meta.url),
+      ),
+    ),
+    b = p.boards[0];
+  b.nodes = Array.from({ length: 100 }, (_, i) => ({
+    id: "perf" + i,
+    name: "Metric",
+    type: "rect",
+    x: 0,
+    y: 0,
+    w: 100,
+    h: 50,
+    text: "",
+    style: { fill: "#FFFFFF" },
+    responsive: [
+      { maxWidth: 300 + i, changes: { style: { fill: "#123456" } } },
+      { maxWidth: 700 + i, changes: { style: { fill: "#654321" } } },
+    ],
+  }));
+  const html = renderBoard(b, p.tokens, p);
+  assert.equal((html.match(/\[data-board-id=/g) || []).length, 200);
+  assert.ok(html.length < 180000);
 });
