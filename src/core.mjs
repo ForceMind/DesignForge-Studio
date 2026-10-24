@@ -1,5 +1,6 @@
 import { effectiveNode } from "./responsive.mjs";
 import { validateAssets } from "./assets.mjs";
+import { validateGuides } from "./guides.mjs";
 import {
   CONTAINERS,
   flattenNodes,
@@ -251,6 +252,8 @@ export function validateProject(project) {
       error(p + ".position", "Board position must be numeric");
     if (board.autoHeight !== undefined && typeof board.autoHeight !== "boolean")
       error(p + ".autoHeight", "Auto height requires one root container");
+    for (const reason of validateGuides(board.guides))
+      error(p + ".guides", reason);
     if (!Array.isArray(board.nodes) || board.nodes.length > 500) {
       error(p + ".nodes", "Expected <= 500 nodes");
       continue;
@@ -1133,7 +1136,7 @@ export function diffProjects(before, after) {
       changes.push({ kind: "board-added", boardId: id, name: board.name });
       continue;
     }
-    for (const field of ["x", "y", "w", "h", "bg", "autoHeight"])
+    for (const field of ["x", "y", "w", "h", "bg", "autoHeight", "guides"])
       if (JSON.stringify(previous[field]) !== JSON.stringify(board[field]))
         changes.push({
           kind: "board-changed",

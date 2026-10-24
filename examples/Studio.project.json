@@ -970,6 +970,20 @@
             "referenceW": 1200
           }
         }
+      ],
+      "guides": [
+        {
+          "id": "contentInset",
+          "axis": "x",
+          "position": 32,
+          "locked": true
+        },
+        {
+          "id": "headerBaseline",
+          "axis": "y",
+          "position": 96,
+          "hidden": true
+        }
       ]
     },
     {

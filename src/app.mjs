@@ -7,7 +7,15 @@ import {
 } from "./responsive.mjs";
 import { nodeElement, measureNode, paintResize } from "./viewport.mjs";
 import {
+  addGuide,
+  updateGuide,
+  removeGuide,
+  guideTargets,
+  rulerTicks,
+} from "./guides.mjs";
+import {
   snapPosition,
+  positionChanges,
   resizeBox,
   geometryChanges,
   boxFromPoints,
@@ -77,6 +85,8 @@ let zoom = 0.58,
 const storageKey = PROJECT_KEY;
 let selectedIds = new Set(),
   collapsed = new Set();
+let rulersVisible = true,
+  activeGuideId = null;
 const selected = () =>
   [...selectedIds].filter((id) => findNode(activeBoard(), id));
 const saveStatus = $("save-status");
@@ -138,12 +148,14 @@ const activeBoard = () =>
   project.boards.find((b) => b.id === activeBoardId) || project.boards[0];
 const activeNode = () => findNode(activeBoard(), activeNodeId) || null;
 function switchBoard(id) {
+  activeGuideId = null;
   activeBoardId = id;
   activeNodeId = null;
   selectedIds.clear();
   render();
 }
 function selectNode(id, boardId = activeBoardId, add = false) {
+  activeGuideId = null;
   if (boardId !== activeBoardId) selectedIds.clear();
   activeBoardId = boardId;
   if (add) {
@@ -162,6 +174,11 @@ function setTool(t) {
 }
 function render() {
   if (!project) return;
+  if (
+    gesture?.kind !== "guide" &&
+    !activeBoard().guides?.some((g) => g.id === activeGuideId)
+  )
+    activeGuideId = null;
   $("project-title").textContent = project.title;
   document.querySelector(".project-visual").textContent =
     project.title[0].toUpperCase();
@@ -316,6 +333,7 @@ function renderCanvas() {
       }
     }
     updateSelectionOverlay();
+    updateGuideOverlay();
   });
 }
 function updateWorld() {
@@ -323,6 +341,7 @@ function updateWorld() {
     `translate(${pan.x}px,${pan.y}px) scale(${zoom})`;
   $("zoom-label").textContent = `${Math.round(zoom * 100)}%`;
   updateSelectionOverlay();
+  updateGuideOverlay();
 }
 function fitAll() {
   if (!project?.boards.length) return;
@@ -419,7 +438,7 @@ function renderProperties() {
           ["false", "固定高度"],
           ["true", "内容撑开（单根容器）"],
         ],
-      )}<div class="fieldrow">${f("宽度 (px)", "board.w", b.w, "number", 'min="280" max="2400"')}${f("高度 (px)", "board.h", b.h, "number", 'min="280" max="3200"')}</div><div class="singlefield"><label>画板背景</label><input data-prop="board.bg" type="color" value="${esc(b.bg)}"></div><div class="board-settings"><button class="btn-small" data-action="duplicate-board">复制画板</button><button class="btn-small danger" data-action="delete-board">删除画板</button></div><div class="divider"></div><div class="note-panel"><b>✦ 设计不是一次性的图片</b><p>每个界面由可编辑元素组成，内容和位置可以单独修改，再导出成为无依赖的 HTML。</p><button data-action="add-comment">添加画板反馈 →</button></div>`;
+      )}<div class="fieldrow">${f("宽度 (px)", "board.w", b.w, "number", 'min="280" max="2400"')}${f("高度 (px)", "board.h", b.h, "number", 'min="280" max="3200"')}</div><div class="singlefield"><label>画板背景</label><input data-prop="board.bg" type="color" value="${esc(b.bg)}"></div><div class="board-settings"><button class="btn-small" data-action="duplicate-board">复制画板</button><button class="btn-small danger" data-action="delete-board">删除画板</button></div><div class="divider"></div>${guideControls(b)}<div class="note-panel"><b>✦ 设计不是一次性的图片</b><p>每个界面由可编辑元素组成，内容和位置可以单独修改，再导出成为无依赖的 HTML。</p><button data-action="add-comment">添加画板反馈 →</button></div>`;
     return;
   }
   const st = n.style || {};
@@ -1362,6 +1381,7 @@ function clearProjectView() {
   previewWidths.clear();
   editScopes.clear();
   collapsed.clear();
+  activeGuideId = null;
 }
 const scopeKey = (id = activeNodeId) => activeBoardId + ":" + id;
 const previewWidth = (board = activeBoard()) =>
@@ -1480,6 +1500,126 @@ function breakpointAction(event) {
   }
   return false;
 }
+function guideControls(board) {
+  return `<section class="guide-settings"><div class="panel-section-title">参考线 <small>${(board.guides || []).length}/100</small></div><p class="property-help">从标尺拖出；拖出画板可删除。坐标相对画板，预览宽度不缩放参考线。隐藏的线不参与吸附，锁定的线仍参与。</p>${(board.guides || []).map((g) => `<div class="guide-row ${activeGuideId === g.id ? "active" : ""}"><span>${g.axis.toUpperCase()}</span><input type="number" min="0" max="10000" step="1" value="${g.position}" data-guide-position="${esc(g.id)}" aria-label="参考线 ${esc(g.id)} 坐标" ${g.locked ? "disabled" : ""}><button class="btn-small" data-guide-action="hidden" data-guide="${esc(g.id)}" aria-label="${g.hidden ? "显示" : "隐藏"}参考线 ${esc(g.id)}" ${g.locked ? "disabled" : ""}>${g.hidden ? "显示" : "隐藏"}</button><button class="btn-small" data-guide-action="locked" data-guide="${esc(g.id)}">${g.locked ? "解锁" : "锁定"}</button><button class="btn-small danger" data-guide-action="remove" data-guide="${esc(g.id)}" aria-label="删除参考线 ${esc(g.id)}" ${g.locked ? "disabled" : ""}>×</button></div>`).join("")}<div class="guide-add"><select id="guide-axis" aria-label="新增参考线方向"><option value="x">垂直 X</option><option value="y">水平 Y</option></select><input id="guide-position" type="number" min="0" max="10000" value="40" aria-label="新增参考线坐标"><button class="btn-small" data-guide-action="add">添加</button></div><div class="divider"></div></section>`;
+}
+function guideAction(e) {
+  const button = e.target.closest("[data-guide-action]");
+  if (!button) return false;
+  const action = button.dataset.guideAction,
+    id = button.dataset.guide;
+  const axis = $("guide-axis")?.value,
+    position = Number($("guide-position")?.value);
+  commit((p) => {
+    const b = p.boards.find((b) => b.id === activeBoardId);
+    if (action === "add") addGuide(b, { id: uid("guide"), axis, position });
+    else if (action === "remove") removeGuide(b, id);
+    else {
+      const g = b.guides.find((g) => g.id === id);
+      updateGuide(b, id, { [action]: !g[action] });
+    }
+  });
+  return true;
+}
+function boardMeasurement(board = activeBoard()) {
+  const main = $("world").querySelector(
+    `[data-artboard="${board.id}"] .df-board`,
+  );
+  return main?.getBoundingClientRect();
+}
+function updateGuideOverlay() {
+  $("guide-overlay")?.remove();
+  $("rulers-toggle").classList.toggle("selected", rulersVisible);
+  $("rulers-toggle").setAttribute("aria-pressed", String(rulersVisible));
+  if (!project || !rulersVisible) return;
+  const b = activeBoard(),
+    rect = boardMeasurement(b),
+    view = $("viewport").getBoundingClientRect();
+  if (!rect) return;
+  const x = rect.left - view.left,
+    y = rect.top - view.top;
+  const tickMarkup = (axis, origin, length) =>
+    rulerTicks(origin, zoom, length)
+      .map(
+        (t) =>
+          `<span class="ruler-tick ${t.major ? "major" : ""}" style="${axis === "x" ? "left" : "top"}:${t.pixel}px">${t.major ? `<i>${t.value}</i>` : ""}</span>`,
+      )
+      .join("");
+  const g = gesture?.kind === "guide" ? gesture : null;
+  const guides = (b.guides || []).filter(
+    (line) => !line.hidden && line.id !== g?.id,
+  );
+  if (g && !g.outside)
+    guides.push({ id: g.id, axis: g.axis, position: g.position });
+  const overlay = document.createElement("div");
+  overlay.id = "guide-overlay";
+  overlay.innerHTML =
+    `<button type="button" class="ruler horizontal" data-ruler-axis="x" aria-label="水平标尺，拖动创建垂直参考线" title="拖出垂直参考线 · 相对 ${esc(b.name)}">${tickMarkup("x", x, view.width)}</button><button type="button" class="ruler vertical" data-ruler-axis="y" aria-label="垂直标尺，拖动创建水平参考线" title="拖出水平参考线 · 相对 ${esc(b.name)}">${tickMarkup("y", y, view.height)}</button><button type="button" class="ruler-corner" data-guide-inspector aria-label="当前画板参考线设置" title="当前画板参考线设置">⌗</button>` +
+    guides
+      .map((line) => {
+        const pixel = (line.axis === "x" ? x : y) + line.position * zoom;
+        const start = Math.max(20, line.axis === "x" ? y : x),
+          end = Math.min(
+            line.axis === "x" ? view.height : view.width,
+            line.axis === "x" ? y + rect.height : x + rect.width,
+          );
+        if (
+          pixel < 20 ||
+          pixel > (line.axis === "x" ? view.width : view.height) ||
+          end <= start ||
+          line.position * zoom > (line.axis === "x" ? rect.width : rect.height)
+        )
+          return "";
+        return `<button type="button" class="design-guide ${line.axis} ${line.locked ? "locked" : ""} ${line.id === activeGuideId ? "active" : ""}" data-design-guide="${esc(line.id)}" aria-label="${line.axis.toUpperCase()} 参考线 ${line.position}px${line.locked ? " 已锁定" : ""}" style="${line.axis === "x" ? `left:${pixel - 4}px;top:${start}px;height:${end - start}px` : `top:${pixel - 4}px;left:${start}px;width:${end - start}px`}"><span>${line.position} px${line.locked ? " · 锁定" : ""}</span></button>`;
+      })
+      .join("") +
+    (g?.outside
+      ? '<span class="guide-drop-hint">松手删除参考线 · Esc 取消</span>'
+      : "");
+  $("viewport").appendChild(overlay);
+}
+function toggleRulers() {
+  rulersVisible = !rulersVisible;
+  if (!rulersVisible) activeGuideId = null;
+  updateGuideOverlay();
+}
+function startGuide(e, axis, id = null) {
+  const b = activeBoard(),
+    guide = b.guides?.find((g) => g.id === id);
+  const original = {
+    nodeId: activeNodeId,
+    ids: selected(),
+    guideId: activeGuideId,
+  };
+  activeNodeId = null;
+  selectedIds.clear();
+  activeGuideId = id;
+  rightTab = "properties";
+  if (guide?.locked) {
+    render();
+    e.preventDefault();
+    return;
+  }
+  const rect = boardMeasurement(b);
+  gesture = {
+    kind: "guide",
+    pointerId: e.pointerId,
+    boardId: b.id,
+    id: id || uid("guide"),
+    axis: guide?.axis || axis,
+    isNew: !id,
+    rect,
+    original,
+    startX: e.clientX,
+    startY: e.clientY,
+    position: guide?.position ?? 0,
+    outside: !id,
+  };
+  activeGuideId = gesture.id;
+  render();
+  $("viewport").setPointerCapture(e.pointerId);
+  e.preventDefault();
+}
 function updateSelectionOverlay() {
   $("selection-overlay")?.remove();
   if (!project) return;
@@ -1570,6 +1710,11 @@ function startMarquee(e, boardId, clickNodeId = null) {
 
 function cancelGesture() {
   const g = gesture;
+  if (g?.kind === "guide") {
+    activeNodeId = g.original.nodeId;
+    selectedIds = new Set(g.original.ids);
+    activeGuideId = g.original.guideId;
+  }
   if (g?.kind === "marquee") {
     activeBoardId = g.original.boardId;
     selectedIds = new Set(g.original.ids);
@@ -1619,6 +1764,7 @@ function startResize(e, handle) {
 }
 
 function bindStatic() {
+  $("rulers-toggle").addEventListener("click", toggleRulers);
   $("preview-width").onchange = (e) => setPreviewWidth(e.target.value);
   $("reset-preview").onclick = () => setPreviewWidth("");
   $("tool-select").onclick = () => setTool("select");
@@ -1788,6 +1934,18 @@ function bindStatic() {
     }
   };
   $("right-content").addEventListener("change", (e) => {
+    if (e.target.matches("[data-guide-position]")) {
+      const id = e.target.dataset.guidePosition,
+        value = Number(e.target.value);
+      commit((p) =>
+        updateGuide(
+          p.boards.find((b) => b.id === activeBoardId),
+          id,
+          { position: value },
+        ),
+      );
+      return;
+    }
     if (e.target.id === "breakpoint-scope") {
       setEditScope(e.target.value);
       return;
@@ -1843,6 +2001,7 @@ function bindStatic() {
     if (e.target.id === "agent-brief") briefText = e.target.value;
   });
   $("right-content").addEventListener("click", (e) => {
+    if (guideAction(e)) return;
     if (breakpointAction(e)) return;
     const al = e.target.closest("[data-align]");
     if (al) {
@@ -2032,6 +2191,21 @@ function onPointerDown(e) {
   if (e.target.closest("[data-preview-control]")) return;
   if (e.button === 0 || e.button === 1)
     $("viewport").focus({ preventScroll: true });
+  if (e.target.closest("[data-guide-inspector]")) {
+    activeNodeId = null;
+    activeGuideId = null;
+    selectedIds.clear();
+    rightTab = "properties";
+    render();
+    e.preventDefault();
+    return;
+  }
+  const ruler = e.target.closest("[data-ruler-axis]"),
+    guide = e.target.closest("[data-design-guide]");
+  if ((ruler || guide) && e.button === 0 && tool === "select" && !heldSpace) {
+    startGuide(e, ruler?.dataset.rulerAxis, guide?.dataset.designGuide);
+    return;
+  }
   const handle = e.target.closest("[data-resize-handle]");
   if (handle && tool === "select" && !heldSpace && e.button === 0) {
     startResize(e, handle.dataset.resizeHandle);
@@ -2091,29 +2265,58 @@ function onPointerDown(e) {
     }
     if (
       isNodeLocked(b, n.id) ||
-      (locateNode(b, n.id).parent?.layout?.mode &&
-        locateNode(b, n.id).parent.layout.mode !== "absolute")
+      (locateNode(b, n.id).parent &&
+        ![undefined, "absolute"].includes(
+          effectiveNode(locateNode(b, n.id).parent, previewWidth(b)).layout
+            ?.mode,
+        ))
     )
       return;
+    const entry = locateNode(b, n.id),
+      measured = measureNode($("world"), bid, n.id, zoom);
+    if (!measured) return;
+    const parentRect = measured.parent.getBoundingClientRect(),
+      boardRect = boardMeasurement(b),
+      parentStyle = getComputedStyle(measured.parent);
     gesture = {
       kind: "node",
       boardId: bid,
       nodeId: n.id,
       startX: e.clientX,
       startY: e.clientY,
-      x: n.x,
-      y: n.y,
+      x: measured.box.x,
+      y: measured.box.y,
+      measured,
+      parentDesign: entry.parent || b,
+      parentOffset: {
+        x:
+          (parentRect.left - boardRect.left) / zoom +
+          (parseFloat(parentStyle.borderLeftWidth) || 0),
+        y:
+          (parentRect.top - boardRect.top) / zoom +
+          (parseFloat(parentStyle.borderTopWidth) || 0),
+      },
+      siblings: entry.siblings.flatMap((sibling) => {
+        const m = measureNode($("world"), bid, sibling.id, zoom);
+        return m && m.box.w > 0 && m.box.h > 0
+          ? [{ id: sibling.id, ...m.box }]
+          : [];
+      }),
       positions: rootSelection(b, selected())
         .map((id) => {
           const entry = locateNode(b, id);
+          const m = measureNode($("world"), bid, id, zoom);
           return {
             id,
-            x: entry.node.x,
-            y: entry.node.y,
+            x: m?.box.x ?? entry.node.x,
+            y: m?.box.y ?? entry.node.y,
             parentId: entry.parent?.id || null,
           };
         })
-        .filter((q) => q.parentId === (locateNode(b, n.id).parent?.id || null)),
+        .filter(
+          (q) =>
+            q.parentId === (entry.parent?.id || null) && !isNodeLocked(b, q.id),
+        ),
       snap: null,
     };
     e.preventDefault();
@@ -2125,6 +2328,30 @@ function onPointerMove(e) {
   if (!gesture) return;
   const dx = e.clientX - gesture.startX,
     dy = e.clientY - gesture.startY;
+  if (gesture.kind === "guide") {
+    const g = gesture,
+      r = g.rect;
+    g.outside =
+      e.clientX < r.left ||
+      e.clientX > r.right ||
+      e.clientY < r.top ||
+      e.clientY > r.bottom;
+    g.position = Math.max(
+      0,
+      Math.min(
+        10000,
+        Math.round(
+          (g.axis === "x" ? e.clientX - r.left : e.clientY - r.top) / zoom,
+        ),
+      ),
+    );
+    updateGuideOverlay();
+    const input = $("right-content").querySelector(
+      `[data-guide-position="${g.id}"]`,
+    );
+    if (input) input.value = g.position;
+    return;
+  }
   if (gesture.kind === "marquee") {
     const box = boxFromPoints(
         { x: gesture.startX, y: gesture.startY },
@@ -2204,12 +2431,25 @@ function onPointerMove(e) {
     const excluded = gesture.positions.map((p) => p.id);
     if ($("snap-toggle").checked && !e.altKey)
       pos = snapPosition(
-        entry.node,
+        { id: entry.node.id, ...gesture.measured.box },
         pos.x,
         pos.y,
-        entry.siblings.filter((n) => !excluded.includes(n.id)),
-        entry.parent || board,
+        gesture.siblings.filter((n) => !excluded.includes(n.id)),
+        gesture.measured.parentSize,
         4 / zoom,
+        8,
+        rulersVisible
+          ? guideTargets(
+              (board.guides || []).filter(
+                (g) =>
+                  g.position <=
+                  (g.axis === "x"
+                    ? previewWidth(board)
+                    : boardMeasurement(board).height / zoom),
+              ),
+              gesture.parentOffset,
+            )
+          : { x: [], y: [] },
       );
     gesture.snap = pos;
     for (const start of gesture.positions) {
@@ -2233,6 +2473,7 @@ function onPointerMove(e) {
         guide.style[axis === "x" ? "left" : "top"] = value + "px";
         host.appendChild(guide);
       }
+    updateSelectionOverlay();
   }
   if (gesture.kind === "board") {
     const el = [...$("world").querySelectorAll("[data-artboard]")].find(
@@ -2254,6 +2495,23 @@ function onPointerUp(e) {
   $("viewport").classList.remove("is-panning", "is-marquee");
   $("selection-marquee")?.remove();
   if (g.kind === "pan") return;
+  if (g.kind === "guide") {
+    const previous = activeBoard().guides?.find((line) => line.id === g.id);
+    if (
+      (g.isNew && g.outside) ||
+      (!g.isNew && !g.outside && previous?.position === g.position)
+    )
+      return;
+    activeGuideId = g.outside ? null : g.id;
+    commit((p) => {
+      const b = p.boards.find((b) => b.id === g.boardId);
+      if (g.outside) removeGuide(b, g.id);
+      else if (g.isNew)
+        addGuide(b, { id: g.id, axis: g.axis, position: g.position });
+      else updateGuide(b, g.id, { position: g.position });
+    });
+    return;
+  }
   if (g.kind === "marquee") {
     if (
       g.clickNodeId &&
@@ -2298,8 +2556,15 @@ function onPointerUp(e) {
       for (const start of g.positions) {
         const n = findNode(board, start.id);
         if (n && !isNodeLocked(board, n.id)) {
-          n.x = start.x + pos.x - g.x;
-          n.y = start.y + pos.y - g.y;
+          Object.assign(
+            n,
+            positionChanges(
+              n,
+              { x: start.x + pos.x - g.x, y: start.y + pos.y - g.y },
+              g.parentDesign,
+              g.measured.parentSize,
+            ),
+          );
         }
       }
     });
@@ -2370,6 +2635,58 @@ function onKeyDown(e) {
     return;
   }
   if (isTyping()) return;
+  if (e.shiftKey && e.key.toLowerCase() === "r" && !meta) {
+    e.preventDefault();
+    toggleRulers();
+    return;
+  }
+  if (activeGuideId && rulersVisible) {
+    const g = activeBoard().guides?.find((line) => line.id === activeGuideId);
+    if (
+      g &&
+      [
+        "Delete",
+        "Backspace",
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown",
+      ].includes(e.key)
+    ) {
+      e.preventDefault();
+      if (g.locked) return;
+      if (["Delete", "Backspace"].includes(e.key))
+        commit((p) =>
+          removeGuide(
+            p.boards.find((b) => b.id === activeBoardId),
+            g.id,
+          ),
+        );
+      else {
+        const axis =
+          e.key === "ArrowLeft" || e.key === "ArrowRight" ? "x" : "y";
+        if (g.axis === axis)
+          commit((p) =>
+            updateGuide(
+              p.boards.find((b) => b.id === activeBoardId),
+              g.id,
+              {
+                position: Math.max(
+                  0,
+                  Math.min(
+                    10000,
+                    g.position +
+                      (e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1) *
+                        (e.shiftKey ? 10 : 1),
+                  ),
+                ),
+              },
+            ),
+          );
+      }
+      return;
+    }
+  }
   if (e.key === "Delete" || e.key === "Backspace") {
     e.preventDefault();
     removeNode();
@@ -2378,6 +2695,7 @@ function onKeyDown(e) {
   if (e.key.toLowerCase() === "h") setTool("hand");
   if (e.key.toLowerCase() === "v") setTool("select");
   if (e.key === "Escape") {
+    activeGuideId = null;
     activeNodeId = null;
     selectedIds.clear();
     render();

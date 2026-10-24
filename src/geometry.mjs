@@ -7,15 +7,18 @@ export function snapPosition(
   parent,
   threshold = 4,
   grid = 8,
+  guides = { x: [], y: [] },
 ) {
   const others = siblings.filter((n) => n.id !== node.id && !n.hidden);
   const targetsX = [
+    ...guides.x,
     0,
     parent.w / 2,
     parent.w,
     ...others.flatMap((n) => [n.x, n.x + n.w / 2, n.x + n.w]),
   ];
   const targetsY = [
+    ...guides.y,
     0,
     parent.h / 2,
     parent.h,
@@ -39,6 +42,24 @@ export function snapPosition(
   const sx = axis(x, node.w, targetsX),
     sy = axis(y, node.h, targetsY);
   return { x: sx.value, y: sy.value, guideX: sx.guide, guideY: sy.guide };
+}
+/** Translate actual geometry back into the unchanged design constraint space. */
+export function positionChanges(node, position, parentDesign, parentActual) {
+  const changes = {};
+  for (const [axis, pos, size, reference] of [
+    ["horizontal", "x", "w", "referenceW"],
+    ["vertical", "y", "h", "referenceH"],
+  ]) {
+    const baseline = node.constraints?.[reference] || parentDesign[size],
+      actual = parentActual[size],
+      rule = node.constraints?.[axis] || "start";
+    let value = position[pos];
+    if (rule === "end") value += baseline - actual;
+    if (rule === "center") value += (baseline - actual) / 2;
+    if (rule === "scale") value *= baseline / actual;
+    changes[pos] = Math.round(value * 100) / 100;
+  }
+  return changes;
 }
 /** Resize about the opposite edge (Alt: center, Shift+corner: preserve ratio). */
 export function resizeBox(

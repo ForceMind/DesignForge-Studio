@@ -256,6 +256,10 @@ p.boards = [
   ),
 ];
 const mobile = clone(p.boards[0]);
+p.boards[0].guides = [
+  { id: "contentInset", axis: "x", position: 32, locked: true },
+  { id: "headerBaseline", axis: "y", position: 96, hidden: true },
+];
 mobile.id = id();
 mobile.name = "Workspace / Mobile";
 mobile.x = 1290;

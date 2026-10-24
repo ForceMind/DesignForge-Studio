@@ -97,3 +97,8 @@ Project 和 Patch 的版本号仍为 1；原 M0 文件和示例 Patch 保持不�
 ```
 
 Diff 新增后代、父级 `$parent`、同父顺序 `$order`、布局/断点/实例覆盖、画板尺寸和项目设计系统字段。它不能证明语义影响只限于目标节点：Token、主题或库定义会影响引用对象。人工审批仍必须查看影响范围；本版没有截图级并排审批。
+
+
+### 编辑辅助参考线（alpha.3）
+
+v1 画板可携带 `guides: [{id,axis,position,hidden?,locked?}]`，每板最多 100 项，axis 为 x/y，position 为 0..10000 的有限数值；id 在该画板的参考线集合内唯一，未知字段拒绝。省略时沿用旧工程行为。它参与项目 hash 和板级 Diff，不进入静态 HTML/CSS 导出。现有 Patch 操作不允许编辑参考线；Agent 必须保留它们，也不能用未知 `set-guides` 操作扩权。
