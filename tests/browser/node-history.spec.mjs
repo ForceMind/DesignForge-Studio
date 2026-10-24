@@ -375,6 +375,7 @@ test("source locks added after an instance edit also guard the history restore p
   await page.locator('[data-prop="locked"]').selectOption("true");
   await page.locator('[data-node="sourceRoot"]').click();
   await page.locator('[data-lefttab="components"]').click();
+  page.once("dialog", (dialog) => dialog.accept("base"));
   await page.locator('[data-update-component="symbol"]').click();
   await history(page, "instance");
   await expect(page.locator(".history-field.blocked")).toHaveCount(1);
