@@ -99,3 +99,17 @@ DesignForge 长期不止要“输出漂亮页面”。要建立从 **设计系�
 | [Claude Design current guide](https://support.claude.com/en/articles/14604416-get-started-with-claude-design) / [design system](https://support.claude.com/en/articles/14604397-set-up-your-design-system-in-claude-design) | 对话生成、画布编辑及设计系统结合，当前文档把Design作为Artifact模板入口 | 借鉴从设计体系到局部迭代的产品闭环；当前仍是外部Agent+受限Patch，不虚构内置模型或逆向复制运行时 |
 
 官方文档中的入口、订阅与可用性会变化；不把4月发布稿当成永久当前状态。当前工作不涉及竞品付费/登录、第三方设计上传或部署。BaoCut/baoyu-design的原始研究与许可边界沿用前述章节。
+
+
+## 用户参考的实际取舍（2026-10-25，alpha.8）
+
+用户提供 [NIxinhai0 帖子](https://x.com/NIxinhai0/status/2114021822895387009) 与 [CY160909 帖子](https://x.com/CY160909/status/2114213361621540994)。X直接抓取受限，通过公开帖子转发接口核对ID/作者/正文，再独立检查上游仓库与LICENSE；没有访问用户登录会话。第二条配图显示elaya.design，与Elaya源码Skill对应。
+
+| 一手来源 / 固定版本 | 可取机制 | 本项目落地与取舍 |
+|---|---|---|
+| [Galaxy](https://github.com/uiverse-io/galaxy/tree/adbd2adde0a299a3956ea288fb444ec01891ca41)，MIT (c)2023 Uiverse.io | 按钮/输入框/卡片等分类；搜索、预览、复用；社区贡献 | 12个原创原生AST素材、分类/多词检索、4项分页、sandbox+CSP预览、保留人工定义的一次插入。未搬运外站HTML/CSS或社区账号/品牌资源。 |
+| [Elaya AI Design Skills](https://github.com/elayadesign/ai-design-skills/tree/38bbe5765600b9178b5395a823c9f6c8d2b8e730)，MIT (c)2026 Elaya | 明确产品/受众/主要行动；逐段组织；统一节奏与字体层级；Hover/Focus/Loading/Error和移动检查 | 可选项目简报、只读Agent上下文/CLI、原生状态模型、仓库Skill流程和Launch示例。不自动安装上游Skill或其AGENTS，不接受项目文本带来的新权限。 |
+
+不采纳“禁用某些字族、斜体、渐变”等一刀切审美规则；改为可选profile建议，沿用当前Token/字族。上游示例中用于丰富画面的占位评价/数字也不能转化为本项目真实业务声明：缺少证据明确提示，不捏造证明。
+
+规模需区分：帖子描述约7000个在线组件，所检查Galaxy仓库README则写over3000。两者不能混同为已核验的当前库存；本项目只声称实际实现并测试的12个本地配方。许可原文与归属见[THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md)。新流程见[CREATIVE_WORKFLOW](CREATIVE_WORKFLOW.md)。

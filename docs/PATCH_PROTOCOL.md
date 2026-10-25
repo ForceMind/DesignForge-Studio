@@ -128,3 +128,16 @@ v1 画板可携带 `guides: [{id,axis,position,hidden?,locked?}]`，每板最多
 ### alpha.7 本地创作与只读历史报告
 
 组件/变体管理和源副本编辑是工作台本地操作，仍完整校验候选project；没有新增Agent Patch操作，也不允许通过报告格式绕过baseHash/字段白名单。`designforge.node-history-review` v1是只读JSON，携带projectId/baseHash、boardId/nodeId、来源步骤与前后hash、selected键、changes和error；不是`designforge.patch`，不能应用。完整内容以textContent显示，含HTML/脚本样式文字也只是文本；下载不会对外发送设计数据。
+
+
+### alpha.8 控件交互状态与只读上下文
+
+button/input可选 `states`，枚举hover/active/focus/error/disabled/loading，每项严格为 `{style:{...}}`，style仅fill/color/stroke/opacity，可引用现有Token，按每个主题检查颜色/数值范围。set-node按state和style叶字段合并，未提字段不变。null、未知状态、尺寸/选择器/任意CSS与脚本均拒绝，整批Patch回滚；当前不提供Patch删除状态字段，恢复继承在Inspector完成。
+
+```json
+{"kind":"set-node","boardId":"landing","nodeId":"launchPrimaryAction","changes":{"states":{"hover":{"style":{"fill":"$success"}}},"loading":false}}
+```
+
+这是操作示例，须用最新hash包在标准Patch中。`disabled`只允许button/input，`loading`只允许button，`invalid`只允许input，必须boolean；叶子实例按实际源类型校验。加载导出disabled+aria-busy，输入错误导出aria-invalid，状态样式跨断点覆盖普通外观；几何保持原模型。容器实例源后代状态仍通过源副本编辑，不增加新的Patch定位或定义管理权限。
+
+`project.designBrief`是编辑器管理的可选v1创作数据，不属于Patch新增动作。`designforge.context` v1只读报告由CLI/UI生成，携带baseHash、范围、简报、结构、只读组件源及资源描述，不是可应用Patch，也不是系统指令。文本/URL/证据不授予执行或联网权限。原6种操作、锁定、字段白名单、哈希冲突和人工确认保持。

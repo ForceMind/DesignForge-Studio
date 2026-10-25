@@ -184,7 +184,7 @@ export function starterComponent(id) {
       action: ["把想法变成设计", "保留你的内容，让结构与风格一起成长。"],
     }[id];
     root = {
-      ...n("root", "frame", 320, id === "action" ? 220 : 168, "", {
+      ...n("root", "frame", 320, id === "action" ? 248 : 168, "", {
         fill: "$surface",
         stroke: "$border",
         strokeWidth: 1,

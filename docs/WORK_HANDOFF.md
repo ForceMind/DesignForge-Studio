@@ -1,9 +1,20 @@
 # DesignForge Studio · 当前 Work 交接
 
+## alpha.8 当前接管点
+
+用户已要求持续研发，最新两条X参考已核对正文及上游MIT仓库。继续同一开发分支/PR，不需要逐项等待“继续”。
+
+- 产品新增：受限原生控件状态、12项原创AST素材、可选项目简报、只读Agent上下文/CLI、Launch两画板与Starters库。详见CREATIVE_WORKFLOW。
+- 本地219 Node通过；代码e4ebf8a的CI run49通过218 Node、Chrome143、Firefox137、WebKit137（后两者各6像素跳过）。随后补root override文字预算与面板滚动/控件样式，最新CI与截图复核以VALIDATION当前章节为准。
+- 来源：Galaxy commit adbd2add、Elaya AI Design Skills commit38bbe576。只吸收分类/预览/复用和简报/逐段创作/状态检查；未拷原始组件HTML/CSS、品牌/图片或安装外站Skill。许可保留THIRD_PARTY_NOTICES。
+- 仓库Skill按skill-creator规范更新并quick_validate通过；独立最小上下文Agent实际读取Launch、生成1-op Hover Patch、apply/validate/audit，并严格确认仅目标状态及自动updatedAt变化。不把CLI校验当真实浏览器。
+- 操作：npm start→Launch示例；组件→素材精选；源副本编辑button/input状态；Agent→项目设计简报→导出范围上下文。npm run examples可重建11个M1工程（含Launch），原Orbit不重建。
+- 状态不是业务状态机，简报不是模型调用，12素材不是Uiverse全库；定义内嵌套实例、完整DTCG、在线库/BYOK/视觉Diff、React/Vue和真机等仍未完成。
+
 ## 工程状态
 
 - Public / MIT，主分支 `main` 继续保留 M0 基线 `56a189bf929d09eb8b092a24674b717faba6e0cd`（后续会话必须重新核对）。
-- 开发分支：`codex/m1-editor-foundation`；[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。M1 基础交付增强版 `0.2.0-alpha.7`，用户第一阶段八项交付已验收；原路线增强项未全部完成。
+- 开发分支：`codex/m1-editor-foundation`；[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)。M1 基础交付增强版 `0.2.0-alpha.8`，用户第一阶段八项交付已验收；原路线增强项未全部完成。
 - 最新已验收产品：`5dd72a46eb909a12a173f01f819214a42f1861a9`，[CI run47](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40118816678)通过200 Node、Chrome134、Firefox128、WebKit128；后两者各6项像素检查跳过。文档后续head以PR为准。
 - 运行：`npm start`，本地 loopback `127.0.0.1:4173`；运行时零外部依赖。测试工具使用 `npm ci` 安装。
 - 本轮已扩展树、原生布局、约束/断点、组件/变体/实例、Token alias/主题、本地资源、多选/组合/对齐/吸附、存档备份与恢复；保留 M0 的导出、评论、CLI、严格 Patch。

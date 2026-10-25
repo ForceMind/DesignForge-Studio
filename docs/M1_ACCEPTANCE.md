@@ -1,6 +1,6 @@
 # M1 第一阶段交付验收
 
-日期：2026-10-25（Asia/Shanghai）。版本：0.2.0-alpha.7。产品代码：5dd72a46eb909a12a173f01f819214a42f1861a9。[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)，分支 codex/m1-editor-foundation；稳定 main 仍为 M0。
+日期：2026-10-25（Asia/Shanghai）。版本：0.2.0-alpha.8。最新产品/CI见VALIDATION当前章节；历史alpha.7代码5dd72a46已保留。[PR #1](https://github.com/ForceMind/DesignForge-Studio/pull/1)，分支 codex/m1-editor-foundation；稳定 main 仍为 M0。
 
 本表对应用户要求的第一阶段八项工程交付。结论是这些基础交付已完成验收；不会把长期路线中尚未实现的增强项改写为已完成。
 
@@ -9,9 +9,9 @@
 | 可运行改进工作台 | Node本地启动、明暗模式、层级/画板/Inspector同步、完整编辑流程 | HTTP smoke及真实Chrome编辑、保存回读/恢复、导出下载 |
 | 真正可编辑组件树和布局 | 嵌套容器、Flex/Grid、Fixed/Fill/Hug、五类约束、断点范围、组件/变体/实例 | tree/responsive/group/richtext/flow-layout单测及实际CSS/几何断言 |
 | 兼容已有数据 | v1继续使用；可选嵌套/分段/设计系统数据，原Orbit不变 | Orbit 3画板/170节点/hash21a89182，原Patch和回归全部保留 |
-| 可复用设计系统 | Token/alias/字体/主题、实例源后代覆盖/恢复、本地库包前缀隔离与冲突拒绝 | 真实库下载→另一项目导入→插实例渲染；主题/字体/资产引用单测 |
-| 可操作示例 | 原Orbit + 10个M1工程，Desktop/Mobile与横竖游戏HUD；Studio.library.json | 11工程JSON往返、全部HTML渲染，Studio390/768/1440原稿/中文长文及约+30%压力场景边界 |
-| 测试及可验证结果 | 200 Node + 134 Chrome + 128 Firefox + 128 WebKit全部通过；实际截图复核 | [CI run47](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40118816678)，VALIDATION.md |
+| 可复用设计系统 | Token/alias/字体/主题、实例源后代覆盖/恢复、本地库包前缀隔离与冲突拒绝 | 真实库下载→另一项目导入→插实例渲染；主题/字体/资产引用单测；12项原生素材检索/预览/插入，状态随库导出 |
+| 可操作示例 | 原Orbit + 11个M1工程（含Launch双画板），Desktop/Mobile与横竖游戏HUD；Studio.library.json / Starters.library.json | 12工程JSON往返、全部HTML渲染，Studio390/768/1440原稿/中文长文及约+30%压力场景边界 |
+| 测试及可验证结果 | alpha.8本地219 Node通过；三引擎验收及实际截图复核见当前VALIDATION记录 | [CI run49](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40197963027)及最新VALIDATION.md |
 | 架构/路线/缺陷文档 | 模块、协议扩展、投影预算、当前能力边界和历史失败记录已更新 | ARCHITECTURE / PATCH_PROTOCOL / ROADMAP / KNOWN_ISSUES / VALIDATION |
 | GitHub提交及PR | 独立分支持续提交，PR可审阅，不替换稳定main | PR #1、产品代码及后续文档提交；具体head以GitHub为准 |
 
@@ -22,7 +22,8 @@
 3. 在Flex/Grid父级内单选图层拖动排序，或用Alt+方向键；Esc/移出父级取消，松手一次Undo。点击断点范围条切换修改范围，输入宽度只预览且不增加历史。从标尺拖出参考线；画板设置修改数值/锁定/隐藏；Inspector选择基础/断点范围并恢复字段继承。
 4. 文字框选字符应用样式，改变内容保留前后格式；节点可选字体/字体Token及行高。
 5. 组件面板导出/导入Studio.library.json，使用命名空间避免覆盖；插实例，修改源后代属性后单字段恢复。
-6. 检查面板运行浏览器几何检查或“模拟文字+30%”，后者只在离屏副本运行；导出实际/模拟结果及上下文，编辑后旧结果显示过期。
+6. 打开Launch，在Agent面板保存简报与证据、导出当前范围上下文；素材分类搜索、插入、源副本编辑状态、Undo/回读。
+7. 检查面板运行浏览器几何检查或“模拟文字+30%”，后者只在离屏副本运行；导出实际/模拟结果及上下文，编辑后旧结果显示过期。
 
 ## 明确边界
 

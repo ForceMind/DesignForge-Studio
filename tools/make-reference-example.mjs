@@ -214,7 +214,7 @@ const workshop = frame(
 );
 workshop.responsive = [{ maxWidth: 600, changes: { layout: { padding: 24 } } }];
 p.boards.push(
-  b("workshop", "交互组件 · 可编辑源与状态", 1540, 1900, [workshop]),
+  b("workshop", "交互组件 · 可编辑源与状态", 1540, 1100, [workshop]),
 );
 const issues = validateProject(p);
 if (issues.length) throw Error(JSON.stringify(issues));

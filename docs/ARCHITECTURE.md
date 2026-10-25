@@ -132,3 +132,13 @@ Inspector 保留当前编辑范围的W/H输入，同时从选中元素DOM的bord
 源编辑采用明确的普通画板副本，无临时项目字段或假投影ID：克隆源根到新画板，源节点ID在不同画板作用域内可复用。用户使用原有图层/布局工具编辑，选中相同源根后显式更新对应变体。绑定更新检查根身份，通用“用当前容器更新变体”入口继续保留。更新不能自动清理悬空覆盖、嵌套实例或缺资源；候选校验失败则定义/实例/历史均不变。副本包含在文件/HTML导出中，用户可自行删除；不是自动同步主定义或协作分支，尚无更新前专用视觉Diff审批。
 
 实例解析继续沿用同一materializeInstance：容器源保持frame投影；非容器源保留button/text/image等类型和源文字，不给叶子根附加children。解除关联后仍能通过工程校验并保留语义；没有为此放宽公开工程、SVG、字体或Patch边界。明暗模式只调整工作台变量，不改用户画板内容。
+
+
+## alpha.8 原生状态、素材与简报
+
+- `interaction-states.mjs`定义状态/字段/原生标志枚举、形状校验、按状态/style叶字段合并和固定选择器CSS；标量与每个主题的Token类型由core复用checkStyle验证。core渲染普通/实例展开共用renderedEntries，响应式和状态选择器均按画板/实例作用域隔离。没有来自项目数据的任意选择器/动画。
+- `scene-budget.mjs`把每个状态与其字段计入渲染单位，先计算投影再克隆/渲染；叶子实例文本按实际源文本计算，不能被instance.text空值抵消。原5000/board、20000/project和200万投影字符上限继续有效。
+- `state-inspector.mjs`处理临时预览与显式覆盖编辑，持久字段进入原commit/save/Undo；data-df-state仅在渲染DOM存在，禁止由Agent作为公开元数据写入。`node-history`恢复状态映射与原生标志；`design-library`保留状态并重写别名。
+- `starter-gallery.mjs`提供12个原创AST配方、纯插入候选和受限预览；默认折叠，仅打开时渲染，4项分页限制iframe工作量。相同定义复用，手工差异保留并换ID；不合并全局Tokens或请求外站。iframe为空sandbox，CSP默认禁源，仅允许内联样式和data资源。
+- `design-brief.mjs`保存可选受限project.designBrief，生成提示/大纲与allowlist只读范围；`brief-inspector.mjs`是Agent面板入口。CLI context和UI下载加上当前baseHash。报告排除任意顶层/节点元数据和资源data，不授予模型调用、命令执行或链接访问权限。
+- `Launch.project.json`有产品页/原生素材两张画板，`Starters.library.json`可独立导入；`make-reference-example.mjs`可重建。原Orbit格式、字节与哈希不变。完整模型/操作见CREATIVE_WORKFLOW，来源及许可见RESEARCH与THIRD_PARTY_NOTICES。

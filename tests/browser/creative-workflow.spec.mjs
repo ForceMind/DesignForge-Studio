@@ -153,6 +153,14 @@ test("state preview never saves; edits, reset, flags, Undo and reload preserve u
   await layer(page, "action").click();
   expect((await stored(page)).boards[0].nodes[0].loading).toBe(true);
   await expect(page.locator("#state-preview")).toHaveValue("default");
+  await layer(page, "field").click();
+  await expect(page.locator('[data-prop="name"]')).toHaveValue("Email");
+  const disabledBox = await canvas(page, "action").boundingBox();
+  await page.mouse.click(
+    disabledBox.x + disabledBox.width / 2,
+    disabledBox.y + disabledBox.height / 2,
+  );
+  await expect(page.locator('[data-prop="name"]')).toHaveValue("Action");
   await page.locator('[data-reset-state="hover"]').click();
   expect((await stored(page)).boards[0].nodes[0].states.hover).toBeUndefined();
   await page.locator('[data-state-flag="loading"]').selectOption("");
@@ -331,7 +339,16 @@ for (const width of [390, 768, 1440])
       expect(overflow.scroll).toBeLessThanOrEqual(overflow.client + 1);
       expect(await page.locator("button.df-button").count()).toBeGreaterThan(1);
       expect(await page.locator("input.df-input").count()).toBeGreaterThan(0);
-      if (board.id === "landing" || width === 1440)
+      const smallControls = await page
+        .locator("button.df-button,input.df-input")
+        .evaluateAll((elements) =>
+          elements
+            .filter((el) => el.getBoundingClientRect().height < 44)
+            .map((el) => el.dataset.nodeId || el.dataset.sourceId),
+        );
+      expect(smallControls).toEqual([]);
+
+      if (board.id === "landing" || width === 1440 || width === 390)
         await page.screenshot({
           path: info.outputPath(`launch-${board.id}-${width}.png`),
           fullPage: true,
