@@ -48,13 +48,15 @@ npm run format:check
 
 ## 实际验证
 
-CI 分开运行 Node 测试，以及 Chrome、Playwright Firefox/WebKit 三套真实引擎测试；截图/失败追踪和实际版本保存在 `browser-evidence-<engine>` artifact（保留14天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。[CI run47](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40118816678) 中200项Node、Chrome134项、Firefox128项、WebKit128项全部通过；后两者各跳过6项Chrome专属像素检查；最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
+CI 分开运行 Node 测试，以及 Chrome、Playwright Firefox/WebKit 三套真实引擎测试；截图/失败追踪和实际版本保存在 `browser-evidence-<engine>` artifact（保留14天）。测试覆盖嵌套编辑、撤销/重做、保存回读、组件变体、资源导入、鼠标拖动、响应式导出及原 M0 回归。[CI run53](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40199977270) 中221项Node、Chrome144项、Firefox138项、WebKit138项全部通过；后两者各跳过6项Chrome专属像素检查；最新结果及已知边界见 [验证记录](docs/VALIDATION.md) 和 [已知问题](docs/KNOWN_ISSUES.md)。
 
 检查面板可运行实际DOM几何检查及约+30%文字膨胀预检（离屏副本，不改原稿），报告可导出并标记过期。
 
 已加入5张经过人工查看的Chrome/Linux像素基准和差异检出对照；正常CI禁止自动更新。它不是完整WCAG认证、AI视觉审查或原生Safari/真实触屏设备验收。
 
 ## 真实浏览器截图
+
+alpha.8原始截图：[浅色素材](docs/screenshots/m1-starter-gallery.png) · [深色素材](docs/screenshots/m1-starter-gallery-dark.png) · [WebKit状态编辑](docs/screenshots/m1-interaction-states-webkit.png) · [设计简报](docs/screenshots/m1-design-brief.png) · [Launch桌面](docs/screenshots/m1-launch-desktop.png) · [Launch移动](docs/screenshots/m1-launch-mobile.png) · [组件工作台](docs/screenshots/m1-starter-workshop.png) · [Firefox移动素材](docs/screenshots/m1-starter-workshop-mobile-firefox.png)。全部从run53下载并实际查看，原图未编辑；[来源/哈希清单](docs/evidence/alpha8-browser.json)。
 
 ![深色设计工作台](tests/browser/visual-baselines.spec.mjs-snapshots/workbench-dark-chromium-linux.png)
 

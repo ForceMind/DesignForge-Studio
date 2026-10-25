@@ -11,7 +11,7 @@
 | 兼容已有数据 | v1继续使用；可选嵌套/分段/设计系统数据，原Orbit不变 | Orbit 3画板/170节点/hash21a89182，原Patch和回归全部保留 |
 | 可复用设计系统 | Token/alias/字体/主题、实例源后代覆盖/恢复、本地库包前缀隔离与冲突拒绝 | 真实库下载→另一项目导入→插实例渲染；主题/字体/资产引用单测；12项原生素材检索/预览/插入，状态随库导出 |
 | 可操作示例 | 原Orbit + 11个M1工程（含Launch双画板），Desktop/Mobile与横竖游戏HUD；Studio.library.json / Starters.library.json | 12工程JSON往返、全部HTML渲染，Studio390/768/1440原稿/中文长文及约+30%压力场景边界 |
-| 测试及可验证结果 | alpha.8本地219 Node通过；三引擎验收及实际截图复核见当前VALIDATION记录 | [CI run49](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40197963027)及最新VALIDATION.md |
+| 测试及可验证结果 | 221 Node、Chrome144、Firefox138、WebKit138通过；后两者各6项像素跳过；8张新原图实际查看 | [CI run53](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40199977270)、VALIDATION.md及evidence/alpha8-browser.json |
 | 架构/路线/缺陷文档 | 模块、协议扩展、投影预算、当前能力边界和历史失败记录已更新 | ARCHITECTURE / PATCH_PROTOCOL / ROADMAP / KNOWN_ISSUES / VALIDATION |
 | GitHub提交及PR | 独立分支持续提交，PR可审阅，不替换稳定main | PR #1、产品代码及后续文档提交；具体head以GitHub为准 |
 

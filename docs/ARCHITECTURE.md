@@ -137,7 +137,7 @@ Inspector 保留当前编辑范围的W/H输入，同时从选中元素DOM的bord
 ## alpha.8 原生状态、素材与简报
 
 - `interaction-states.mjs`定义状态/字段/原生标志枚举、形状校验、按状态/style叶字段合并和固定选择器CSS；标量与每个主题的Token类型由core复用checkStyle验证。core渲染普通/实例展开共用renderedEntries，响应式和状态选择器均按画板/实例作用域隔离。没有来自项目数据的任意选择器/动画。
-- `scene-budget.mjs`把每个状态与其字段计入渲染单位，先计算投影再克隆/渲染；叶子实例文本按实际源文本计算，不能被instance.text空值抵消。原5000/board、20000/project和200万投影字符上限继续有效。
+- `scene-budget.mjs`把每个状态与其字段计入渲染单位，先计算投影再克隆/渲染；叶子实例文本按实际源文本及根文字覆盖计算，不能被instance.text空值抵消；替换富文本同步扣除源span成本。原5000/board、20000/project和200万投影字符上限继续有效。
 - `state-inspector.mjs`处理临时预览与显式覆盖编辑，持久字段进入原commit/save/Undo；data-df-state仅在渲染DOM存在，禁止由Agent作为公开元数据写入。`node-history`恢复状态映射与原生标志；`design-library`保留状态并重写别名。
 - `starter-gallery.mjs`提供12个原创AST配方、纯插入候选和受限预览；默认折叠，仅打开时渲染，4项分页限制iframe工作量。相同定义复用，手工差异保留并换ID；不合并全局Tokens或请求外站。iframe为空sandbox，CSP默认禁源，仅允许内联样式和data资源。
 - `design-brief.mjs`保存可选受限project.designBrief，生成提示/大纲与allowlist只读范围；`brief-inspector.mjs`是Agent面板入口。CLI context和UI下载加上当前baseHash。报告排除任意顶层/节点元数据和资源data，不授予模型调用、命令执行或链接访问权限。

@@ -1,0 +1,125 @@
+{
+  "productCommit": "aa86c15e05f8b0967347700ac97dc287d9a1f3e2",
+  "runId": 40199977270,
+  "runUrl": "https://github.com/ForceMind/DesignForge-Studio/actions/runs/40199977270",
+  "results": {
+    "node": {
+      "passed": 221
+    },
+    "chromium": {
+      "passed": 144,
+      "skipped": 0
+    },
+    "firefox": {
+      "passed": 138,
+      "skipped": 6
+    },
+    "webkit": {
+      "passed": 138,
+      "skipped": 6
+    }
+  },
+  "skipReason": "Six pixel checks are Chrome/Linux-specific. No skips in the shared 138 functional tests.",
+  "artifacts": {
+    "chromium": {
+      "id": 12601271951,
+      "sha256": "49156e39d1d2266adc016153bb26e62efbd1de6068e6271537c3c93480fe237e",
+      "version": {
+        "engine": "chromium",
+        "channel": "chrome",
+        "version": "155.0.8059.39",
+        "playwright": "1.64.1",
+        "platform": "linux",
+        "arch": "x64",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+        "recordedAt": "2026-10-25T13:57:58.611Z"
+      }
+    },
+    "firefox": {
+      "id": 12602015987,
+      "sha256": "640345ec990e0a545434df976c4f0f02eb7c745be34607a3dc758dc4052934b5",
+      "version": {
+        "engine": "firefox",
+        "channel": null,
+        "version": "157.0",
+        "playwright": "1.64.1",
+        "platform": "linux",
+        "arch": "x64",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+        "recordedAt": "2026-10-25T13:57:54.218Z"
+      }
+    },
+    "webkit": {
+      "id": 12600887584,
+      "sha256": "da877ef4d669519a430ff61704d244f89b1b22167397aaa4bf37813f0302814c",
+      "version": {
+        "engine": "webkit",
+        "channel": null,
+        "version": "27.2",
+        "playwright": "1.64.1",
+        "platform": "linux",
+        "arch": "x64",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15",
+        "recordedAt": "2026-10-25T13:58:28.601Z"
+      }
+    }
+  },
+  "screenshots": [
+    {
+      "path": "docs/screenshots/m1-starter-gallery.png",
+      "engine": "chromium",
+      "artifactPath": "test-results/creative-workflow-gallery--4cc3c-ownload-are-real-operations-chromium/starter-gallery.png",
+      "sha256": "30832330d5f79bc6c636fecf18b0b308ebfdaaaeca9129f6139b14bd9b224ece",
+      "bytes": 189518
+    },
+    {
+      "path": "docs/screenshots/m1-starter-gallery-dark.png",
+      "engine": "chromium",
+      "artifactPath": "test-results/creative-workflow-gallery--4cc3c-ownload-are-real-operations-chromium/starter-gallery-dark.png",
+      "sha256": "46e5df36256fe1a061d5d45faa31484f86c4572430e74f0946740ec48523da00",
+      "bytes": 183285
+    },
+    {
+      "path": "docs/screenshots/m1-design-brief.png",
+      "engine": "chromium",
+      "artifactPath": "test-results/creative-workflow-brief-pe-1626b-hout-executing-hostile-text-chromium/design-brief.png",
+      "sha256": "53daf938c134c1c4ab76a106f4e995afd555c4a5c3d21c6e31dcf50d7b91213c",
+      "bytes": 144922
+    },
+    {
+      "path": "docs/screenshots/m1-interaction-states-webkit.png",
+      "engine": "webkit",
+      "artifactPath": "test-results/creative-workflow-state-pr-c35ab-eload-preserve-user-content-webkit/state-inspector.png",
+      "sha256": "5833ace53592b901cb865b17a7a72da127c8e2a7e7258efd960dc154a89e24fb",
+      "bytes": 174643
+    },
+    {
+      "path": "docs/screenshots/m1-launch-desktop.png",
+      "engine": "chromium",
+      "artifactPath": "test-results/creative-workflow-Launch-r-21825-tains-all-native-components-chromium/launch-landing-1440.png",
+      "sha256": "657ea2f7b21f1af980a5d19daba8f54a9e07d492bd4e67f05d798b13ab2b1b50",
+      "bytes": 100600
+    },
+    {
+      "path": "docs/screenshots/m1-launch-mobile.png",
+      "engine": "webkit",
+      "artifactPath": "test-results/creative-workflow-Launch-r-d01e4-tains-all-native-components-webkit/launch-landing-390.png",
+      "sha256": "36a439d4383a4d664388918a7e5f22300d5daba621f7e9363420a012447b0f36",
+      "bytes": 191994
+    },
+    {
+      "path": "docs/screenshots/m1-starter-workshop.png",
+      "engine": "chromium",
+      "artifactPath": "test-results/creative-workflow-Launch-r-21825-tains-all-native-components-chromium/launch-workshop-1440.png",
+      "sha256": "3a1aa878bc21590bd66a7081e11b8b1300e99d38e76157b3413c156b860a4b15",
+      "bytes": 62338
+    },
+    {
+      "path": "docs/screenshots/m1-starter-workshop-mobile-firefox.png",
+      "engine": "firefox",
+      "artifactPath": "test-results/creative-workflow-Launch-r-d01e4-tains-all-native-components-firefox/launch-workshop-390.png",
+      "sha256": "cb7bec5609f3212e5b2547c37ff5288fe63f056164ea81f2a8b8cd45456583d2",
+      "bytes": 153529
+    }
+  ]
+}

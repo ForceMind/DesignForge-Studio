@@ -1,5 +1,48 @@
 # M1 验证记录
 
+## 当前 alpha.8 验收（2026-10-25）
+
+产品提交：`aa86c15e05f8b0967347700ac97dc287d9a1f3e2`；[CI run53](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40199977270)四job全部通过。原main仍是56a189bf，M0 Orbit文件逐字节未改（3画板/170节点/hash21a89182）。Launch为2画板/67节点/hash99c7a3d5；共12工程及2个本地库示例。以下旧章节是研发历史，不是当前套件规模。
+
+| 实际执行 | 结果 |
+|---|---|
+| Node22 | 221通过、0失败；保留原200项并新增状态/素材/简报/预算保护 |
+| Chrome155.0.8059.39 / Linux x64 | 144通过，包括6项Chrome像素检查 |
+| Firefox157.0 / Linux x64 | 138通过、6项Chrome专属像素检查跳过 |
+| WebKit27.2 / Linux x64 | 138通过、同样6项跳过；不是用户Mac/Safari/iOS真机 |
+| CLI/示例/格式 | validate/audit/export、12工程往返、库包、npm run examples可重复重建、format与diff检查通过 |
+| 仓库Skill | skill-creator quick_validate通过；独立最小上下文Agent实际执行一次更新后的流程 |
+
+新增真实浏览器验证：原生Hover/Active/键盘Focus实际颜色、实例/断点隔离、加载禁用和输入aria-invalid、reduced-motion；状态预览不写项目，编辑/重置/Undo/回读；锁定/非法CSS原子拒绝；素材分类/搜索/sandbox预览/插入/源副本编辑/库下载；autoHeight根内插入保持内容高度、锁定容器拒绝；简报保存/顺序保留/上下文下载/文本转义。Launch两个画板均在390/768/1440实测横向边界和原生控件高度≥44 CSS px。
+
+这不是完整WCAG、所有主题/尺寸/字体保证或AI视觉审查。文字可能使用Linux CI的CJK fallback，字体观感不代表用户系统；没有向外部模型上传设计或在平台部署。当前容差/5张原Chrome基准保持，正常CI禁止自动更新。
+
+### 实际截图与发现后的修复
+
+三个artifact均已下载，ZIP的SHA256与GitHub digest匹配；8张原始PNG逐张实际查看并保存，未裁切、拼接或美化。[机器可读来源、版本与哈希](evidence/alpha8-browser.json)包含每张图片的artifactPath与SHA256。
+
+- [浅色素材检索](screenshots/m1-starter-gallery.png) / [深色素材检索](screenshots/m1-starter-gallery-dark.png)
+- [WebKit状态编辑](screenshots/m1-interaction-states-webkit.png) / [设计简报](screenshots/m1-design-brief.png)
+- [Launch桌面](screenshots/m1-launch-desktop.png) / [Launch移动](screenshots/m1-launch-mobile.png)
+- [原生组件工作台](screenshots/m1-starter-workshop.png) / [Firefox移动素材](screenshots/m1-starter-workshop-mobile-firefox.png)
+
+run49虽然测试通过，截图仍暴露默认筛选框样式和WebKit状态提交后的滚动回顶部：随后统一明暗输入/select并保留同图层Inspector滚动，增加实测可见断言。还修复叶子源文字/根文字覆盖投影预算、autoHeight新增根造成的裁切风险、简报checkbox重排人工大纲，以及currentColor白色焦点环风险；未降低预算、像素阈值或放松协议。
+
+| 源提交 / CI | 实际结果 |
+|---|---|
+| e4ebf8a / [run49](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40197963027) | 218 Node、143/137/137；功能通过后继续人工截图修正 |
+| d69f966 / [run50](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40198648052) | 219 Node、143/137/137；滚动/样式与根覆盖预算通过 |
+| c27e788 / [run51](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40199291333) | 219 Node、143/137/137；控件高度、禁用画布选择和紧凑示例通过 |
+| 9fd3949 / [run52](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40199739502) | 221 Node、144/138/138；内容根和简报顺序保护通过 |
+| aa86c15 / [run53](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40199977270) | 221 Node、144/138/138；焦点环实际颜色及全部回归通过 |
+
+斜线顺序为Chrome/Firefox/WebKit；后两者每轮各6项像素检查明确跳过。初始恢复基线200 Node通过，当前本地221 Node通过；没有本地浏览器可执行文件，真实浏览器执行来自上述CI。未将--list、格式或Node测试当浏览器验收。
+
+### Skill最小修改实证
+
+独立Agent只拿仓库Skill与Launch任务，读取当前99c7a3d5，旧32b068f9补丁实际以退出码1拒绝且未生成输出。重读后只输出1个set-node，把landing/launchPrimaryAction的Hover fill设为$success；修订哈希471e056f。CLI apply/validate/audit通过，audit findings=[]；严格JSON和materializeInstance比较确认只新增目标状态填充与自动updatedAt，保留继承opacity0.88、其他状态、全部最新尺寸/文字/Tokens/主题。此流程无联网、仓库写入、浏览器或部署，不能据此声称完整WCAG。
+
+
 ## 基线与范围
 
 远程 M0 基线：`56a189bf929d09eb8b092a24674b717faba6e0cd`。原始 Orbit 文件保持 3 画板、170 节点、hash `21a89182`；16 个原测试及原 Patch 均保留。

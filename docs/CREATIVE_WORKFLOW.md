@@ -24,7 +24,7 @@ node tools/forge.mjs context examples/Launch.project.json landing launchPrimaryA
 
 button/input的可选`states`为hover/active/focus/error/disabled/loading映射；每项只有`style`，允许fill/color/stroke/opacity及已存在Token别名。状态跨断点共用，按hover→active→focus→error→disabled→loading顺序覆盖普通外观；不写几何尺寸、CSS选择器、任意动画或脚本。每个状态及其字段计入投影渲染预算。
 
-`disabled`支持button/input；`loading`支持button并导出disabled+aria-busy；`invalid`支持input并导出aria-invalid。原生Hover/Active/键盘Focus可在导出HTML中工作；加载指示保留文案，尊重reduced-motion。没有真实表单校验、异步请求、业务事件状态机或页面跳转。错误文字仍需设计师明确编写，不能仅用描边色传达信息。
+`disabled`支持button/input；`loading`支持button并导出disabled+aria-busy；`invalid`支持input并导出aria-invalid。原生Hover/Active/键盘Focus可在导出HTML中工作；焦点环优先使用Focus描边色，否则使用项目主色，避免直接继承白色文案导致白底上不可见；加载指示保留文案，尊重reduced-motion。没有真实表单校验、异步请求、业务事件状态机或页面跳转。错误文字仍需设计师明确编写，不能仅用描边色传达信息。
 
 叶子实例继承源状态并按字段覆盖；容器实例中的控件通过源副本编辑。状态颜色的完整对比度/背景合成尚不属于静态审计保证范围。用户自己的Token主题可能改变对比度，必须实际检查。
 
