@@ -1,0 +1,822 @@
+{
+  "format": "designforge.project",
+  "version": 1,
+  "id": "projectboard",
+  "title": "Project board",
+  "tokens": {
+    "primary": "$accent",
+    "primarySoft": "#EEEAFE",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#F7F8FB",
+    "canvas": "#F3F5F9",
+    "ink": "#202238",
+    "muted": "#667085",
+    "border": "#E4E7F0",
+    "success": "#13734F",
+    "warning": "#F4B754",
+    "danger": "#E16C70",
+    "radius": 14,
+    "fontFamily": "system-ui",
+    "accent": "#2563EB",
+    "spacing": 12,
+    "spaceLarge": 24
+  },
+  "boards": [
+    {
+      "id": "m275",
+      "name": "Project board",
+      "x": 0,
+      "y": 80,
+      "w": 1200,
+      "h": 800,
+      "autoHeight": true,
+      "bg": "#EEF1F6",
+      "nodes": [
+        {
+          "id": "m274",
+          "type": "frame",
+          "name": "Page frame",
+          "x": 32,
+          "y": 32,
+          "w": 1136,
+          "h": 736,
+          "text": "",
+          "style": {
+            "fill": "$surface",
+            "radius": "$radius"
+          },
+          "children": [
+            {
+              "id": "m116",
+              "type": "frame",
+              "name": "Header",
+              "x": 0,
+              "y": 0,
+              "w": 1000,
+              "h": 48,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m114",
+                  "type": "text",
+                  "name": "Product name",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 36,
+                  "text": "Sprint workspace",
+                  "style": {
+                    "fontSize": 22,
+                    "fontWeight": 700,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m115",
+                  "type": "button",
+                  "name": "New project",
+                  "x": 0,
+                  "y": 0,
+                  "w": 140,
+                  "h": 44,
+                  "text": "New project",
+                  "style": {
+                    "fill": "$primary",
+                    "color": "#FFFFFF",
+                    "fontSize": 14,
+                    "fontWeight": 650,
+                    "radius": 10
+                  },
+                  "sizing": {
+                    "w": "fill"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "row",
+                "gap": "$spacing",
+                "padding": 0,
+                "align": "center",
+                "justify": "space-between"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m147",
+              "type": "frame",
+              "name": "Board columns",
+              "x": 0,
+              "y": 0,
+              "w": 1000,
+              "h": 390,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m127",
+                  "type": "frame",
+                  "name": "Planned",
+                  "x": 0,
+                  "y": 0,
+                  "w": 320,
+                  "h": 360,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m117",
+                      "type": "text",
+                      "name": "Section heading",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 32,
+                      "text": "Planned",
+                      "style": {
+                        "fontSize": 20,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m120",
+                      "type": "frame",
+                      "name": "Search flow",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m118",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Search flow",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m119",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Ready for review",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m123",
+                      "type": "frame",
+                      "name": "Empty states",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m121",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Empty states",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m122",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "In progress",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m126",
+                      "type": "frame",
+                      "name": "Design tokens",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m124",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Design tokens",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m125",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Updated just now",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": "$spacing",
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m138",
+                  "type": "frame",
+                  "name": "Building",
+                  "x": 0,
+                  "y": 0,
+                  "w": 320,
+                  "h": 360,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m128",
+                      "type": "text",
+                      "name": "Section heading",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 32,
+                      "text": "Building",
+                      "style": {
+                        "fontSize": 20,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m131",
+                      "type": "frame",
+                      "name": "Settings view",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m129",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Settings view",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m130",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Ready for review",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m134",
+                      "type": "frame",
+                      "name": "Project import",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m132",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Project import",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m133",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "In progress",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m137",
+                      "type": "frame",
+                      "name": "Review panel",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m135",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Review panel",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m136",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Updated just now",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": "$spacing",
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m146",
+                  "type": "frame",
+                  "name": "Review",
+                  "x": 0,
+                  "y": 0,
+                  "w": 320,
+                  "h": 360,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m139",
+                      "type": "text",
+                      "name": "Section heading",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 32,
+                      "text": "Review",
+                      "style": {
+                        "fontSize": 20,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m142",
+                      "type": "frame",
+                      "name": "Editor toolbar",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m140",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Editor toolbar",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m141",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "Ready for review",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m145",
+                      "type": "frame",
+                      "name": "Export assets",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 72,
+                      "text": "",
+                      "style": {
+                        "fill": "$surface",
+                        "radius": "$radius"
+                      },
+                      "children": [
+                        {
+                          "id": "m143",
+                          "type": "text",
+                          "name": "Label",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 24,
+                          "text": "Export assets",
+                          "style": {
+                            "fontSize": 15,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        },
+                        {
+                          "id": "m144",
+                          "type": "text",
+                          "name": "Detail",
+                          "x": 0,
+                          "y": 0,
+                          "w": 260,
+                          "h": 20,
+                          "text": "In progress",
+                          "style": {
+                            "fontSize": 12,
+                            "fontWeight": 500,
+                            "color": "$ink"
+                          },
+                          "sizing": {
+                            "w": "fill",
+                            "h": "hug"
+                          }
+                        }
+                      ],
+                      "layout": {
+                        "mode": "flex",
+                        "direction": "column",
+                        "gap": 4,
+                        "padding": 12
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": "$spacing",
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "grid",
+                "direction": "column",
+                "gap": "$spacing",
+                "padding": 0,
+                "columns": 3
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            }
+          ],
+          "layout": {
+            "mode": "flex",
+            "direction": "column",
+            "gap": 20,
+            "padding": "$spaceLarge"
+          },
+          "sizing": {
+            "h": "hug"
+          },
+          "constraints": {
+            "horizontal": "stretch",
+            "referenceW": 1200
+          }
+        }
+      ]
+    }
+  ],
+  "comments": [],
+  "updatedAt": "2026-10-23T00:00:00.000Z",
+  "themes": {
+    "dark": {
+      "surface": "#202938",
+      "surfaceAlt": "#151D2B",
+      "ink": "#F2F4F8",
+      "muted": "#BCC7DA",
+      "border": "#3A4659",
+      "primarySoft": "#263D62",
+      "accent": "#3B82F6"
+    }
+  },
+  "components": []
+}

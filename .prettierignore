@@ -1,0 +1,7 @@
+node_modules
+output
+output-*
+playwright-report
+test-results
+examples
+package-lock.json

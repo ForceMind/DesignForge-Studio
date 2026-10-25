@@ -1,0 +1,622 @@
+{
+  "format": "designforge.project",
+  "version": 1,
+  "id": "mobilesettings",
+  "title": "Mobile settings",
+  "tokens": {
+    "primary": "$accent",
+    "primarySoft": "#EEEAFE",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#F7F8FB",
+    "canvas": "#F3F5F9",
+    "ink": "#202238",
+    "muted": "#667085",
+    "border": "#E4E7F0",
+    "success": "#13734F",
+    "warning": "#F4B754",
+    "danger": "#E16C70",
+    "radius": 14,
+    "fontFamily": "system-ui",
+    "accent": "#2563EB",
+    "spacing": 12,
+    "spaceLarge": 24
+  },
+  "boards": [
+    {
+      "id": "m273",
+      "name": "Mobile settings",
+      "x": 0,
+      "y": 80,
+      "w": 390,
+      "h": 1100,
+      "autoHeight": true,
+      "bg": "#EEF1F6",
+      "nodes": [
+        {
+          "id": "m272",
+          "type": "frame",
+          "name": "Page frame",
+          "x": 32,
+          "y": 32,
+          "w": 326,
+          "h": 1036,
+          "text": "",
+          "style": {
+            "fill": "$surface",
+            "radius": "$radius"
+          },
+          "children": [
+            {
+              "id": "m91",
+              "type": "frame",
+              "name": "Header",
+              "x": 0,
+              "y": 0,
+              "w": 1000,
+              "h": 48,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m89",
+                  "type": "text",
+                  "name": "Product name",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 36,
+                  "text": "Preferences",
+                  "style": {
+                    "fontSize": 22,
+                    "fontWeight": 700,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m90",
+                  "type": "button",
+                  "name": "New project",
+                  "x": 0,
+                  "y": 0,
+                  "w": 140,
+                  "h": 44,
+                  "text": "New project",
+                  "style": {
+                    "fill": "$primary",
+                    "color": "#FFFFFF",
+                    "fontSize": 14,
+                    "fontWeight": 650,
+                    "radius": 10
+                  },
+                  "sizing": {
+                    "w": "fill"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "row",
+                "gap": "$spacing",
+                "padding": 0,
+                "align": "center",
+                "justify": "space-between"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m102",
+              "type": "frame",
+              "name": "Account",
+              "x": 0,
+              "y": 0,
+              "w": 320,
+              "h": 360,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m92",
+                  "type": "text",
+                  "name": "Section heading",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 32,
+                  "text": "Account",
+                  "style": {
+                    "fontSize": 20,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m95",
+                  "type": "frame",
+                  "name": "Profile and avatar",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 72,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m93",
+                      "type": "text",
+                      "name": "Label",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Profile and avatar",
+                      "style": {
+                        "fontSize": 15,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m94",
+                      "type": "text",
+                      "name": "Detail",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "Ready for review",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 4,
+                    "padding": 12
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m98",
+                  "type": "frame",
+                  "name": "Privacy and security",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 72,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m96",
+                      "type": "text",
+                      "name": "Label",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Privacy and security",
+                      "style": {
+                        "fontSize": 15,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m97",
+                      "type": "text",
+                      "name": "Detail",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "In progress",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 4,
+                    "padding": 12
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m101",
+                  "type": "frame",
+                  "name": "Language and region",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 72,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m99",
+                      "type": "text",
+                      "name": "Label",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Language and region",
+                      "style": {
+                        "fontSize": 15,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m100",
+                      "type": "text",
+                      "name": "Detail",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "Updated just now",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 4,
+                    "padding": 12
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": "$spacing",
+                "padding": 20
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m113",
+              "type": "frame",
+              "name": "Experience",
+              "x": 0,
+              "y": 0,
+              "w": 320,
+              "h": 360,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m103",
+                  "type": "text",
+                  "name": "Section heading",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 32,
+                  "text": "Experience",
+                  "style": {
+                    "fontSize": 20,
+                    "fontWeight": 500,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m106",
+                  "type": "frame",
+                  "name": "Appearance",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 72,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m104",
+                      "type": "text",
+                      "name": "Label",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Appearance",
+                      "style": {
+                        "fontSize": 15,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m105",
+                      "type": "text",
+                      "name": "Detail",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "Ready for review",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 4,
+                    "padding": 12
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m109",
+                  "type": "frame",
+                  "name": "Haptic feedback",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 72,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m107",
+                      "type": "text",
+                      "name": "Label",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Haptic feedback",
+                      "style": {
+                        "fontSize": 15,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m108",
+                      "type": "text",
+                      "name": "Detail",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "In progress",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 4,
+                    "padding": 12
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m112",
+                  "type": "frame",
+                  "name": "Notifications",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 72,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m110",
+                      "type": "text",
+                      "name": "Label",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Notifications",
+                      "style": {
+                        "fontSize": 15,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m111",
+                      "type": "text",
+                      "name": "Detail",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "Updated just now",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 4,
+                    "padding": 12
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": "$spacing",
+                "padding": 20
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            }
+          ],
+          "layout": {
+            "mode": "flex",
+            "direction": "column",
+            "gap": 20,
+            "padding": "$spaceLarge"
+          },
+          "sizing": {
+            "h": "hug"
+          },
+          "constraints": {
+            "horizontal": "stretch",
+            "referenceW": 390
+          }
+        }
+      ]
+    }
+  ],
+  "comments": [],
+  "updatedAt": "2026-10-23T00:00:00.000Z",
+  "themes": {
+    "dark": {
+      "surface": "#202938",
+      "surfaceAlt": "#151D2B",
+      "ink": "#F2F4F8",
+      "muted": "#BCC7DA",
+      "border": "#3A4659",
+      "primarySoft": "#263D62",
+      "accent": "#3B82F6"
+    }
+  },
+  "components": []
+}

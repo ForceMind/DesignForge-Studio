@@ -2,3 +2,7 @@ output/
 .DS_Store
 node_modules/
 *.log
+test-results/
+playwright-report/
+browser-version.txt
+browser-version.json
