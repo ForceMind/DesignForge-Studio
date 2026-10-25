@@ -63,7 +63,7 @@ function context(project, hasProject) {
   const check = (cost) => {
     if (cost.units > SCENE_LIMITS.boardUnits)
       fail(
-        `projected board exceeds ${SCENE_LIMITS.boardUnits} render units (nodes and rich-text spans)`,
+        `projected board exceeds ${SCENE_LIMITS.boardUnits} render units (nodes, rich-text spans and state fields)`,
       );
     if (cost.textCharacters > SCENE_LIMITS.textCharacters)
       fail(`projected text exceeds ${SCENE_LIMITS.textCharacters} characters`);
@@ -175,7 +175,10 @@ function context(project, hasProject) {
             if (change.text !== undefined) {
               if (typeof change.text !== "string")
                 fail("malformed instance override text");
-              if (id !== summary.rootId) {
+              if (
+                id !== summary.rootId ||
+                !["frame", "group", "component"].includes(summary.rootType)
+              ) {
                 cost.textCharacters +=
                   change.text.length - source.textCharacters;
                 cost.units -= source.runUnits;

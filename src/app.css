@@ -2629,3 +2629,44 @@ select:focus-visible {
   gap: 8px;
   align-items: center;
 }
+
+#starter-filter input,
+#starter-filter select,
+.state-fields input,
+.state-flags select {
+  box-sizing: border-box;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  color: var(--ui-ink);
+  background: var(--ui-soft);
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+}
+#starter-filter select,
+.state-flags select {
+  appearance: none;
+  padding-right: 27px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 13px) 15px,
+    calc(100% - 9px) 15px;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+}
+#starter-filter input:focus-visible,
+#starter-filter select:focus-visible,
+.state-fields input:focus-visible,
+.state-flags select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.brief-sections {
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  padding: 10px;
+}

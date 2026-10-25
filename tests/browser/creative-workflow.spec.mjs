@@ -133,8 +133,18 @@ test("state preview never saves; edits, reset, flags, Undo and reload preserve u
     "rgb(18, 52, 86)",
   );
   await page.locator("#redo").click();
+  await page.locator('[data-state-flag="loading"]').scrollIntoViewIfNeeded();
   await page.locator('[data-state-flag="loading"]').selectOption("true");
   await expect(canvas(page, "action")).toBeDisabled();
+  const inspectorScroll = await page
+    .locator("#right-content")
+    .evaluate((el) => el.scrollTop);
+  expect(inspectorScroll).toBeGreaterThan(0);
+  const flagRect = await page
+    .locator('[data-state-flag="loading"]')
+    .boundingBox();
+  expect(flagRect.y + flagRect.height).toBeLessThan(960);
+  await page.locator(".state-inspector").scrollIntoViewIfNeeded();
   await page.screenshot({
     path: info.outputPath("state-inspector.png"),
     fullPage: true,
@@ -193,6 +203,21 @@ test("gallery filters, isolated previews, insert, reuse, source edit and design-
     page.frameLocator("#starter-cards iframe").locator("input"),
   ).toHaveAttribute("placeholder", "输入邮箱地址");
   expect(await stored(page)).toEqual(original);
+  await expect(page.locator("#starter-query")).toHaveCSS(
+    "border-radius",
+    "7px",
+  );
+  await page.locator("#theme-toggle").click();
+  const inputColors = await page.locator("#starter-query").evaluate((el) => ({
+    text: getComputedStyle(el).color,
+    background: getComputedStyle(el).backgroundColor,
+  }));
+  expect(inputColors.text).not.toBe(inputColors.background);
+  await page.screenshot({
+    path: info.outputPath("starter-gallery-dark.png"),
+    fullPage: true,
+  });
+  await page.locator("#theme-toggle").click();
   await page.screenshot({
     path: info.outputPath("starter-gallery.png"),
     fullPage: true,
@@ -255,6 +280,8 @@ test("brief persists with Undo and exports precise untrusted Agent context witho
   await expect(page.locator("[data-brief-warnings]")).toContainText(
     "不生成虚构指标",
   );
+  await page.locator("#brief-product").fill("DesignForge Studio");
+  await page.locator("#brief-product").press("Tab");
   const before = await stored(page),
     result = await downloaded(page, () =>
       page.locator('[data-action="download-context"]').click(),
@@ -269,6 +296,7 @@ test("brief persists with Undo and exports precise untrusted Agent context witho
   expect(result.data.brief.audience).toBe("Interface designers");
   expect(result.data.trust).toContain("untrusted");
   expect(await stored(page)).toEqual(before);
+  await page.locator("#design-brief-panel > summary").scrollIntoViewIfNeeded();
   await page.screenshot({
     path: info.outputPath("design-brief.png"),
     fullPage: true,

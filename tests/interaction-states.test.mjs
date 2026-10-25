@@ -251,3 +251,28 @@ test("scene budget counts merged state CSS and actual leaf source text before ma
     measureSceneBudget(text).issues.some((i) => i.reason.includes("text")),
   );
 });
+
+test("leaf source-root text overrides count actual rendered characters and rich spans", () => {
+  const p = linked();
+  const first = node(p);
+  p.boards[0].nodes = Array.from({ length: 201 }, (_, i) => ({
+    ...first,
+    id: "rootOverride" + i,
+    overrides: { source: { text: "A".repeat(10000) } },
+  }));
+  assert.ok(
+    measureSceneBudget(p).issues.some((i) => i.reason.includes("text")),
+  );
+  const small = linked();
+  small.components[0].variants[0].root.textRuns = [
+    { text: "Save project", style: { fontWeight: 600 } },
+  ];
+  const baseline = measureSceneBudget(small).boards[0].units;
+  node(small).overrides = { source: { text: "Actual root override" } };
+  assert.equal(
+    materializeInstance(node(small), small).text,
+    "Actual root override",
+  );
+  assert.equal(measureSceneBudget(small).boards[0].units, baseline - 2);
+  assert.deepEqual(validateProject(small), []);
+});

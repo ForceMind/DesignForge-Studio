@@ -117,6 +117,7 @@ const uid = (prefix = "n") =>
   `${prefix}${Math.random().toString(36).slice(2, 10)}`;
 const interactionViews = new Map();
 let briefOpen = false;
+let inspectorScope = null;
 const starterView = { query: "", category: "all", page: 0 };
 let project = null,
   activeBoardId = null,
@@ -484,6 +485,7 @@ function colorField(title, field, value, fallback) {
   return `<div class="fieldcol"><label for="prop-${field}">${title}</label><div class="color-field"><input type="color" data-style-color="${field}" aria-label="${title}取色器" value="${esc(resolvedHex(value, fallback))}"><input id="prop-${field}" data-prop="${field}" value="${esc(value || "")}"></div></div>`;
 }
 function renderRight() {
+  if (rightTab !== "properties") inspectorScope = null;
   if (rightTab === "tokens") renderTokens();
   else if (rightTab === "audit") renderAudit();
   else if (rightTab === "agent") renderAgent();
@@ -491,6 +493,13 @@ function renderRight() {
   else renderProperties();
 }
 function renderProperties() {
+  const scope = project.id + ":" + activeBoardId + ":" + activeNodeId;
+  const top = inspectorScope === scope ? $("right-content").scrollTop : 0;
+  inspectorScope = scope;
+  renderPropertiesBody();
+  $("right-content").scrollTop = top;
+}
+function renderPropertiesBody() {
   inspectorSizeObserver.disconnect();
   const b = activeBoard(),
     source = activeNode(),
@@ -2085,6 +2094,7 @@ function clearProjectView() {
   componentManagerOpen.clear();
   interactionViews.clear();
   briefOpen = false;
+  inspectorScope = null;
   Object.assign(starterView, { query: "", category: "all", page: 0 });
   $("starter-query").value = "";
   $("starter-category").value = "all";
