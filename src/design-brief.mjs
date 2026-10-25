@@ -100,6 +100,18 @@ export function briefPlan(brief = {}) {
     outline: sections.map((id) => ({ id, label: BRIEF_SECTIONS[id] })),
   };
 }
+
+/** Change one section without reordering the user's existing outline. */
+export function toggleBriefSection(brief, section, checked) {
+  if (!Object.hasOwn(BRIEF_SECTIONS, section) || typeof checked !== "boolean")
+    throw Error("Invalid brief section");
+  const sections = brief.sections || briefPlan(brief).outline.map((s) => s.id);
+  brief.sections = checked
+    ? sections.includes(section)
+      ? [...sections]
+      : [...sections, section]
+    : sections.filter((s) => s !== section);
+}
 /** Deliberate allowlist: no credentials, arbitrary metadata, asset payloads or executable strings. */
 export function designContext(
   project,

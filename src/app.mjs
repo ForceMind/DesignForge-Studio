@@ -1,4 +1,8 @@
-import { designContext, BRIEF_SECTIONS, briefPlan } from "./design-brief.mjs";
+import {
+  designContext,
+  toggleBriefSection,
+  briefPlan,
+} from "./design-brief.mjs";
 import { briefControls } from "./brief-inspector.mjs";
 import { starterCards, insertStarter } from "./starter-gallery.mjs";
 import { interactionControls, editInteraction } from "./state-inspector.mjs";
@@ -3023,6 +3027,9 @@ function bindStatic() {
           p,
           activeBoardId,
           insert.dataset.insertStarter,
+          {
+            parentId: CONTAINERS.has(activeNode()?.type) ? activeNodeId : null,
+          },
         );
         Object.assign(p, result.project);
         activeNodeId = result.nodeId;
@@ -3130,16 +3137,12 @@ function bindStatic() {
   $("right-content").addEventListener("change", (e) => {
     if (e.target.matches("[data-brief-field], [data-brief-section]")) {
       const field = e.target.dataset.briefField;
-      const sections = [
-        ...$("right-content").querySelectorAll("[data-brief-section]:checked"),
-      ].map((el) => el.dataset.briefSection);
+      const section = e.target.dataset.briefSection,
+        checked = e.target.checked;
       commit((p) => {
         p.designBrief ||= { version: 1 };
         if (field) p.designBrief[field] = e.target.value;
-        else
-          p.designBrief.sections = Object.keys(BRIEF_SECTIONS).filter((k) =>
-            sections.includes(k),
-          );
+        else toggleBriefSection(p.designBrief, section, checked);
       });
       return;
     }

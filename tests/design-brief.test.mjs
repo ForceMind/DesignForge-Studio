@@ -5,6 +5,7 @@ import {
   validateDesignBrief,
   briefPlan,
   designContext,
+  toggleBriefSection,
 } from "../src/design-brief.mjs";
 import { interactionProject } from "./fixtures/interaction-project.mjs";
 import { validateProject, hashProject } from "../src/core.mjs";
@@ -106,4 +107,18 @@ test("CLI context reads a real project without changing its original bytes or gu
       }),
     /Unknown context board/,
   );
+});
+
+test("editing one brief section retains manual ordering and explicit empty outlines", () => {
+  const brief = { version: 1, sections: ["action", "hero", "product"] };
+  toggleBriefSection(brief, "faq", true);
+  assert.deepEqual(brief.sections, ["action", "hero", "product", "faq"]);
+  toggleBriefSection(brief, "hero", false);
+  assert.deepEqual(brief.sections, ["action", "product", "faq"]);
+  const empty = { version: 1, sections: [] };
+  toggleBriefSection(empty, "faq", false);
+  assert.deepEqual(empty.sections, []);
+  toggleBriefSection(empty, "hero", true);
+  assert.deepEqual(empty.sections, ["hero"]);
+  assert.throws(() => toggleBriefSection(empty, "constructor", true));
 });

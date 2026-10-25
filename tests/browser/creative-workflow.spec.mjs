@@ -268,7 +268,9 @@ test("gallery filters, isolated previews, insert, reuse, source edit and design-
 test("brief persists with Undo and exports precise untrusted Agent context without executing hostile text", async ({
   page,
 }, info) => {
-  await open(page);
+  const p = interactionProject();
+  p.designBrief = { version: 1, sections: ["action", "hero", "product"] };
+  await open(page, p);
   await page.locator('[data-righttab="agent"]').click();
   await page.locator("#design-brief-panel > summary").click();
   await page
@@ -284,6 +286,13 @@ test("brief persists with Undo and exports precise untrusted Agent context witho
   await expect(page.locator("#brief-audience")).toHaveValue("");
   await page.locator("#redo").click();
   await page.locator("#brief-profile").selectOption("product");
+  await page.locator('[data-brief-section="faq"]').check();
+  expect((await stored(page)).designBrief.sections).toEqual([
+    "action",
+    "hero",
+    "product",
+    "faq",
+  ]);
   expect(await page.evaluate(() => window.briefInjected)).toBeUndefined();
   await expect(page.locator("[data-brief-warnings]")).toContainText(
     "不生成虚构指标",
@@ -316,6 +325,55 @@ test("brief persists with Undo and exports precise untrusted Agent context witho
     "Interface designers",
   );
   await expect(page.locator("#brief-profile")).toHaveValue("product");
+});
+
+test("gallery insertion retains autoHeight root layout and rejects locked target containers atomically", async ({
+  page,
+}) => {
+  const p = interactionProject(),
+    original = p.boards[0].nodes;
+  p.boards[0].h = 280;
+  p.boards[0].autoHeight = true;
+  p.boards[0].nodes = [
+    {
+      id: "pageRoot",
+      name: "Page",
+      type: "frame",
+      x: 0,
+      y: 0,
+      w: 800,
+      h: 280,
+      text: "",
+      style: {},
+      layout: { mode: "flex", direction: "column", padding: 24, gap: 16 },
+      sizing: { w: "fill", h: "hug" },
+      children: original,
+    },
+  ];
+  await open(page, p);
+  const board = page.locator('[data-artboard="work"] .df-board');
+  const before = (await board.boundingBox()).height;
+  await page.locator('[data-lefttab="components"]').click();
+  await page.locator("#starter-gallery > summary").click();
+  await page.locator("#starter-query").fill("行动");
+  await page.locator("#starter-filter button").click();
+  await page.locator('[data-insert-starter="action"]').click();
+  const next = await stored(page);
+  expect(next.boards[0].nodes).toHaveLength(1);
+  expect(next.boards[0].nodes[0].children.slice(0, 2)).toEqual(original);
+  expect(next.boards[0].nodes[0].children).toHaveLength(3);
+  await expect
+    .poll(async () => (await board.boundingBox()).height)
+    .toBeGreaterThan(before);
+  await page.locator("#undo").click();
+  expect((await stored(page)).boards[0].nodes[0].children).toHaveLength(2);
+  p.boards[0].nodes[0].locked = true;
+  await open(page, p);
+  await page.locator('[data-lefttab="components"]').click();
+  await page.locator("#starter-gallery > summary").click();
+  const saved = await stored(page);
+  await page.locator('[data-insert-starter="primary"]').click();
+  expect(await stored(page)).toEqual(saved);
 });
 for (const width of [390, 768, 1440])
   test(`Launch real responsive prototype stays within ${width}px and retains all native components`, async ({

@@ -6,7 +6,7 @@ import {
   exportStyles,
   effectiveTokens,
 } from "./core.mjs";
-import { findNode } from "./tree.mjs";
+import { findNode, CONTAINERS, isNodeLocked } from "./tree.mjs";
 
 /** Original DesignForge AST recipes. No third-party HTML/CSS is loaded or executed. */
 export const STARTER_ITEMS = Object.freeze(
@@ -234,10 +234,23 @@ export function starterComponent(id) {
   return { id: "starter-" + id, name: item.name, variants };
 }
 /** Reuse only an identical definition. User changes are never overwritten. */
-export function insertStarter(project, boardId, itemId) {
+export function insertStarter(
+  project,
+  boardId,
+  itemId,
+  { parentId = null } = {},
+) {
   const next = clone(project),
     b = next.boards.find((b) => b.id === boardId);
   if (!b) throw Error("Unknown target board");
+  const parent = parentId
+    ? findNode(b, parentId)
+    : b.autoHeight && b.nodes.length === 1 && CONTAINERS.has(b.nodes[0].type)
+      ? b.nodes[0]
+      : null;
+  if (parentId && !parent) throw Error("Unknown target container");
+  if (parent && (!CONTAINERS.has(parent.type) || isNodeLocked(b, parent.id)))
+    throw Error("Target container is locked or not editable");
   const canonical = starterComponent(itemId);
   next.components ||= [];
   let component = next.components.find(
@@ -268,7 +281,13 @@ export function insertStarter(project, boardId, itemId) {
     text: "",
     style: {},
   };
-  b.nodes.push(node);
+  if (
+    parent &&
+    ["flex", "grid"].includes(parent.layout?.mode) &&
+    ["frame", "input"].includes(root.type)
+  )
+    node.sizing = { w: "fill" };
+  (parent ? (parent.children ||= []) : b.nodes).push(node);
   const issues = validateProject(next);
   if (issues.length) throw Error(issues[0].path + ": " + issues[0].reason);
   return { project: next, nodeId };

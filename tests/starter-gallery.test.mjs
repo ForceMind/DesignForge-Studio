@@ -77,3 +77,46 @@ test("preview is sandbox compatible, offline and uses the current theme without 
   assert.throws(() => starterComponent("unknown"));
   assert.throws(() => insertStarter(p, "missing", "primary"));
 });
+
+test("starter insertion preserves single-root autoHeight and respects explicit container locks", () => {
+  const p = interactionProject(),
+    old = structuredClone(p.boards[0].nodes);
+  p.boards[0].autoHeight = true;
+  p.boards[0].nodes = [
+    {
+      id: "pageRoot",
+      name: "Page",
+      type: "frame",
+      x: 0,
+      y: 0,
+      w: 800,
+      h: 600,
+      text: "",
+      style: {},
+      sizing: { w: "fill", h: "hug" },
+      layout: { mode: "flex", direction: "column", padding: 24, gap: 16 },
+      children: old,
+    },
+  ];
+  const result = insertStarter(p, "work", "email");
+  assert.equal(result.project.boards[0].nodes.length, 1);
+  assert.deepEqual(result.project.boards[0].nodes[0].children.slice(0, 2), old);
+  assert.equal(result.project.boards[0].nodes[0].children[2].id, result.nodeId);
+  assert.equal(result.project.boards[0].nodes[0].children[2].sizing.w, "fill");
+  assert.match(
+    standaloneHtml(result.project.boards[0], result.project),
+    /height:auto/,
+  );
+  p.boards[0].nodes[0].locked = true;
+  const before = structuredClone(p);
+  assert.throws(() => insertStarter(p, "work", "email"), /locked/);
+  assert.deepEqual(p, before);
+  assert.throws(
+    () => insertStarter(p, "work", "email", { parentId: "action" }),
+    /not editable/,
+  );
+  assert.throws(
+    () => insertStarter(p, "work", "email", { parentId: "missing" }),
+    /Unknown target/,
+  );
+});
