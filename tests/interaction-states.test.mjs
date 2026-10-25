@@ -37,6 +37,8 @@ test("typed interaction states round-trip v1 with safe native CSS, focus and red
     /data-node-id="action"\][^{}]*\{background:#123456!important/,
   );
   assert.match(html, /:focus-visible/);
+  assert.match(html, /--df-focus-ring:#345678/);
+  assert.match(html, /outline:2px solid var\(--df-focus-ring/);
   assert.match(html, /prefers-reduced-motion:reduce/);
   assert.doesNotMatch(html, /<script/);
   assert.deepEqual(JSON.parse(JSON.stringify(p)), p);

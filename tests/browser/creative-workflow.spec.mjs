@@ -48,6 +48,7 @@ test("native hover, active, keyboard focus, loading and error render with reduce
   await page.keyboard.press("Tab");
   await button.focus();
   await expect(button).toHaveCSS("outline-style", "solid");
+  await expect(button).toHaveCSS("outline-color", "rgb(52, 86, 120)");
   p.boards[0].nodes[0].loading = true;
   p.boards[0].nodes[1].invalid = true;
   await page.setContent(standaloneHtml(p.boards[0], p));

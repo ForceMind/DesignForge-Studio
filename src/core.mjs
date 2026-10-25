@@ -1224,11 +1224,16 @@ export function renderNode(
   if (!NODE_TYPES.has(node.type)) node = { ...node, type: "rect" };
   if (node.type === "instance" && project)
     node = materializeInstance(node, project);
-  const st = escapeHtml(colorStyle(node, tokens, board, parent));
   const interactive =
     ["button", "input"].includes(node.type) &&
     (node.states !== undefined ||
       INTERACTION_FLAGS.some((key) => node[key] !== undefined));
+  const st = escapeHtml(
+    colorStyle(node, tokens, board, parent) +
+      (interactive
+        ? `;--df-focus-ring:${cssColor(node.states?.focus?.style?.stroke ?? "$primary", tokens, "#6958e8")}`
+        : ""),
+  );
   const attributes = interactive
     ? ` data-df-interactive=""${node.disabled || node.loading ? " disabled" : ""}${node.loading ? ' aria-busy="true"' : ""}${node.invalid ? ' aria-invalid="true"' : ""}`
     : "";
