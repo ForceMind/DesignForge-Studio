@@ -52,11 +52,11 @@ const board = () => ({
   h: 800,
   nodes: [leaf("a"), leaf("b", 150, 90), leaf("c", 300, 60)],
 });
-test("all 11 examples round-trip, preserve every field, and render without scripts", () => {
+test("all 12 examples round-trip, preserve every field, and render without scripts", () => {
   const files = fs
     .readdirSync(new URL("../examples", import.meta.url))
     .filter((n) => n.endsWith(".project.json"));
-  assert.equal(files.length, 11);
+  assert.equal(files.length, 12);
   for (const file of files) {
     const p = JSON.parse(
       fs.readFileSync(new URL("../examples/" + file, import.meta.url)),

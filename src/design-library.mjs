@@ -33,6 +33,10 @@ const nodeFields = new Set([
   "responsive",
   "assetId",
   "textRuns",
+  "states",
+  "disabled",
+  "loading",
+  "invalid",
 ]);
 function assertFields(value, allowed, path) {
   if (!isObject(value) || Object.keys(value).some((k) => !allowed.has(k)))
@@ -234,6 +238,13 @@ function prefixedBundle(bundle, prefix) {
         fontFamily: "$" + tokenMap.get("fontFamily"),
       };
     if (n.layout) result.layout = fields(n.layout);
+    if (n.states)
+      result.states = Object.fromEntries(
+        Object.entries(n.states).map(([key, state]) => [
+          key,
+          { style: fields(state.style) },
+        ]),
+      );
     if (n.assetId) result.assetId = assetMap.get(n.assetId) || n.assetId;
     if (n.componentId)
       result.componentId = componentMap.get(n.componentId) || n.componentId;

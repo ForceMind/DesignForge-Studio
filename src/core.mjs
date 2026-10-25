@@ -1,3 +1,11 @@
+import { validateDesignBrief } from "./design-brief.mjs";
+import {
+  interactionIssues,
+  mergeInteractionStates,
+  interactionRules,
+  interactionCss,
+  INTERACTION_FLAGS,
+} from "./interaction-states.mjs";
 import { effectiveNode } from "./responsive.mjs";
 import { validateAssets } from "./assets.mjs";
 import { validateGuides } from "./guides.mjs";
@@ -193,6 +201,8 @@ export function validateProject(project) {
     error("root", "Project must be an object");
     return issues;
   }
+  for (const issue of validateDesignBrief(project.designBrief))
+    error(issue.path, issue.reason);
   if (project.format !== FORMAT || project.version !== VERSION)
     error("format", "Unsupported project format/version");
   if (typeof project.title !== "string" || !project.title.trim())
@@ -384,6 +394,18 @@ export function validateProject(project) {
         error(n + ".locked", "Expected boolean");
       if (!isObject(node.style)) error(n + ".style", "Style object required");
       else checkStyle(node.style, n + ".style");
+      const interactionType =
+        node.type === "instance"
+          ? project.components
+              ?.find((c) => c.id === node.componentId)
+              ?.variants?.find((v) => v.id === node.variantId)?.root?.type
+          : node.type;
+      const stateIssues = interactionIssues(node, interactionType);
+      for (const issue of stateIssues)
+        error(n + "." + issue.field, issue.reason);
+      if (!stateIssues.some((i) => i.field === "states"))
+        for (const [key, state] of Object.entries(node.states || {}))
+          checkStyle(state.style, `${n}.states.${key}.style`);
       if (typeof node.text !== "string" || node.text.length > 10000)
         error(n + ".text", "Expected text up to 10000 chars");
       for (const palette of [
@@ -770,6 +792,10 @@ const editableKeys = new Set([
   "variantId",
   "overrides",
   "assetId",
+  "states",
+  "disabled",
+  "loading",
+  "invalid",
 ]);
 const editStyleKeys = new Set([
   "fill",
@@ -884,6 +910,16 @@ export function applyPatch(project, patch) {
           )
             throw Error("Unsafe style keys");
           n.style = { ...n.style, ...clone(value) };
+        } else if (key === "states") {
+          const type =
+            n.type === "instance"
+              ? next.components
+                  ?.find((c) => c.id === n.componentId)
+                  ?.variants.find((v) => v.id === n.variantId)?.root.type
+              : n.type;
+          if (interactionIssues({ type, states: value }).length)
+            throw Error("Unsafe interaction state map");
+          n.states = mergeInteractionStates(n.states, clone(value));
         } else if (key === "textRuns" && value === null) delete n.textRuns;
         else if (editableKeys.has(key)) n[key] = clone(value);
         else throw Error("Property not editable: " + key);
@@ -1087,10 +1123,13 @@ export function materializeInstance(instance, project) {
     layout: instance.layout || root.layout,
     ...(CONTAINERS.has(root.type) ? { children: root.children || [] } : {}),
     style: { ...root.style, ...instance.style },
+    ...(root.states || instance.states
+      ? { states: mergeInteractionStates(root.states, instance.states) }
+      : {}),
     $sourceId: undefined,
   };
 }
-function responsiveStyles(board, tokens, project) {
+function renderedEntries(board, project) {
   // Recompute descendants too: switching a parent to Flex must remove their absolute positioning.
   function expand(node, scope = "") {
     const instance = node.type === "instance" && project;
@@ -1107,8 +1146,26 @@ function responsiveStyles(board, tokens, project) {
       children: (current.children || []).map((n) => expand(n, childScope)),
     };
   }
-  const entries = flattenNodes(board.nodes.map((n) => expand(n))),
-    affected = new Map();
+  return flattenNodes(board.nodes.map((n) => expand(n)));
+}
+function interactionBoardStyles(board, tokens, entries) {
+  const rules = entries
+    .map(({ node }) =>
+      interactionRules(
+        node,
+        `[data-board-id="${escapeHtml(board.id)}"] ${node.$selector}`,
+        {
+          color: (value) => cssColor(value, tokens, "transparent"),
+          opacity: (value) => clamp(scalar(value, tokens), 0, 1),
+        },
+      ),
+    )
+    .join("");
+  return rules ? `<style>${rules}</style>` : "";
+}
+function responsiveStyles(board, tokens, project, entries) {
+  // Recompute descendants too: switching a parent to Flex must remove absolute positions.
+  const affected = new Map();
   // A node needs a new rule only for its own override or its immediate layout owner.
   // This bounds emitted CSS by tree edges × scopes instead of all nodes × all widths.
   for (const entry of entries)
@@ -1168,6 +1225,13 @@ export function renderNode(
   if (node.type === "instance" && project)
     node = materializeInstance(node, project);
   const st = escapeHtml(colorStyle(node, tokens, board, parent));
+  const interactive =
+    ["button", "input"].includes(node.type) &&
+    (node.states !== undefined ||
+      INTERACTION_FLAGS.some((key) => node[key] !== undefined));
+  const attributes = interactive
+    ? ` data-df-interactive=""${node.disabled || node.loading ? " disabled" : ""}${node.loading ? ' aria-busy="true"' : ""}${node.invalid ? ' aria-invalid="true"' : ""}`
+    : "";
   const content = CONTAINERS.has(node.type)
     ? (node.children || [])
         .map((n) => renderNode(n, board, tokens, node, project))
@@ -1181,16 +1245,16 @@ export function renderNode(
     return `<img class="df-node df-image" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" alt="${escapeHtml(node.text)}" src="${escapeHtml(asset?.data || "")}" style="${st};object-fit:contain" draggable="false" />`;
   }
   if (node.type === "button")
-    return `<button type="button" class="df-node df-button" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}">${content}</button>`;
+    return `<button type="button" class="df-node df-button" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}"${attributes}>${content}</button>`;
   if (node.type === "input")
-    return `<input class="df-node df-input" aria-label="${content}" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}" placeholder="${content}" readonly />`;
+    return `<input class="df-node df-input" aria-label="${content}" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}" placeholder="${content}"${attributes} readonly />`;
   if (node.type === "icon")
     return `<div class="df-node df-icon" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st}"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${Object.hasOwn(ICONS, node.icon) ? ICONS[node.icon] : ICONS.grid}</svg></div>`;
   if (node.type === "line")
     return `<div class="df-node df-line" ${node.$sourceId ? "data-source-id" : "data-node-id"}="${escapeHtml(node.id)}" style="${st};border-top:${clamp(scalar(node.style?.strokeWidth, tokens, 1), 1, 10, 1)}px solid ${cssColor(node.style?.stroke, tokens, "#E4E7F0")}"></div>`;
   return wrap;
 }
-export const exportStyles = `*{box-sizing:border-box}body{margin:0}.df-board{position:relative;overflow:hidden;margin:0 auto}.df-node{margin:0;padding:0}.df-button,.df-pill{display:flex;align-items:center;justify-content:center;cursor:pointer;border:0}.df-input{padding:0 14px;outline:0}.df-icon{display:flex;align-items:center;justify-content:center}.df-icon svg{width:100%;height:100%}.df-text{line-height:1.35}.df-line{pointer-events:none}`;
+export const exportStyles = `*{box-sizing:border-box}body{margin:0}.df-board{position:relative;overflow:hidden;margin:0 auto}.df-node{margin:0;padding:0}.df-button,.df-pill{display:flex;align-items:center;justify-content:center;cursor:pointer;border:0}.df-input{padding:0 14px;outline:0}.df-icon{display:flex;align-items:center;justify-content:center}.df-icon svg{width:100%;height:100%}.df-text{line-height:1.35}.df-line{pointer-events:none}${interactionCss}`;
 export function renderBoard(board, tokens, project = null) {
   assertBoardSceneBudget(board, project);
   const auto =
@@ -1201,6 +1265,7 @@ export function renderBoard(board, tokens, project = null) {
     ? []
     : project?.assets || [];
   if (project) project = { ...project, assets };
+  const entries = renderedEntries(board, project);
   const fonts = assets
     .filter((a) => a.type === "font")
     .map(
@@ -1208,7 +1273,7 @@ export function renderBoard(board, tokens, project = null) {
         `@font-face{font-family:df-${a.id};src:url("${a.data}");font-display:swap}`,
     )
     .join("");
-  return `${fonts ? `<style>${fonts}</style>` : ""}<main class="df-board" data-board-id="${escapeHtml(board.id)}" style="container-type:inline-size;width:${px(board.w)};max-width:100%;height:${auto ? "auto" : px(board.h)};${auto ? `min-height:${px(board.h)};padding-bottom:${px(Math.max(0, board.nodes[0]?.y || 0) * 2)};` : ""}background:${safeColor(board.bg) || "#FFFFFF"}">${board.nodes.map((n) => renderNode(n, board, tokens, board, project)).join("")}</main>${responsiveStyles(board, tokens, project)}`;
+  return `${fonts ? `<style>${fonts}</style>` : ""}<main class="df-board" data-board-id="${escapeHtml(board.id)}" style="container-type:inline-size;width:${px(board.w)};max-width:100%;height:${auto ? "auto" : px(board.h)};${auto ? `min-height:${px(board.h)};padding-bottom:${px(Math.max(0, board.nodes[0]?.y || 0) * 2)};` : ""}background:${safeColor(board.bg) || "#FFFFFF"}">${board.nodes.map((n) => renderNode(n, board, tokens, board, project)).join("")}</main>${responsiveStyles(board, tokens, project, entries)}${interactionBoardStyles(board, tokens, entries)}`;
 }
 export function standaloneHtml(board, project) {
   const title = escapeHtml(`${board.name} – ${project.title}`);
@@ -1324,6 +1389,10 @@ export function diffProjects(before, after) {
         "overrides",
         "assetId",
         "hidden",
+        "states",
+        "disabled",
+        "loading",
+        "invalid",
         "$parent",
         "$order",
       ];

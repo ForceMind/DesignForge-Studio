@@ -2525,3 +2525,107 @@ select:focus-visible {
 .design-token-row label small {
   font-size: 10px;
 }
+
+/* Native interaction and starter-library controls */
+.state-inspector,
+.starter-gallery {
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+}
+.state-inspector summary,
+.starter-gallery summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+.state-inspector summary small,
+.starter-gallery summary small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+.state-fields,
+.state-flags {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  margin: 10px 0;
+}
+.state-fields label,
+.state-flags label,
+#starter-filter label {
+  display: grid;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.state-fields input,
+.state-flags select,
+#starter-filter input,
+#starter-filter select {
+  min-width: 0;
+  width: 100%;
+}
+#starter-filter {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.starter-card {
+  margin: 12px 0;
+  padding: 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.starter-card b {
+  font-size: 12px;
+}
+.starter-preview {
+  overflow: hidden;
+  border-radius: 4px;
+  background: #f4f5f7;
+}
+.starter-preview iframe {
+  display: block;
+  border: 0;
+  transform: scale(0.55);
+  transform-origin: top left;
+}
+
+.design-brief summary {
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.design-brief {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ui-line);
+  margin-bottom: 16px;
+}
+.design-brief textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+.brief-outline {
+  margin: 10px 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.brief-sections {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 12px;
+}
+.brief-sections label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}

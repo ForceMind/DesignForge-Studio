@@ -39,6 +39,7 @@
           <select id="example-picker" aria-label="打开示例">
             <option value="">示例项目</option>
             <option value="Orbit">Orbit · M0 原稿</option>
+            <option value="Launch">Launch · 简报与交互组件</option>
             <option value="Studio">Studio · 响应式组件</option>
             <option value="Settings">Settings</option>
             <option value="Kanban">Kanban</option>
@@ -177,6 +178,27 @@
                   Token、主题、组件和资源。冲突会拒绝；填写命名空间可隔离导入。
                 </p>
               </div>
+              <details id="starter-gallery" class="starter-gallery">
+                <summary>素材精选 <small>12 个原生组件</small></summary>
+                <p class="property-help">
+                  本地预览，插入后可通过组件源副本编辑。使用当前项目
+                  Tokens，不覆盖已有设计。
+                </p>
+                <form id="starter-filter">
+                  <label for="starter-query">搜索素材</label
+                  ><input
+                    id="starter-query"
+                    maxlength="100"
+                    placeholder="按钮、搜索、空状态…"
+                  /><select id="starter-category" aria-label="素材分类">
+                    <option value="all">全部分类</option>
+                    <option value="buttons">按钮</option>
+                    <option value="inputs">输入框</option>
+                    <option value="cards">卡片</option></select
+                  ><button class="btn-small" type="submit">筛选</button>
+                </form>
+                <div id="starter-cards"></div>
+              </details>
               <div id="component-list"></div>
             </div>
             <div id="comments-pane" hidden>

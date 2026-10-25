@@ -1,6 +1,6 @@
 {
   "name": "designforge-studio",
-  "version": "0.2.0-alpha.7",
+  "version": "0.2.0-alpha.8",
   "private": true,
   "type": "module",
   "description": "Local-first, agent-friendly visual UI design editor",
@@ -11,7 +11,7 @@
     "audit": "node tools/forge.mjs audit examples/Orbit.project.json",
     "export": "node tools/forge.mjs export examples/Orbit.project.json ./output",
     "test:browser": "playwright test",
-    "examples": "node tools/make-m1-examples.mjs",
+    "examples": "node tools/make-m1-examples.mjs && node tools/make-reference-example.mjs",
     "format:check": "prettier --check src tools tests index.html playwright.config.mjs",
     "format": "prettier --write src tools tests index.html playwright.config.mjs"
   },

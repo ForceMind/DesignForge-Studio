@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { designContext } from "../src/design-brief.mjs";
 import { flattenNodes } from "../src/tree.mjs";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -16,6 +17,7 @@ const [cmd, src, arg3, arg4, arg5] = process.argv.slice(2);
 const help = () => {
   console.log(`DesignForge CLI · project protocol v1
   node tools/forge.mjs validate <project.json>
+  node tools/forge.mjs context <project.json> [boardId] [nodeId]
   node tools/forge.mjs audit <project.json>
   node tools/forge.mjs export <project.json> <output-dir>
   node tools/forge.mjs apply <project.json> <patch.json> --out <revised.json>
@@ -88,6 +90,19 @@ async function main() {
   if (cmd === "validate") {
     console.log(
       `VALID • ${project.title} • ${project.boards.length} boards • ${project.boards.reduce((n, b) => n + flattenNodes(b.nodes).length, 0)} nodes • hash ${hashProject(project)}`,
+    );
+    return;
+  }
+  if (cmd === "context") {
+    console.log(
+      JSON.stringify(
+        {
+          ...designContext(project, { boardId: arg3, nodeId: arg4 }),
+          baseHash: hashProject(project),
+        },
+        null,
+        2,
+      ),
     );
     return;
   }

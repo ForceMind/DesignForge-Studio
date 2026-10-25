@@ -46,6 +46,10 @@ const fields = [
   "assetId",
   "icon",
   "locked",
+  "states",
+  "disabled",
+  "loading",
+  "invalid",
 ];
 const nested = new Set([
   "style",
@@ -53,6 +57,7 @@ const nested = new Set([
   "sizing",
   "constraints",
   "overrides",
+  "states",
 ]);
 const geometry = new Set(["x", "y", "w", "h", "sizing", "constraints"]);
 const boardOf = (p, id) => p.boards.find((b) => b.id === id);

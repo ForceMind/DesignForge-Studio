@@ -1,3 +1,8 @@
+import {
+  interactionIssues,
+  stateUnits,
+  mergeInteractionStates,
+} from "./interaction-states.mjs";
 /** Resource limits apply to projected DOM work, not only the small persisted AST. */
 export const SCENE_LIMITS = Object.freeze({
   boardUnits: 5000,
@@ -65,6 +70,10 @@ function context(project, hasProject) {
     return cost;
   };
   function ownCost(node) {
+    const issues = interactionIssues(node);
+    if (issues.length)
+      fail(issues[0].reason, { field: issues[0].field, nodeId: node.id });
+    const interactionUnits = stateUnits(node.states);
     let characters = typeof node.text === "string" ? node.text.length : 0,
       runUnits = 0;
     if (node.textRuns !== undefined) {
@@ -96,7 +105,12 @@ function context(project, hasProject) {
       // Invalid mismatched runs cannot hide a large payload behind a short fallback string.
       characters = Math.max(characters, runCharacters);
     }
-    return check({ units: 1 + runUnits, textCharacters: characters, runUnits });
+    return check({
+      units: 1 + runUnits + interactionUnits,
+      textCharacters: characters,
+      runUnits,
+      interactionUnits,
+    });
   }
   function summaryFor(componentId, variantId) {
     if (!validId(componentId) || !validId(variantId))
@@ -108,7 +122,13 @@ function context(project, hasProject) {
     const sources = new Map(),
       active = new Set();
     const cost = walk(variant.root, 0, active, true, sources);
-    const summary = { ...cost, sources, rootId: variant.root.id };
+    const summary = {
+      ...cost,
+      sources,
+      rootId: variant.root.id,
+      rootType: variant.root.type,
+      rootStates: variant.root.states,
+    };
     summaries.set(key, summary);
     stats.componentSummaries++;
     return summary;
@@ -133,12 +153,16 @@ function context(project, hasProject) {
           });
         const summary = summaryFor(node.componentId, node.variantId),
           root = summary.sources.get(summary.rootId);
+        const issues = interactionIssues(node, summary.rootType);
+        if (issues.length)
+          fail(issues[0].reason, { field: issues[0].field, nodeId: node.id });
         let cost = {
-          units: summary.units,
+          units:
+            summary.units -
+            root.interactionUnits +
+            stateUnits(mergeInteractionStates(summary.rootStates, node.states)),
           textCharacters: summary.textCharacters,
         };
-        if (typeof node.text === "string")
-          cost.textCharacters += node.text.length - root.textCharacters;
         if (node.overrides !== undefined) {
           if (!object(node.overrides)) fail("malformed instance override map");
           const ids = Object.keys(node.overrides);
