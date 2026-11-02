@@ -1,5 +1,16 @@
 # DesignForge Studio · 当前 Work 交接
 
+## 2026-11-02 新增待开发需求：Design Quality Engine + Auto Polish
+
+用户已明确要求将此前对 [Bruce Van 设计讨论帖](https://x.com/bruc3van/status/2115963644811116732) 的产品化建议写入仓库。需求已正式登记，**本轮仅提交文档/任务，不包括产品实现或测试通过声明**。
+
+- 产品完整需求：[DESIGN_QUALITY_PRD.md](DESIGN_QUALITY_PRD.md)：几何/圆角/间距、中文与英文排版、色彩与品牌、交互/图标、模板化风险顾问、只读质量报告与 AI 精修审批闭环。
+- 研发清单：[DESIGN_QUALITY_BACKLOG.md](DESIGN_QUALITY_BACKLOG.md)：P0 确定性质量引擎、P1 可操作的安全建议、P2 BYOK 视觉审查+Auto Polish、P3 设计知识 Skill。
+- 路线：[ROADMAP.md](ROADMAP.md)“新增：Design Quality Engine / Auto Polish”。
+- **接手动作**：先核对远程状态与 PR #1；按 P0 建立规则 ID/证据报告/复用 browser-audit 的最小纵向切片，逐项验证。切忌用 UI 装饰性重做代替可运行规则，不得把风格偏好变成硬禁令。
+- 继续沿用原项目/锁/baseHash/Patch 安全机制；不自动调暗品牌色、不上传截图、不擅自接模型或部署、不操作用户设备。此需求完成需要真实代码与 CI/视觉证据。
+
+
 ## alpha.8 当前接管点
 
 用户已要求持续研发，最新两条X参考已核对正文及上游MIT仓库。继续同一开发分支/PR，不需要逐项等待“继续”。

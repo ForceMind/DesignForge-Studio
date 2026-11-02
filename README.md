@@ -93,3 +93,14 @@ node tools/forge.mjs apply examples/Orbit.project.json examples/Rename-revenue.p
 同一套交互用例在三个引擎执行。Linux WebKit不等于原生Safari或iOS真机。像素基准仅针对Chrome/Linux、同一字体/环境；覆盖Studio在390/768/1440px的浏览器视口和明暗工作台。比较阈值为0.1%像素、默认颜色阈值0.2；一个对照用例先匹配原图，再制造12px偏移并要求检出差异。它不自动判断审美或所有无障碍规则。
 
 正常CI使用`updateSnapshots: none`；维护者需要在相同环境显式运行`npx playwright test visual-baselines --update-snapshots`，查看原始PNG后提交基准。不能用自动重写基准掩盖回归。
+
+
+## 新增研发需求：设计质量引擎与智能精修（规划中）
+
+已将设计细节规范、中文排版、模板化风险提示、可解释 UI 质量审计、逐项审批的 Auto Polish 纳入后续阶段。
+
+- [完整产品需求 · Design Quality Engine + Auto Polish](docs/DESIGN_QUALITY_PRD.md)
+- [P0–P3 实施与验收清单](docs/DESIGN_QUALITY_BACKLOG.md)
+- [分阶段路线图](docs/ROADMAP.md)
+
+**提示**：以上是新增需求，当前 alpha.8 尚**未**实现质量规则引擎或模型驱动的自动精修。已有基础静态/浏览器检查和 Agent Patch 不等于上述功能完成。
