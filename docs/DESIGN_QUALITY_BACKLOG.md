@@ -1,6 +1,6 @@
 # DesignForge Studio｜设计质量与智能精修实施清单
 
-> 创建：2026-11-02 · 状态：**需求已登记，全部待开发**  
+> 创建：2026-11-02 · 状态：**P0 首个本地检查切片已实现，待覆盖项继续跟踪**
 > 详细交互、规则及安全边界：[DESIGN_QUALITY_PRD.md](DESIGN_QUALITY_PRD.md)  
 > 工作原则：复用现有 M1 审计、设计系统、Agent Patch、浏览器 CI；新功能必须有实际用例和对应截图/日志，不能把规划写成已交付。
 
@@ -10,6 +10,10 @@
 - core.mjs 的结构/基础审计，browser-audit.mjs 的浏览器几何/裁切/触控检测。
 - readonly 的 designforge.context / design brief，旧 designforge.patch v1、baseHash、审批、撤销及浏览器 CI。
 - 上述基础不意味着设计审美检查、AI 视觉评估或 Auto Polish 已实现。
+
+## 当前已接通的切片
+
+[本地设计质量报告](QUALITY_REPORT.md)接入现有检查面板和几何/文字测量。提供报告、过期保护、三种范围、筛选/定位及八项规则。下列任务包含更广范围，暂不整项勾选；同角色一致性、字形回退、状态完整性与主题/断点矩阵尚未完成。
 
 ## P0 · 确定性 Design Quality Engine（优先接续 M1）
 

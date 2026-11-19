@@ -1,6 +1,6 @@
 # DesignForge Studio｜Design Quality Engine + Auto Polish 需求规格
 
-> 状态：**已纳入研发需求，尚未实现/验收** · 2026-11-02 · 适用 M1 后续质量增强与 M2 AI 工作流  
+> 状态：**已纳入研发需求；首个本地切片见 [当前实现](QUALITY_REPORT.md)** · 2026-11-02 · 适用 M1 后续质量增强与 M2 AI 工作流
 > 产品：DesignForge Studio（形界设计工作台） · 维护范围：本地优先、结构化设计、可审核的 Agent 局部修改
 
 ## 0. 需求来源与决策

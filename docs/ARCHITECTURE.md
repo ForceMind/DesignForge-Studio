@@ -142,3 +142,8 @@ Inspector 保留当前编辑范围的W/H输入，同时从选中元素DOM的bord
 - `starter-gallery.mjs`提供12个原创AST配方、纯插入候选和受限预览；默认折叠，仅打开时渲染，4项分页限制iframe工作量。相同定义复用，手工差异保留并换ID；不合并全局Tokens或请求外站。iframe为空sandbox，CSP默认禁源，仅允许内联样式和data资源。
 - `design-brief.mjs`保存可选受限project.designBrief，生成提示/大纲与allowlist只读范围；`brief-inspector.mjs`是Agent面板入口。CLI context和UI下载加上当前baseHash。报告排除任意顶层/节点元数据和资源data，不授予模型调用、命令执行或链接访问权限。
 - `Launch.project.json`有产品页/原生素材两张画板，`Starters.library.json`可独立导入；`make-reference-example.mjs`可重建。原Orbit格式、字节与哈希不变。完整模型/操作见CREATIVE_WORKFLOW，来源及许可见RESEARCH与THIRD_PARTY_NOTICES。
+
+
+## 本地设计质量检查
+
+`browser-audit.mjs` 在显式 quality 模式复用实际 DOM 盒子、文字证据和组件源定位，并补充有限的圆角、字号及不透明前景/填充对比。旧审计、CLI 和项目格式保持原语义。`quality-core.mjs` 负责规则注册、范围映射、去重、限制和快照上下文；`quality-panel.mjs` 负责解释及筛选。不运行模型、不写工程。报告格式和已知覆盖见 [QUALITY_REPORT.md](QUALITY_REPORT.md)。

@@ -54,6 +54,8 @@ CI 分开运行 Node 测试，以及 Chrome、Playwright Firefox/WebKit 三套�
 
 已加入5张经过人工查看的Chrome/Linux像素基准和差异检出对照；正常CI禁止自动更新。它不是完整WCAG认证、AI视觉审查或原生Safari/真实触屏设备验收。
 
+「检查 → 本地设计质量」可按选区、画板或项目运行当前视图测量，筛选、定位并下载可审阅的只读报告。见[规则、证据与检测边界](docs/QUALITY_REPORT.md)。
+
 ## 真实浏览器截图
 
 alpha.8原始截图：[浅色素材](docs/screenshots/m1-starter-gallery.png) · [深色素材](docs/screenshots/m1-starter-gallery-dark.png) · [WebKit状态编辑](docs/screenshots/m1-interaction-states-webkit.png) · [设计简报](docs/screenshots/m1-design-brief.png) · [Launch桌面](docs/screenshots/m1-launch-desktop.png) · [Launch移动](docs/screenshots/m1-launch-mobile.png) · [组件工作台](docs/screenshots/m1-starter-workshop.png) · [Firefox移动素材](docs/screenshots/m1-starter-workshop-mobile-firefox.png)。全部从run53下载并实际查看，原图未编辑；[来源/哈希清单](docs/evidence/alpha8-browser.json)。

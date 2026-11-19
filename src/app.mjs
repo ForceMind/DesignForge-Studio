@@ -1,4 +1,10 @@
 import {
+  buildQualityReport,
+  qualityContext,
+  qualityReportIsCurrent,
+} from "./quality-core.mjs";
+import { qualityPanelMarkup } from "./quality-panel.mjs";
+import {
   designContext,
   toggleBriefSection,
   briefPlan,
@@ -148,6 +154,16 @@ let toastTimer;
 let richRange = null,
   renderedAudit = null,
   expansionAudit = null;
+const defaultQualityView = () => ({
+  scope: "board",
+  expansion: false,
+  group: "all",
+  severity: "all",
+  visible: 30,
+});
+let qualityView = defaultQualityView(),
+  qualityReport = null,
+  qualityRequest = 0;
 let historyFocusNode = null,
   nodeHistoryPreview = null;
 const boardBreakpointViews = new Map();
@@ -797,6 +813,73 @@ function expansionAuditMarkup() {
       : ""
   }</section>`;
 }
+function currentQualityContext() {
+  if (qualityView.scope === "selection" && !selected().length) return null;
+  return qualityContext(project, {
+    ...qualityView,
+    boardId: activeBoardId,
+    nodeIds: selected(),
+    widthFor: previewWidth,
+    locale: document.documentElement.lang || null,
+    stateFor: (b) => {
+      const node = activeNode(),
+        state = interactionViews.get(scopeKey())?.preview;
+      return b.id === activeBoardId &&
+        node &&
+        state &&
+        state !== "default" &&
+        nodeElement($("world"), b.id, node.id)?.matches(
+          "button.df-node,input.df-node",
+        )
+        ? { nodeId: node.id, state }
+        : null;
+    },
+  });
+}
+const qualityCurrent = () =>
+  qualityReport &&
+  qualityReportIsCurrent(qualityReport, project, currentQualityContext());
+async function runQuality() {
+  if (gesture) return toast("请先结束当前画布操作");
+  const context = currentQualityContext();
+  if (!context) return toast("请先选择要检查的图层");
+  const snapshot = project,
+    request = ++qualityRequest;
+  await document.fonts.ready;
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  if (request !== qualityRequest) return;
+  if (
+    gesture ||
+    project !== snapshot ||
+    JSON.stringify(context) !== JSON.stringify(currentQualityContext())
+  )
+    return toast("检查范围已变化，请重新运行");
+  const measurements = new Map();
+  for (const b of context.boards) {
+    const main = $("world").querySelector(
+      `[data-artboard="${b.boardId}"] .df-board`,
+    );
+    if (!main) continue;
+    const width =
+      Math.round((main.getBoundingClientRect().width / zoom) * 100) / 100;
+    if (!(width > 0)) continue;
+    measurements.set(b.boardId, {
+      width,
+      findings: auditRenderedBoard(main, { scale: zoom, quality: true }),
+      ...(qualityView.expansion
+        ? { expanded: auditTextExpansion(main, { scale: zoom, factor: 1.3 }) }
+        : {}),
+    });
+  }
+  qualityReport = buildQualityReport(snapshot, context, measurements);
+  qualityView.visible = 30;
+  if (rightTab === "audit") {
+    renderRight();
+    $("right-content")
+      .querySelector('[data-action="run-quality"]')
+      ?.focus({ preventScroll: true });
+  }
+}
 function renderAudit() {
   const staticIssues = auditProject(project),
     current = renderedAuditCurrent(),
@@ -804,7 +887,7 @@ function renderAudit() {
     issues = [...staticIssues, ...browserIssues];
   const score = Math.max(0, 100 - staticIssues.length * 4);
   $("right-content").innerHTML =
-    `<div class="inspector-title">设计质量检查 <span class="safe-tag">ON DEVICE</span></div><p class="property-help">静态规则与当前浏览器实测分开记录。碰撞属于建议，不能自动判定设计错误，也不等同完整 WCAG 或视觉差异验收。</p><div class="button-row"><button class="btn-small primary" data-action="run-browser-audit">运行浏览器几何检查</button></div><p class="property-help" data-rendered-findings data-audit-stale="${renderedAudit && !current ? "true" : "false"}">${current ? `实测 ${browserIssues.length} 项 · ${esc(renderedAudit.checkedAt)}` : renderedAudit ? "上次浏览器结果已过期，请重新检测。" : "尚未检测当前浏览器布局。"}</p><div class="audit-top"><div class="audit-score">${score}</div><div><b>${issues.length ? `找到 ${issues.length} 项建议` : "没有发现静态规则问题"}</b><p>仅静态启发式评分 / 100<br>不是通过 WCAG 认证</p></div></div>${
+    `<div class="inspector-title">设计质量检查 <span class="safe-tag">ON DEVICE</span></div>${qualityPanelMarkup(qualityView, qualityReport, qualityCurrent(), project)}<p class="property-help">静态规则与当前浏览器实测分开记录。碰撞属于建议，不能自动判定设计错误，也不等同完整 WCAG 或视觉差异验收。</p><div class="button-row"><button class="btn-small primary" data-action="run-browser-audit">运行浏览器几何检查</button></div><p class="property-help" data-rendered-findings data-audit-stale="${renderedAudit && !current ? "true" : "false"}">${current ? `实测 ${browserIssues.length} 项 · ${esc(renderedAudit.checkedAt)}` : renderedAudit ? "上次浏览器结果已过期，请重新检测。" : "尚未检测当前浏览器布局。"}</p><div class="audit-top"><div class="audit-score">${score}</div><div><b>${issues.length ? `找到 ${issues.length} 项建议` : "没有发现静态规则问题"}</b><p>仅静态启发式评分 / 100<br>不是通过 WCAG 认证</p></div></div>${
       issues.length
         ? `<div class="audit-group"><h4>需要关注的元素 (${issues.length})</h4>${issues
             .slice(0, 100)
@@ -2108,6 +2191,9 @@ function clearProjectView() {
   richRange = null;
   renderedAudit = null;
   expansionAudit = null;
+  qualityView = defaultQualityView();
+  qualityReport = null;
+  ++qualityRequest;
   activeGuideId = null;
 }
 const scopeKey = (id = activeNodeId) => activeBoardId + ":" + id;
@@ -3135,6 +3221,23 @@ function bindStatic() {
     if (e.target.closest("[data-rich-format]")) e.preventDefault();
   });
   $("right-content").addEventListener("change", (e) => {
+    if (
+      [
+        "quality-scope",
+        "quality-expansion",
+        "quality-group",
+        "quality-severity",
+      ].includes(e.target.id)
+    ) {
+      const id = e.target.id,
+        field = id.slice("quality-".length);
+      qualityView[field] =
+        field === "expansion" ? e.target.checked : e.target.value;
+      qualityView.visible = 30;
+      renderRight();
+      $(id)?.focus({ preventScroll: true });
+      return;
+    }
     if (e.target.matches("[data-brief-field], [data-brief-section]")) {
       const field = e.target.dataset.briefField;
       const section = e.target.dataset.briefSection,
@@ -3436,6 +3539,21 @@ function bindStatic() {
           );
           toast("Patch 模板已导出，按需编辑再用 CLI 应用");
           break;
+        case "run-quality":
+          runQuality().catch((error) => toast(error.message));
+          break;
+        case "download-quality":
+          if (qualityCurrent())
+            download(
+              JSON.stringify(qualityReport, null, 2),
+              "designforge-quality.json",
+              "application/json",
+            );
+          break;
+        case "more-quality":
+          qualityView.visible += 30;
+          renderRight();
+          break;
         case "run-text-expansion":
           runTextExpansionAudit().catch((error) => toast(error.message));
           break;
@@ -3481,7 +3599,31 @@ function bindStatic() {
     }
     const issue = e.target.closest("[data-auditboard]");
     if (issue) {
+      if (issue.dataset.qualityRule && !qualityCurrent()) return;
+      if (
+        issue.dataset.qualityRule &&
+        activeBoardId !== issue.dataset.auditboard
+      )
+        focusBoard(issue.dataset.auditboard);
       selectNode(issue.dataset.auditnode, issue.dataset.auditboard);
+      if (issue.dataset.qualityRule) {
+        const el = nodeElement($("world"), activeBoardId, activeNodeId),
+          v = $("viewport").getBoundingClientRect();
+        const r = el?.getBoundingClientRect();
+        if (
+          r &&
+          r.width > 0 &&
+          r.height > 0 &&
+          (r.left < v.left ||
+            r.right > v.right ||
+            r.top < v.top ||
+            r.bottom > v.bottom)
+        ) {
+          pan.x += v.left + v.width / 2 - r.left - r.width / 2;
+          pan.y += v.top + v.height / 2 - r.top - r.height / 2;
+          updateWorld();
+        }
+      }
       rightTab = "properties";
       render();
     }

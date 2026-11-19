@@ -1,3 +1,7 @@
+import {
+  nestedRadiusEvidence,
+  localContrastEvidence,
+} from "./quality-core.mjs";
 /** Read-only, measured browser QA. Findings are evidence, not WCAG certification. */
 const round = (value) => Math.round(value * 100) / 100;
 const finiteRect = (r) => r && [r.x, r.y, r.w, r.h].every(Number.isFinite);
@@ -176,7 +180,7 @@ export function auditGeometry(
  */
 export function auditRenderedBoard(
   mainElement,
-  { scale = 1, maxFindings = 200, maxNodes = 2000 } = {},
+  { scale = 1, maxFindings = 200, maxNodes = 2000, quality = false } = {},
 ) {
   if (
     !mainElement ||
@@ -357,6 +361,65 @@ export function auditRenderedBoard(
     records = [];
   for (let i = 0; i < Math.min(all.length, maxNodes); i++) nodes.push(all[i]);
   const indexes = new Map(nodes.map((el, i) => [el, i]));
+  const extras = [];
+  let limitedQuality = false;
+  const appendQuality = (record, code, evidence) => {
+    if (extras.length >= maxFindings) {
+      limitedQuality = true;
+      return;
+    }
+    extras.push({
+      code,
+      boardId,
+      nodeId: record.nodeId,
+      sourceId: record.sourceId,
+      rect: evidenceRect(record.rect),
+      evidence,
+    });
+  };
+  const uniformPx = (values) => {
+    const first = parseFloat(values[0]);
+    return Number.isFinite(first) &&
+      values.every((v) => v === values[0] && /^\d+(?:\.\d+)?px$/.test(v))
+      ? first
+      : NaN;
+  };
+  const opaqueChain = (el) => {
+    for (let current = el; current; current = current.parentElement) {
+      const s = style(current);
+      if (
+        Number(s.opacity) !== 1 ||
+        s.mixBlendMode !== "normal" ||
+        s.filter !== "none"
+      )
+        return false;
+      if (current === mainElement) return true;
+    }
+    return false;
+  };
+  const shape = (el) => {
+    const s = style(el);
+    return {
+      rect: box(el),
+      container: el.matches(".df-frame,.df-component"),
+      painted:
+        s.backgroundColor !== "transparent" &&
+        s.backgroundColor !== "rgba(0, 0, 0, 0)" &&
+        s.backgroundImage === "none",
+      radius: uniformPx([
+        s.borderTopLeftRadius,
+        s.borderTopRightRadius,
+        s.borderBottomLeftRadius,
+        s.borderBottomRightRadius,
+      ]),
+      border: uniformPx([
+        s.borderTopWidth,
+        s.borderRightWidth,
+        s.borderBottomWidth,
+        s.borderLeftWidth,
+      ]),
+    };
+  };
   for (const el of nodes) {
     if (hidden(el)) continue;
     const rect = box(el);
@@ -377,12 +440,56 @@ export function auditRenderedBoard(
       decorative:
         el.matches(".df-icon,.df-line") ||
         el.getAttribute("aria-hidden") === "true",
-      interactive: el.matches(
-        "button,input,select,textarea,a[href],[role=button]",
-      ),
+      interactive:
+        el.matches("button,input,select,textarea,a[href],[role=button]") &&
+        (!quality || !el.matches(':disabled,[aria-disabled="true"]')),
     };
-    if (el.matches(".df-text,.df-button,.df-pill,.df-input"))
+    if (el.matches(".df-text,.df-button,.df-pill,.df-input")) {
       Object.assign(record, textMetrics(el));
+      if (
+        quality &&
+        (el.textContent || el.getAttribute("placeholder") || "").trim()
+      ) {
+        const runs = [...el.querySelectorAll("[data-text-run]")].filter(
+          (run) => run.textContent.trim() && !hidden(run),
+        );
+        const fontSizes = (runs.length ? runs : [el])
+          .map((run) => parseFloat(style(run).fontSize))
+          .filter(Number.isFinite);
+        const size = Math.min(...fontSizes);
+        if (size < 12)
+          appendQuality(record, "MEASURED_TEXT_SIZE", {
+            fontSizePx: round(size),
+            referencePx: 12,
+            method: runs.length ? "computed-text-run" : "computed-node-style",
+          });
+        if (
+          record.interactive &&
+          el.matches(".df-button") &&
+          !runs.length &&
+          !record.textOverflow &&
+          style(el).backgroundImage === "none"
+        ) {
+          const s = style(el);
+          const contrast = localContrastEvidence({
+            color: s.color,
+            background: s.backgroundColor,
+            fontSize: parseFloat(s.fontSize),
+            fontWeight: parseFloat(s.fontWeight),
+            opaqueChain: opaqueChain(el),
+          });
+          if (contrast) appendQuality(record, "LOCAL_CONTRAST", contrast);
+        }
+      }
+    }
+    if (
+      quality &&
+      el.matches(".df-frame,.df-component") &&
+      parent.matches(".df-frame,.df-component")
+    ) {
+      const corner = nestedRadiusEvidence(shape(parent), shape(el));
+      if (corner) appendQuality(record, "NESTED_RADIUS", corner);
+    }
     records.push(record);
   }
   const findings = auditGeometry(
@@ -390,8 +497,10 @@ export function auditRenderedBoard(
     { x: 0, y: 0, w: board.width / scale, h: board.height / scale },
     { boardId, maxFindings },
   );
+  const excessQuality = findings.length + extras.length > maxFindings;
+  findings.push(...extras.slice(0, Math.max(0, maxFindings - findings.length)));
   if (
-    (all.length > maxNodes || limitedText) &&
+    (all.length > maxNodes || limitedText || limitedQuality || excessQuality) &&
     !findings.some((f) => f.code === "AUDIT_LIMIT")
   ) {
     if (findings.length >= maxFindings) findings.pop();
@@ -402,7 +511,12 @@ export function auditRenderedBoard(
       nodeId: null,
       message:
         "DOM/text measurement budget reached; this report is incomplete.",
-      evidence: { maxNodes, totalNodes: all.length, limitedText },
+      evidence: {
+        maxNodes,
+        totalNodes: all.length,
+        limitedText,
+        ...(quality ? { limitedQuality: limitedQuality || excessQuality } : {}),
+      },
     });
   }
   return findings;
