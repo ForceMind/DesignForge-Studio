@@ -1,5 +1,14 @@
 # M1 验证记录
 
+## 本地设计质量验收（2026-11-19）
+
+- [报告规则、范围及限制](QUALITY_REPORT.md)；[需求 Issue #2](https://github.com/ForceMind/DesignForge-Studio/issues/2)。工作台提供本地、只读证据报告，未完成整个 P0 或智能精修路线。
+- 本地 227 项 Node，格式检查、原 Orbit 字节差异检查、校验、静态审计、静态 HTML 导出通过。Orbit 仍为 3 画板 / 170 节点 / hash `21a89182`。当前云终端 Chromium 启动受套接字权限限制；实际浏览器结果以 Actions 为准。
+- [run56](https://github.com/ForceMind/DesignForge-Studio/actions/runs/44533223986)（`55daf58`）WebKit 140 项通过（6 项 Chrome 专属像素检查跳过）；Chrome 两条新增质量功能测试均通过，完整套件 145 项通过 / 1 项暗色工作台像素比较失败。已查看 WebKit 实际截图及 Chrome 暗色 actual / diff。
+- 从 Chrome 155 到 CI 上的 Chrome 157.0.8103.50，差异集中在暗色下拉控件及底部文字绘制：1490 像素，空间布局、画板和其它像素基准无变化。仅替换暗色参考图，使用 [run56 Chromium 原始 artifact](https://github.com/ForceMind/DesignForge-Studio/actions/runs/44533223986/artifacts/14534953007) 中稳定实拍的 `workbench-dark-actual.png`。替换图 SHA-256：`dd4d89fdac882a75de7bcae787ad8561991c040fccf1d292496f9e15af6f320c`。不调整 0.001 比较阈值，不自动更新或跳过像素断言。
+- [run57](https://github.com/ForceMind/DesignForge-Studio/actions/runs/44533729050)（`78fe645`）加入隔离三宽度实测、阶段清理和断点定位回归；最新重验状态见 [PR #1 Checks](https://github.com/ForceMind/DesignForge-Studio/pull/1/checks)。
+
+
 ## 当前 alpha.8 验收（2026-10-25）
 
 产品提交：`aa86c15e05f8b0967347700ac97dc287d9a1f3e2`；[CI run53](https://github.com/ForceMind/DesignForge-Studio/actions/runs/40199977270)四job全部通过。原main仍是56a189bf，M0 Orbit文件逐字节未改（3画板/170节点/hash21a89182）。Launch为2画板/67节点/hash99c7a3d5；共12工程及2个本地库示例。以下旧章节是研发历史，不是当前套件规模。
