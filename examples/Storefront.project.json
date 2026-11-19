@@ -1,0 +1,468 @@
+{
+  "format": "designforge.project",
+  "version": 1,
+  "id": "mobilestorefront",
+  "title": "Mobile storefront",
+  "tokens": {
+    "primary": "$accent",
+    "primarySoft": "#EEEAFE",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#F7F8FB",
+    "canvas": "#F3F5F9",
+    "ink": "#202238",
+    "muted": "#667085",
+    "border": "#E4E7F0",
+    "success": "#13734F",
+    "warning": "#F4B754",
+    "danger": "#E16C70",
+    "radius": 14,
+    "fontFamily": "system-ui",
+    "accent": "#2563EB",
+    "spacing": 12,
+    "spaceLarge": 24
+  },
+  "boards": [
+    {
+      "id": "m287",
+      "name": "Mobile storefront",
+      "x": 0,
+      "y": 80,
+      "w": 390,
+      "h": 1000,
+      "autoHeight": true,
+      "bg": "#EEF1F6",
+      "nodes": [
+        {
+          "id": "m286",
+          "type": "frame",
+          "name": "Page frame",
+          "x": 32,
+          "y": 32,
+          "w": 326,
+          "h": 936,
+          "text": "",
+          "style": {
+            "fill": "$surface",
+            "radius": "$radius"
+          },
+          "children": [
+            {
+              "id": "m224",
+              "type": "frame",
+              "name": "Header",
+              "x": 0,
+              "y": 0,
+              "w": 1000,
+              "h": 48,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m222",
+                  "type": "text",
+                  "name": "Product name",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 36,
+                  "text": "Objects / Studio",
+                  "style": {
+                    "fontSize": 22,
+                    "fontWeight": 700,
+                    "color": "$ink"
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m223",
+                  "type": "button",
+                  "name": "New project",
+                  "x": 0,
+                  "y": 0,
+                  "w": 140,
+                  "h": 44,
+                  "text": "New project",
+                  "style": {
+                    "fill": "$primary",
+                    "color": "#FFFFFF",
+                    "fontSize": 14,
+                    "fontWeight": 650,
+                    "radius": 10
+                  },
+                  "sizing": {
+                    "w": "fill"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "row",
+                "gap": "$spacing",
+                "padding": 0,
+                "align": "center",
+                "justify": "space-between"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m225",
+              "type": "text",
+              "name": "Collection",
+              "x": 0,
+              "y": 0,
+              "w": 260,
+              "h": 72,
+              "text": "Everyday essentials",
+              "style": {
+                "fontSize": 28,
+                "fontWeight": 700,
+                "color": "$ink"
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m238",
+              "type": "frame",
+              "name": "Products",
+              "x": 0,
+              "y": 0,
+              "w": 320,
+              "h": 500,
+              "text": "",
+              "style": {
+                "fill": "$surface",
+                "radius": "$radius"
+              },
+              "children": [
+                {
+                  "id": "m229",
+                  "type": "frame",
+                  "name": "Field notebook",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 148,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m226",
+                      "type": "text",
+                      "name": "Field notebook",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Field notebook",
+                      "style": {
+                        "fontSize": 14,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m227",
+                      "type": "text",
+                      "name": "Value",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 42,
+                      "text": "$12",
+                      "style": {
+                        "fontSize": 30,
+                        "fontWeight": 700,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m228",
+                      "type": "text",
+                      "name": "Context",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "Demo data · this month",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": "$spacing",
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m233",
+                  "type": "frame",
+                  "name": "Desk organizer",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 148,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m230",
+                      "type": "text",
+                      "name": "Desk organizer",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Desk organizer",
+                      "style": {
+                        "fontSize": 14,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m231",
+                      "type": "text",
+                      "name": "Value",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 42,
+                      "text": "$28",
+                      "style": {
+                        "fontSize": 30,
+                        "fontWeight": 700,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m232",
+                      "type": "text",
+                      "name": "Context",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "Demo data · this month",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": "$spacing",
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "m237",
+                  "type": "frame",
+                  "name": "Travel pouch",
+                  "x": 0,
+                  "y": 0,
+                  "w": 260,
+                  "h": 148,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
+                    "radius": "$radius"
+                  },
+                  "children": [
+                    {
+                      "id": "m234",
+                      "type": "text",
+                      "name": "Travel pouch",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 24,
+                      "text": "Travel pouch",
+                      "style": {
+                        "fontSize": 14,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m235",
+                      "type": "text",
+                      "name": "Value",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 42,
+                      "text": "$24",
+                      "style": {
+                        "fontSize": 30,
+                        "fontWeight": 700,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "m236",
+                      "type": "text",
+                      "name": "Context",
+                      "x": 0,
+                      "y": 0,
+                      "w": 260,
+                      "h": 20,
+                      "text": "Demo data · this month",
+                      "style": {
+                        "fontSize": 12,
+                        "fontWeight": 500,
+                        "color": "$ink"
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ],
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": "$spacing",
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ],
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": 16,
+                "padding": 0
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "m239",
+              "type": "button",
+              "name": "View basket",
+              "x": 0,
+              "y": 0,
+              "w": 140,
+              "h": 44,
+              "text": "View basket",
+              "style": {
+                "fill": "$primary",
+                "color": "#FFFFFF",
+                "fontSize": 14,
+                "fontWeight": 650,
+                "radius": 10
+              },
+              "sizing": {
+                "w": "fill"
+              }
+            }
+          ],
+          "layout": {
+            "mode": "flex",
+            "direction": "column",
+            "gap": 20,
+            "padding": "$spaceLarge"
+          },
+          "sizing": {
+            "h": "hug"
+          },
+          "constraints": {
+            "horizontal": "stretch",
+            "referenceW": 390
+          }
+        }
+      ]
+    }
+  ],
+  "comments": [],
+  "updatedAt": "2026-10-23T00:00:00.000Z",
+  "themes": {
+    "dark": {
+      "surface": "#202938",
+      "surfaceAlt": "#151D2B",
+      "ink": "#F2F4F8",
+      "muted": "#BCC7DA",
+      "border": "#3A4659",
+      "primarySoft": "#263D62",
+      "accent": "#3B82F6"
+    }
+  },
+  "components": []
+}

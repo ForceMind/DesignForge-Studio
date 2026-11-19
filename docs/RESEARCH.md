@@ -71,3 +71,45 @@ Skill 规则：理解 → 选定风格与设计系统 → 排版 → 可编辑�
 ## 6. 面向游戏研发的专有竞争力
 
 DesignForge 长期不止要“输出漂亮页面”。要建立从 **设计系统 → UI 状态 / 流程 → 游戏 HUD / 按钮 / 弹窗 / 任务系统 → 国际化长文本测试 → 手势与小屏审计 → H5 运行代码 → Visual QA → PR** 的闭环。游戏产品还应有安全区、横竖屏、动态内容、状态机、局部可访问性审计与低端机渲染预算，这些领域能力可能形成不同于通用设计产品的壁垒。
+
+## 7. M1 实施前的官方机制复核
+
+本轮仅研究公开产品/文档机制，没有引入第三方编辑器源码或品牌资产。部分搜索索引对 BaoCut 的历史许可摘要互相冲突；以当前根许可及 README 为准，本项目继续独立实现。
+
+| 来源 | 公开机制 | 本项目的工程选择 |
+|---|---|---|
+| [Penpot flexible layouts](https://help.penpot.app/user-guide/designing/flexible-layouts/) / [Design tokens](https://help.penpot.app/user-guide/design-systems/design-tokens/) | Flex/Grid 与共享 Token 可一起表达自适应设计 | 使用原生 CSS Flex/Grid，编辑器与导出共用渲染；spacing 可引用数值 Token |
+| [Figma Auto Layout](https://help.figma.com/hc/en-us/articles/360040451373-Guide-to-auto-layout-in-Figma) / [Variants](https://help.figma.com/hc/en-us/articles/360056440594-Create-and-use-variants) | 容器布局、组件实例及变体降低重复编辑成本 | 显式组件定义/变体/实例覆盖，不把渲染子元素伪装成独立持久化节点 |
+| [Framer breakpoints](https://www.framer.com/academy/lessons/framer-fundamentals-breakpoints) | 主布局继承与断点覆盖一起处理不同屏宽 | 同一树上保存受限字段覆盖，用画板 container queries 实际验证 |
+| [Claude Design launch](https://www.anthropic.com/news/claude-design-anthropic-labs) / [Getting started](https://support.claude.com/en/articles/14604416-get-started-with-claude-design) | 对话、直接编辑、行内反馈及交付结合 | 先保持项目/标注/Patch/审批闭环；BYOK 和内置模型留给 M2，不宣称已实现 |
+| [BaoCut](https://github.com/JimLiu/baocut) / [第三方声明](https://github.com/JimLiu/baocut/blob/main/THIRD_PARTY_NOTICES.md) / [baoyu-design](https://github.com/JimLiu/baoyu-design) | 宿主能力与 Agent Skill 相互补充；许可需分项目核对 | 保留独立 AST、受限协议和本项目原创实现；不复制 BaoCut runtime |
+
+上表最后一列为本项目的设计决策，不是竞品实测性能结论。尚未进行同任务、同模型、同硬件的优劣基准测试。
+
+
+## 8. alpha.7 官方机制复查（2026-10-25 Asia/Shanghai）
+
+本节只依据当前官方文档；没有运行竞品、读取用户竞品账户或引入其源码。下表的工程选择是本项目推断/取舍，不是兼容或性能领先声明。
+
+| 官方来源 | 复查机制 | 本项目实现及边界 |
+|---|---|---|
+| [Figma variants](https://help.figma.com/hc/en-us/articles/360056440594-Create-and-use-variants) | 相似组件归入组件集，可复制变体并组织属性值 | 当前提供列表式命名/复制/引用保护，尚非多属性变体矩阵 |
+| [Penpot components](https://help.penpot.app/user-guide/design-systems/components/) / [variants](https://help.penpot.app/user-guide/design-systems/variants/) | 主源和实例覆盖分离，可从副本更新主源；变体关联参考层名、类型及层级 | 保留源ID作用域的普通源副本，显式更新；不兼容覆盖拒绝，不按名称猜测迁移 |
+| [Framer breakpoints](https://www.framer.com/academy/lessons/framer-fundamentals-breakpoints) | 新断点布局继承主断点，再覆盖差异 | 本项目画板容器查询与明确编辑范围共用同一树，实测尺寸反馈和像素回归核对结果 |
+| [Claude Design current guide](https://support.claude.com/en/articles/14604416-get-started-with-claude-design) / [design system](https://support.claude.com/en/articles/14604397-set-up-your-design-system-in-claude-design) | 对话生成、画布编辑及设计系统结合，当前文档把Design作为Artifact模板入口 | 借鉴从设计体系到局部迭代的产品闭环；当前仍是外部Agent+受限Patch，不虚构内置模型或逆向复制运行时 |
+
+官方文档中的入口、订阅与可用性会变化；不把4月发布稿当成永久当前状态。当前工作不涉及竞品付费/登录、第三方设计上传或部署。BaoCut/baoyu-design的原始研究与许可边界沿用前述章节。
+
+
+## 用户参考的实际取舍（2026-10-25，alpha.8）
+
+用户提供 [NIxinhai0 帖子](https://x.com/NIxinhai0/status/2114021822895387009) 与 [CY160909 帖子](https://x.com/CY160909/status/2114213361621540994)。X直接抓取受限，通过公开帖子转发接口核对ID/作者/正文，再独立检查上游仓库与LICENSE；没有访问用户登录会话。第二条配图显示elaya.design，与Elaya源码Skill对应。
+
+| 一手来源 / 固定版本 | 可取机制 | 本项目落地与取舍 |
+|---|---|---|
+| [Galaxy](https://github.com/uiverse-io/galaxy/tree/adbd2adde0a299a3956ea288fb444ec01891ca41)，MIT (c)2023 Uiverse.io | 按钮/输入框/卡片等分类；搜索、预览、复用；社区贡献 | 12个原创原生AST素材、分类/多词检索、4项分页、sandbox+CSP预览、保留人工定义的一次插入。未搬运外站HTML/CSS或社区账号/品牌资源。 |
+| [Elaya AI Design Skills](https://github.com/elayadesign/ai-design-skills/tree/38bbe5765600b9178b5395a823c9f6c8d2b8e730)，MIT (c)2026 Elaya | 明确产品/受众/主要行动；逐段组织；统一节奏与字体层级；Hover/Focus/Loading/Error和移动检查 | 可选项目简报、只读Agent上下文/CLI、原生状态模型、仓库Skill流程和Launch示例。不自动安装上游Skill或其AGENTS，不接受项目文本带来的新权限。 |
+
+不采纳“禁用某些字族、斜体、渐变”等一刀切审美规则；改为可选profile建议，沿用当前Token/字族。上游示例中用于丰富画面的占位评价/数字也不能转化为本项目真实业务声明：缺少证据明确提示，不捏造证明。
+
+规模需区分：帖子描述约7000个在线组件，所检查Galaxy仓库README则写over3000。两者不能混同为已核验的当前库存；本项目只声称实际实现并测试的12个本地配方。许可原文与归属见[THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md)。新流程见[CREATIVE_WORKFLOW](CREATIVE_WORKFLOW.md)。

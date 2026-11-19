@@ -1,0 +1,2633 @@
+{
+  "format": "designforge.project",
+  "version": 1,
+  "id": "launch-workshop",
+  "title": "Launch · 设计简报与交互组件",
+  "tokens": {
+    "primary": "#2454CE",
+    "primarySoft": "#EBF0FF",
+    "surface": "#FFFFFF",
+    "surfaceAlt": "#F3F6FA",
+    "canvas": "#F3F5F9",
+    "ink": "#17233A",
+    "muted": "#536176",
+    "border": "#D7DFE9",
+    "success": "#13734F",
+    "warning": "#F4B754",
+    "danger": "#E16C70",
+    "radius": 12,
+    "fontFamily": "system-ui",
+    "spacing": 16
+  },
+  "boards": [
+    {
+      "id": "landing",
+      "name": "产品创作 · 1440 / 768 / 390",
+      "x": 0,
+      "y": 60,
+      "w": 1440,
+      "h": 1400,
+      "bg": "#FFFFFF",
+      "autoHeight": true,
+      "nodes": [
+        {
+          "id": "launch24",
+          "name": "Landing 主布局",
+          "type": "frame",
+          "x": 0,
+          "y": 0,
+          "w": 1312,
+          "h": 400,
+          "text": "",
+          "style": {
+            "fill": "$surface"
+          },
+          "layout": {
+            "mode": "flex",
+            "direction": "column",
+            "gap": 48,
+            "padding": 64
+          },
+          "sizing": {
+            "w": "fill",
+            "h": "hug"
+          },
+          "children": [
+            {
+              "id": "launch4",
+              "name": "首屏与行动",
+              "type": "frame",
+              "x": 0,
+              "y": 0,
+              "w": 1312,
+              "h": 400,
+              "text": "",
+              "style": {
+                "fill": "$surfaceAlt",
+                "radius": "$radius"
+              },
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": 24,
+                "padding": 40
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              },
+              "children": [
+                {
+                  "id": "launch1",
+                  "name": "产品标签",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 21,
+                  "text": "LOCAL FIRST · DESIGNFORGE STUDIO",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 14,
+                    "fontWeight": 400,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "launch2",
+                  "name": "主标题",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 90,
+                  "text": "从想法到界面，\n每一步都可以继续编辑。",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 60,
+                    "fontWeight": 650,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "responsive": [
+                    {
+                      "maxWidth": 600,
+                      "changes": {
+                        "style": {
+                          "fontSize": 36
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch3",
+                  "name": "产品说明",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 30,
+                  "text": "结构化图层、可复用组件与精确 Patch，让设计和 AI 协作回到同一份项目。",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 20,
+                    "fontWeight": 400,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "launchPrimaryAction",
+                  "name": "主操作按钮",
+                  "type": "instance",
+                  "componentId": "starter-primary",
+                  "variantId": "base",
+                  "x": 0,
+                  "y": 0,
+                  "w": 208,
+                  "h": 48,
+                  "text": "",
+                  "style": {}
+                }
+              ],
+              "responsive": [
+                {
+                  "maxWidth": 600,
+                  "changes": {
+                    "layout": {
+                      "padding": 24
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "launch14",
+              "name": "任务与收益",
+              "type": "frame",
+              "x": 0,
+              "y": 0,
+              "w": 1312,
+              "h": 400,
+              "text": "",
+              "style": {},
+              "layout": {
+                "mode": "grid",
+                "direction": "column",
+                "gap": 24,
+                "padding": 0,
+                "columns": 3
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              },
+              "children": [
+                {
+                  "id": "launch7",
+                  "name": "结构可理解",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 24
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch5",
+                      "name": "结构可理解",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 36,
+                      "text": "结构可理解",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 24,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "launch6",
+                      "name": "说明",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "图层与布局是可编辑数据；组件实例保持关联。",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch10",
+                  "name": "修改有边界",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 24
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch8",
+                      "name": "修改有边界",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 36,
+                      "text": "修改有边界",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 24,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "launch9",
+                      "name": "说明",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "读取当前哈希，再以最小 Patch 修改指定元素。",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch13",
+                  "name": "交互可验证",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surface",
+                    "stroke": "$border",
+                    "strokeWidth": 1,
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 24
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch11",
+                      "name": "交互可验证",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 36,
+                      "text": "交互可验证",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 24,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "launch12",
+                      "name": "说明",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "在画布中预览状态，在真实浏览器中检查导出。",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "responsive": [
+                {
+                  "maxWidth": 900,
+                  "changes": {
+                    "layout": {
+                      "columns": 1
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "launch17",
+              "name": "真实组件展示",
+              "type": "frame",
+              "x": 0,
+              "y": 0,
+              "w": 1312,
+              "h": 400,
+              "text": "",
+              "style": {
+                "fill": "$surfaceAlt",
+                "radius": "$radius"
+              },
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": 20,
+                "padding": 32
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              },
+              "children": [
+                {
+                  "id": "launch15",
+                  "name": "展示标题",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 45,
+                  "text": "交互原语，直接成为设计结构。",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 30,
+                    "fontWeight": 650,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "launch16",
+                  "name": "展示说明",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 24,
+                  "text": "选择第二张画板中的组件；打开源副本即可编辑 Hover、Focus、加载和错误状态。输入框是原型只读控件。",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 16,
+                    "fontWeight": 400,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "launchEmail",
+                  "name": "邮箱输入框",
+                  "type": "instance",
+                  "componentId": "starter-email",
+                  "variantId": "base",
+                  "x": 0,
+                  "y": 0,
+                  "w": 304,
+                  "h": 48,
+                  "text": "",
+                  "style": {},
+                  "sizing": {
+                    "w": "fill"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "launch20",
+              "name": "操作流程",
+              "type": "frame",
+              "x": 0,
+              "y": 0,
+              "w": 1312,
+              "h": 400,
+              "text": "",
+              "style": {},
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": 16,
+                "padding": 24
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              },
+              "children": [
+                {
+                  "id": "launch18",
+                  "name": "流程标题",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 45,
+                  "text": "先明确目标，再逐步完成。",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 30,
+                    "fontWeight": 650,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "launch19",
+                  "name": "流程正文",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 27,
+                  "text": "01 写下服务对象与主要行动\n02 插入原生组件并编辑布局\n03 预览状态，导出上下文并审核 Patch\n04 运行浏览器检查，保留真实验收证据",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 18,
+                    "fontWeight": 400,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "launch23",
+              "name": "下一步行动",
+              "type": "frame",
+              "x": 0,
+              "y": 0,
+              "w": 1312,
+              "h": 400,
+              "text": "",
+              "style": {
+                "fill": "$primarySoft",
+                "radius": "$radius"
+              },
+              "layout": {
+                "mode": "flex",
+                "direction": "column",
+                "gap": 24,
+                "padding": 32
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              },
+              "children": [
+                {
+                  "id": "launch21",
+                  "name": "行动标题",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 54,
+                  "text": "打开一个项目，开始精确设计。",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 36,
+                    "fontWeight": 650,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "launch22",
+                  "name": "行动说明",
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 800,
+                  "h": 24,
+                  "text": "此示例展示设计结构与状态；按钮尚未绑定页面跳转或业务请求。",
+                  "style": {
+                    "color": "$ink",
+                    "fontSize": 16,
+                    "fontWeight": 400,
+                    "lineHeight": 1.4
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  }
+                },
+                {
+                  "id": "launchFinalAction",
+                  "name": "主操作按钮",
+                  "type": "instance",
+                  "componentId": "starter-primary",
+                  "variantId": "base",
+                  "x": 0,
+                  "y": 0,
+                  "w": 208,
+                  "h": 48,
+                  "text": "",
+                  "style": {}
+                }
+              ]
+            }
+          ],
+          "responsive": [
+            {
+              "maxWidth": 600,
+              "changes": {
+                "layout": {
+                  "padding": 24,
+                  "gap": 32
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "workshop",
+      "name": "交互组件 · 可编辑源与状态",
+      "x": 1540,
+      "y": 60,
+      "w": 1440,
+      "h": 1100,
+      "bg": "#FFFFFF",
+      "autoHeight": true,
+      "nodes": [
+        {
+          "id": "launch52",
+          "name": "交互素材工作台",
+          "type": "frame",
+          "x": 0,
+          "y": 0,
+          "w": 1312,
+          "h": 400,
+          "text": "",
+          "style": {
+            "fill": "$surface"
+          },
+          "layout": {
+            "mode": "flex",
+            "direction": "column",
+            "gap": 32,
+            "padding": 48
+          },
+          "sizing": {
+            "w": "fill",
+            "h": "hug"
+          },
+          "children": [
+            {
+              "id": "launch50",
+              "name": "工作台标题",
+              "type": "text",
+              "x": 0,
+              "y": 0,
+              "w": 800,
+              "h": 54,
+              "text": "12 个原生组件，继续设计。",
+              "style": {
+                "color": "$ink",
+                "fontSize": 36,
+                "fontWeight": 650,
+                "lineHeight": 1.4
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "launch51",
+              "name": "工作台说明",
+              "type": "text",
+              "x": 0,
+              "y": 0,
+              "w": 800,
+              "h": 24,
+              "text": "按钮与输入框具有可编辑状态；实际加载会禁用按钮，错误输入会保留 aria-invalid。所有配方使用项目 Tokens。",
+              "style": {
+                "color": "$ink",
+                "fontSize": 16,
+                "fontWeight": 400,
+                "lineHeight": 1.4
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              }
+            },
+            {
+              "id": "launch49",
+              "name": "素材布局",
+              "type": "frame",
+              "x": 0,
+              "y": 0,
+              "w": 1312,
+              "h": 400,
+              "text": "",
+              "style": {},
+              "layout": {
+                "mode": "grid",
+                "direction": "column",
+                "gap": 24,
+                "padding": 0,
+                "columns": 3
+              },
+              "sizing": {
+                "w": "fill",
+                "h": "hug"
+              },
+              "children": [
+                {
+                  "id": "launch26",
+                  "name": "主操作按钮",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch25",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "主操作按钮",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance",
+                      "name": "主操作按钮",
+                      "type": "instance",
+                      "componentId": "starter-primary",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 208,
+                      "h": 48,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch28",
+                  "name": "描边按钮",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch27",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "描边按钮",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance2",
+                      "name": "描边按钮",
+                      "type": "instance",
+                      "componentId": "starter-outline",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 208,
+                      "h": 48,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch30",
+                  "name": "轻量按钮",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch29",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "轻量按钮",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance3",
+                      "name": "轻量按钮",
+                      "type": "instance",
+                      "componentId": "starter-quiet",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 208,
+                      "h": 48,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch32",
+                  "name": "确认按钮",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch31",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "确认按钮",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance4",
+                      "name": "确认按钮",
+                      "type": "instance",
+                      "componentId": "starter-confirm",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 208,
+                      "h": 48,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch34",
+                  "name": "搜索输入框",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch33",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "搜索输入框",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance5",
+                      "name": "搜索输入框",
+                      "type": "instance",
+                      "componentId": "starter-search",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 304,
+                      "h": 48,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch36",
+                  "name": "邮箱输入框",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch35",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "邮箱输入框",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance6",
+                      "name": "邮箱输入框",
+                      "type": "instance",
+                      "componentId": "starter-email",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 304,
+                      "h": 48,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch38",
+                  "name": "校验输入框",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch37",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "校验输入框",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance7",
+                      "name": "校验输入框",
+                      "type": "instance",
+                      "componentId": "starter-validation",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 304,
+                      "h": 48,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch40",
+                  "name": "提示卡片",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch39",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "提示卡片",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance8",
+                      "name": "提示卡片",
+                      "type": "instance",
+                      "componentId": "starter-notice",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 320,
+                      "h": 168,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch42",
+                  "name": "功能卡片",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch41",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "功能卡片",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance9",
+                      "name": "功能卡片",
+                      "type": "instance",
+                      "componentId": "starter-feature",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 320,
+                      "h": 168,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch44",
+                  "name": "空状态卡片",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch43",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "空状态卡片",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance10",
+                      "name": "空状态卡片",
+                      "type": "instance",
+                      "componentId": "starter-empty",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 320,
+                      "h": 168,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch46",
+                  "name": "步骤卡片",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch45",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "步骤卡片",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance11",
+                      "name": "步骤卡片",
+                      "type": "instance",
+                      "componentId": "starter-step",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 320,
+                      "h": 168,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "launch48",
+                  "name": "行动卡片",
+                  "type": "frame",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1312,
+                  "h": 400,
+                  "text": "",
+                  "style": {
+                    "fill": "$surfaceAlt",
+                    "radius": "$radius"
+                  },
+                  "layout": {
+                    "mode": "flex",
+                    "direction": "column",
+                    "gap": 16,
+                    "padding": 20
+                  },
+                  "sizing": {
+                    "w": "fill",
+                    "h": "hug"
+                  },
+                  "children": [
+                    {
+                      "id": "launch47",
+                      "name": "素材名称",
+                      "type": "text",
+                      "x": 0,
+                      "y": 0,
+                      "w": 800,
+                      "h": 24,
+                      "text": "行动卡片",
+                      "style": {
+                        "color": "$ink",
+                        "fontSize": 16,
+                        "fontWeight": 400,
+                        "lineHeight": 1.4
+                      },
+                      "sizing": {
+                        "w": "fill",
+                        "h": "hug"
+                      }
+                    },
+                    {
+                      "id": "starterInstance12",
+                      "name": "行动卡片",
+                      "type": "instance",
+                      "componentId": "starter-action",
+                      "variantId": "base",
+                      "x": 0,
+                      "y": 0,
+                      "w": 320,
+                      "h": 248,
+                      "text": "",
+                      "style": {},
+                      "sizing": {
+                        "w": "fill"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "responsive": [
+                {
+                  "maxWidth": 1000,
+                  "changes": {
+                    "layout": {
+                      "columns": 2
+                    }
+                  }
+                },
+                {
+                  "maxWidth": 600,
+                  "changes": {
+                    "layout": {
+                      "columns": 1
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "responsive": [
+            {
+              "maxWidth": 600,
+              "changes": {
+                "layout": {
+                  "padding": 24
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "comments": [],
+  "updatedAt": "2026-10-25T12:00:00.000Z",
+  "themes": {
+    "night": {
+      "primary": "#9DB8FF",
+      "primarySoft": "#233452",
+      "ink": "#ECF1FA",
+      "muted": "#B3BED1",
+      "border": "#3B4960",
+      "surface": "#172235",
+      "surfaceAlt": "#101927"
+    }
+  },
+  "designBrief": {
+    "version": 1,
+    "product": "DesignForge Studio",
+    "audience": "需要结构化编辑与 AI 协作的界面设计师",
+    "outcome": "把可复用的设计结构与精确修改流程保留在本地工程",
+    "primaryAction": "打开本地项目并开始设计",
+    "evidence": "本仓库的可编辑示例、单元测试与 GitHub Actions 浏览器验收记录；不添加未经核实的业务指标。",
+    "constraints": "保留当前 Token 字族和用户人工编辑。当前没有内置模型请求、在线素材市场或真实表单提交。",
+    "profile": "product",
+    "sections": [
+      "hero",
+      "benefits",
+      "product",
+      "process",
+      "action"
+    ]
+  },
+  "components": [
+    {
+      "id": "starter-primary",
+      "name": "主操作按钮",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-primary-root",
+            "name": "root",
+            "type": "button",
+            "x": 0,
+            "y": 0,
+            "w": 208,
+            "h": 48,
+            "text": "开始设计",
+            "style": {
+              "fill": "$primary",
+              "color": "$surface",
+              "radius": "$radius",
+              "fontSize": 16,
+              "fontWeight": 600,
+              "stroke": "$primary",
+              "strokeWidth": 1
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "opacity": 0.88
+                }
+              },
+              "active": {
+                "style": {
+                  "opacity": 0.72
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$ink"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.45
+                }
+              },
+              "loading": {
+                "style": {
+                  "opacity": 0.8
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "loading",
+          "name": "加载中",
+          "root": {
+            "id": "starter-primary-root",
+            "name": "root",
+            "type": "button",
+            "x": 0,
+            "y": 0,
+            "w": 208,
+            "h": 48,
+            "text": "开始设计",
+            "style": {
+              "fill": "$primary",
+              "color": "$surface",
+              "radius": "$radius",
+              "fontSize": 16,
+              "fontWeight": 600,
+              "stroke": "$primary",
+              "strokeWidth": 1
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "opacity": 0.88
+                }
+              },
+              "active": {
+                "style": {
+                  "opacity": 0.72
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$ink"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.45
+                }
+              },
+              "loading": {
+                "style": {
+                  "opacity": 0.8
+                }
+              }
+            },
+            "loading": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-outline",
+      "name": "描边按钮",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-outline-root",
+            "name": "root",
+            "type": "button",
+            "x": 0,
+            "y": 0,
+            "w": 208,
+            "h": 48,
+            "text": "查看详情",
+            "style": {
+              "fill": "$surface",
+              "color": "$primary",
+              "radius": "$radius",
+              "fontSize": 16,
+              "fontWeight": 600,
+              "stroke": "$primary",
+              "strokeWidth": 1
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "opacity": 0.88
+                }
+              },
+              "active": {
+                "style": {
+                  "opacity": 0.72
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$ink"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.45
+                }
+              },
+              "loading": {
+                "style": {
+                  "opacity": 0.8
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "loading",
+          "name": "加载中",
+          "root": {
+            "id": "starter-outline-root",
+            "name": "root",
+            "type": "button",
+            "x": 0,
+            "y": 0,
+            "w": 208,
+            "h": 48,
+            "text": "查看详情",
+            "style": {
+              "fill": "$surface",
+              "color": "$primary",
+              "radius": "$radius",
+              "fontSize": 16,
+              "fontWeight": 600,
+              "stroke": "$primary",
+              "strokeWidth": 1
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "opacity": 0.88
+                }
+              },
+              "active": {
+                "style": {
+                  "opacity": 0.72
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$ink"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.45
+                }
+              },
+              "loading": {
+                "style": {
+                  "opacity": 0.8
+                }
+              }
+            },
+            "loading": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-quiet",
+      "name": "轻量按钮",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-quiet-root",
+            "name": "root",
+            "type": "button",
+            "x": 0,
+            "y": 0,
+            "w": 208,
+            "h": 48,
+            "text": "了解更多",
+            "style": {
+              "fill": "$surfaceAlt",
+              "color": "$ink",
+              "radius": "$radius",
+              "fontSize": 16,
+              "fontWeight": 600,
+              "stroke": "$surfaceAlt",
+              "strokeWidth": 1
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "opacity": 0.88
+                }
+              },
+              "active": {
+                "style": {
+                  "opacity": 0.72
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$ink"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.45
+                }
+              },
+              "loading": {
+                "style": {
+                  "opacity": 0.8
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "loading",
+          "name": "加载中",
+          "root": {
+            "id": "starter-quiet-root",
+            "name": "root",
+            "type": "button",
+            "x": 0,
+            "y": 0,
+            "w": 208,
+            "h": 48,
+            "text": "了解更多",
+            "style": {
+              "fill": "$surfaceAlt",
+              "color": "$ink",
+              "radius": "$radius",
+              "fontSize": 16,
+              "fontWeight": 600,
+              "stroke": "$surfaceAlt",
+              "strokeWidth": 1
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "opacity": 0.88
+                }
+              },
+              "active": {
+                "style": {
+                  "opacity": 0.72
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$ink"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.45
+                }
+              },
+              "loading": {
+                "style": {
+                  "opacity": 0.8
+                }
+              }
+            },
+            "loading": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-confirm",
+      "name": "确认按钮",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-confirm-root",
+            "name": "root",
+            "type": "button",
+            "x": 0,
+            "y": 0,
+            "w": 208,
+            "h": 48,
+            "text": "确认保存",
+            "style": {
+              "fill": "$success",
+              "color": "$surface",
+              "radius": "$radius",
+              "fontSize": 16,
+              "fontWeight": 600,
+              "stroke": "$success",
+              "strokeWidth": 1
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "opacity": 0.88
+                }
+              },
+              "active": {
+                "style": {
+                  "opacity": 0.72
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$ink"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.45
+                }
+              },
+              "loading": {
+                "style": {
+                  "opacity": 0.8
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "loading",
+          "name": "加载中",
+          "root": {
+            "id": "starter-confirm-root",
+            "name": "root",
+            "type": "button",
+            "x": 0,
+            "y": 0,
+            "w": 208,
+            "h": 48,
+            "text": "确认保存",
+            "style": {
+              "fill": "$success",
+              "color": "$surface",
+              "radius": "$radius",
+              "fontSize": 16,
+              "fontWeight": 600,
+              "stroke": "$success",
+              "strokeWidth": 1
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "opacity": 0.88
+                }
+              },
+              "active": {
+                "style": {
+                  "opacity": 0.72
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$ink"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.45
+                }
+              },
+              "loading": {
+                "style": {
+                  "opacity": 0.8
+                }
+              }
+            },
+            "loading": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-search",
+      "name": "搜索输入框",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-search-root",
+            "name": "root",
+            "type": "input",
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 48,
+            "text": "搜索组件…",
+            "style": {
+              "fill": "$surface",
+              "color": "$ink",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius",
+              "fontSize": 16
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "stroke": "$muted"
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$primary"
+                }
+              },
+              "error": {
+                "style": {
+                  "stroke": "$danger"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "error",
+          "name": "错误",
+          "root": {
+            "id": "starter-search-root",
+            "name": "root",
+            "type": "input",
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 48,
+            "text": "搜索组件…",
+            "style": {
+              "fill": "$surface",
+              "color": "$ink",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius",
+              "fontSize": 16
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "stroke": "$muted"
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$primary"
+                }
+              },
+              "error": {
+                "style": {
+                  "stroke": "$danger"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.5
+                }
+              }
+            },
+            "invalid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-email",
+      "name": "邮箱输入框",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-email-root",
+            "name": "root",
+            "type": "input",
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 48,
+            "text": "输入邮箱地址",
+            "style": {
+              "fill": "$surface",
+              "color": "$ink",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius",
+              "fontSize": 16
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "stroke": "$muted"
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$primary"
+                }
+              },
+              "error": {
+                "style": {
+                  "stroke": "$danger"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.5
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "error",
+          "name": "错误",
+          "root": {
+            "id": "starter-email-root",
+            "name": "root",
+            "type": "input",
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 48,
+            "text": "输入邮箱地址",
+            "style": {
+              "fill": "$surface",
+              "color": "$ink",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius",
+              "fontSize": 16
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "stroke": "$muted"
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$primary"
+                }
+              },
+              "error": {
+                "style": {
+                  "stroke": "$danger"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.5
+                }
+              }
+            },
+            "invalid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-validation",
+      "name": "校验输入框",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-validation-root",
+            "name": "root",
+            "type": "input",
+            "x": 0,
+            "y": 0,
+            "w": 304,
+            "h": 48,
+            "text": "检查输入内容",
+            "style": {
+              "fill": "$surface",
+              "color": "$ink",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius",
+              "fontSize": 16
+            },
+            "states": {
+              "hover": {
+                "style": {
+                  "stroke": "$muted"
+                }
+              },
+              "focus": {
+                "style": {
+                  "stroke": "$primary"
+                }
+              },
+              "error": {
+                "style": {
+                  "stroke": "$danger"
+                }
+              },
+              "disabled": {
+                "style": {
+                  "opacity": 0.5
+                }
+              }
+            },
+            "invalid": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-notice",
+      "name": "提示卡片",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-notice-root",
+            "name": "root",
+            "type": "frame",
+            "x": 0,
+            "y": 0,
+            "w": 320,
+            "h": 168,
+            "text": "",
+            "style": {
+              "fill": "$surface",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius"
+            },
+            "layout": {
+              "mode": "flex",
+              "direction": "column",
+              "gap": 12,
+              "padding": 24,
+              "align": "stretch"
+            },
+            "children": [
+              {
+                "id": "starter-notice-title",
+                "name": "title",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 28,
+                "text": "提示",
+                "style": {
+                  "color": "$ink",
+                  "fontSize": 20,
+                  "fontWeight": 600
+                },
+                "sizing": {
+                  "w": "fill"
+                }
+              },
+              {
+                "id": "starter-notice-body",
+                "name": "body",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 56,
+                "text": "内容已保存在当前设备。",
+                "style": {
+                  "color": "$muted",
+                  "fontSize": 16,
+                  "lineHeight": 1.5
+                },
+                "sizing": {
+                  "w": "fill",
+                  "h": "hug"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-feature",
+      "name": "功能卡片",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-feature-root",
+            "name": "root",
+            "type": "frame",
+            "x": 0,
+            "y": 0,
+            "w": 320,
+            "h": 168,
+            "text": "",
+            "style": {
+              "fill": "$surface",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius"
+            },
+            "layout": {
+              "mode": "flex",
+              "direction": "column",
+              "gap": 12,
+              "padding": 24,
+              "align": "stretch"
+            },
+            "children": [
+              {
+                "id": "starter-feature-title",
+                "name": "title",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 28,
+                "text": "结构化编辑",
+                "style": {
+                  "color": "$ink",
+                  "fontSize": 20,
+                  "fontWeight": 600
+                },
+                "sizing": {
+                  "w": "fill"
+                }
+              },
+              {
+                "id": "starter-feature-body",
+                "name": "body",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 56,
+                "text": "每个元素都可选择、修改与复用。",
+                "style": {
+                  "color": "$muted",
+                  "fontSize": 16,
+                  "lineHeight": 1.5
+                },
+                "sizing": {
+                  "w": "fill",
+                  "h": "hug"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-empty",
+      "name": "空状态卡片",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-empty-root",
+            "name": "root",
+            "type": "frame",
+            "x": 0,
+            "y": 0,
+            "w": 320,
+            "h": 168,
+            "text": "",
+            "style": {
+              "fill": "$surface",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius"
+            },
+            "layout": {
+              "mode": "flex",
+              "direction": "column",
+              "gap": 12,
+              "padding": 24,
+              "align": "stretch"
+            },
+            "children": [
+              {
+                "id": "starter-empty-title",
+                "name": "title",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 28,
+                "text": "还没有内容",
+                "style": {
+                  "color": "$ink",
+                  "fontSize": 20,
+                  "fontWeight": 600
+                },
+                "sizing": {
+                  "w": "fill"
+                }
+              },
+              {
+                "id": "starter-empty-body",
+                "name": "body",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 56,
+                "text": "添加第一个元素，开始整理你的想法。",
+                "style": {
+                  "color": "$muted",
+                  "fontSize": 16,
+                  "lineHeight": 1.5
+                },
+                "sizing": {
+                  "w": "fill",
+                  "h": "hug"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-step",
+      "name": "步骤卡片",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-step-root",
+            "name": "root",
+            "type": "frame",
+            "x": 0,
+            "y": 0,
+            "w": 320,
+            "h": 168,
+            "text": "",
+            "style": {
+              "fill": "$surface",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius"
+            },
+            "layout": {
+              "mode": "flex",
+              "direction": "column",
+              "gap": 12,
+              "padding": 24,
+              "align": "stretch"
+            },
+            "children": [
+              {
+                "id": "starter-step-title",
+                "name": "title",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 28,
+                "text": "01 · 明确目标",
+                "style": {
+                  "color": "$ink",
+                  "fontSize": 20,
+                  "fontWeight": 600
+                },
+                "sizing": {
+                  "w": "fill"
+                }
+              },
+              {
+                "id": "starter-step-body",
+                "name": "body",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 56,
+                "text": "写下服务对象和要完成的主要任务。",
+                "style": {
+                  "color": "$muted",
+                  "fontSize": 16,
+                  "lineHeight": 1.5
+                },
+                "sizing": {
+                  "w": "fill",
+                  "h": "hug"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "starter-action",
+      "name": "行动卡片",
+      "variants": [
+        {
+          "id": "base",
+          "name": "默认",
+          "root": {
+            "id": "starter-action-root",
+            "name": "root",
+            "type": "frame",
+            "x": 0,
+            "y": 0,
+            "w": 320,
+            "h": 248,
+            "text": "",
+            "style": {
+              "fill": "$surface",
+              "stroke": "$border",
+              "strokeWidth": 1,
+              "radius": "$radius"
+            },
+            "layout": {
+              "mode": "flex",
+              "direction": "column",
+              "gap": 12,
+              "padding": 24,
+              "align": "stretch"
+            },
+            "children": [
+              {
+                "id": "starter-action-title",
+                "name": "title",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 28,
+                "text": "把想法变成设计",
+                "style": {
+                  "color": "$ink",
+                  "fontSize": 20,
+                  "fontWeight": 600
+                },
+                "sizing": {
+                  "w": "fill"
+                }
+              },
+              {
+                "id": "starter-action-body",
+                "name": "body",
+                "type": "text",
+                "x": 0,
+                "y": 0,
+                "w": 272,
+                "h": 56,
+                "text": "保留你的内容，让结构与风格一起成长。",
+                "style": {
+                  "color": "$muted",
+                  "fontSize": 16,
+                  "lineHeight": 1.5
+                },
+                "sizing": {
+                  "w": "fill",
+                  "h": "hug"
+                }
+              },
+              {
+                "id": "starter-action-cta",
+                "name": "cta",
+                "type": "button",
+                "x": 0,
+                "y": 0,
+                "w": 208,
+                "h": 48,
+                "text": "开始创作",
+                "style": {
+                  "fill": "$primary",
+                  "color": "$surface",
+                  "radius": "$radius",
+                  "fontSize": 16,
+                  "fontWeight": 600,
+                  "stroke": "$primary",
+                  "strokeWidth": 1
+                },
+                "states": {
+                  "hover": {
+                    "style": {
+                      "opacity": 0.88
+                    }
+                  },
+                  "active": {
+                    "style": {
+                      "opacity": 0.72
+                    }
+                  },
+                  "focus": {
+                    "style": {
+                      "stroke": "$ink"
+                    }
+                  },
+                  "disabled": {
+                    "style": {
+                      "opacity": 0.45
+                    }
+                  },
+                  "loading": {
+                    "style": {
+                      "opacity": 0.8
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
