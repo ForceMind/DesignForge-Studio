@@ -5,6 +5,7 @@ import {
   localContrastEvidence,
   nestedRadiusEvidence,
   qualityContext,
+  qualitySampleKey,
   qualityReportIsCurrent,
 } from "../src/quality-core.mjs";
 const project = {
@@ -90,7 +91,7 @@ test("quality report records a stable version and provenance, rejects stale view
   };
   const measurements = new Map([
     [
-      "board",
+      qualitySampleKey(context.boards[0]),
       {
         width: 768,
         findings: [
@@ -161,7 +162,7 @@ test("same instance source IDs on different owners remain distinct; incomplete D
   };
   const measurements = new Map([
     [
-      "board",
+      qualitySampleKey(context.boards[0]),
       {
         width: 800,
         findings: [
@@ -201,7 +202,7 @@ test("a collision involving the selection points to the selected node even if th
   };
   const measurements = new Map([
     [
-      "board",
+      qualitySampleKey(context.boards[0]),
       {
         width: 800,
         findings: [
@@ -219,4 +220,65 @@ test("a collision involving the selection points to the selected node even if th
   assert.deepEqual(rest, []);
   assert.equal(finding.nodeId, "other");
   assert.equal(finding.relatedNodeId, "child");
+});
+
+test("a matrix keeps findings distinct by width and never claims measurements for absent samples", () => {
+  const options = {
+    scope: "board",
+    boardId: "board",
+    widthMode: "matrix",
+    widthFor: () => 420,
+    stateFor: () => ({ nodeId: "child", state: "focus" }),
+  };
+  const context = qualityContext(project, options);
+  assert.deepEqual(
+    context.boards.map((b) => [b.width, b.forcedState]),
+    [
+      [390, null],
+      [768, null],
+      [1440, null],
+    ],
+  );
+  assert.throws(
+    () => qualityContext(project, { ...options, scope: "project" }),
+    /requires a board/,
+  );
+  const item = {
+    boardId: "board",
+    nodeId: "child",
+    code: "TEXT_CLIP",
+    evidence: { scope: "clip-chain" },
+  };
+  const measurements = new Map(
+    context.boards
+      .slice(0, 2)
+      .map((b) => [
+        qualitySampleKey(b),
+        { width: b.width, findings: [item, item] },
+      ]),
+  );
+  const report = buildQualityReport(project, context, measurements);
+  assert.deepEqual(
+    report.coverage.map((b) => [b.width, b.status]),
+    [
+      [390, "measured"],
+      [768, "measured"],
+      [1440, "unavailable"],
+    ],
+  );
+  assert.deepEqual(
+    report.findings.map((f) => f.width),
+    [390, 768],
+  );
+  assert.ok(
+    qualityReportIsCurrent(
+      report,
+      project,
+      qualityContext(project, {
+        ...options,
+        widthFor: () => 700,
+        stateFor: () => null,
+      }),
+    ),
+  );
 });

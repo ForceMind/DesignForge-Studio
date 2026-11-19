@@ -2,6 +2,7 @@ import {
   buildQualityReport,
   qualityContext,
   qualityReportIsCurrent,
+  qualitySampleKey,
 } from "./quality-core.mjs";
 import { qualityPanelMarkup } from "./quality-panel.mjs";
 import {
@@ -156,6 +157,7 @@ let richRange = null,
   expansionAudit = null;
 const defaultQualityView = () => ({
   scope: "board",
+  widthMode: "preview",
   expansion: false,
   group: "all",
   severity: "all",
@@ -854,23 +856,75 @@ async function runQuality() {
     JSON.stringify(context) !== JSON.stringify(currentQualityContext())
   )
     return toast("检查范围已变化，请重新运行");
-  const measurements = new Map();
-  for (const b of context.boards) {
-    const main = $("world").querySelector(
-      `[data-artboard="${b.boardId}"] .df-board`,
-    );
-    if (!main) continue;
+  const valid = () =>
+    request === qualityRequest &&
+    !gesture &&
+    project === snapshot &&
+    JSON.stringify(context) === JSON.stringify(currentQualityContext());
+  const read = (main, scale) => {
     const width =
-      Math.round((main.getBoundingClientRect().width / zoom) * 100) / 100;
-    if (!(width > 0)) continue;
-    measurements.set(b.boardId, {
-      width,
-      findings: auditRenderedBoard(main, { scale: zoom, quality: true }),
-      ...(qualityView.expansion
-        ? { expanded: auditTextExpansion(main, { scale: zoom, factor: 1.3 }) }
-        : {}),
+      Math.round((main.getBoundingClientRect().width / scale) * 100) / 100;
+    return width > 0
+      ? {
+          width,
+          findings: auditRenderedBoard(main, { scale, quality: true }),
+          ...(context.scenario === "normal-and-text-expansion"
+            ? {
+                expanded: auditTextExpansion(main, {
+                  scale,
+                  factor: 1.3,
+                  quality: true,
+                }),
+              }
+            : {}),
+        }
+      : null;
+  };
+  const measurements = new Map();
+  for (const sample of context.boards) {
+    const key = qualitySampleKey(sample);
+    if (context.widthMode === "preview") {
+      const main = $("world").querySelector(
+        `[data-artboard="${sample.boardId}"] .df-board`,
+      );
+      if (main) {
+        const result = read(main, zoom);
+        if (result) measurements.set(key, result);
+      }
+      continue;
+    }
+    // Isolate generated styles and responsive selectors from all editing artboards.
+    const board = snapshot.boards.find((b) => b.id === sample.boardId);
+    const host = document.createElement("div");
+    host.dataset.qualityStage = "";
+    host.inert = true;
+    host.setAttribute("aria-hidden", "true");
+    Object.assign(host.style, {
+      position: "fixed",
+      top: "0",
+      left: "-10000px",
+      width: sample.width + "px",
+      pointerEvents: "none",
     });
+    const root = host.attachShadow({ mode: "open" });
+    root.innerHTML = `<style>${exportStyles}</style>${renderBoard(
+      { ...board, w: sample.width, $referenceSize: { w: board.w, h: board.h } },
+      effectiveTokens(snapshot),
+      snapshot,
+    )}`;
+    document.body.appendChild(host);
+    try {
+      const main = root.querySelector(".df-board");
+      main.getBoundingClientRect();
+      await document.fonts.ready;
+      if (!valid()) return;
+      const result = read(main, 1);
+      if (result) measurements.set(key, result);
+    } finally {
+      host.remove();
+    }
   }
+  if (!valid()) return;
   qualityReport = buildQualityReport(snapshot, context, measurements);
   qualityView.visible = 30;
   if (rightTab === "audit") {
@@ -3224,6 +3278,7 @@ function bindStatic() {
     if (
       [
         "quality-scope",
+        "quality-widthMode",
         "quality-expansion",
         "quality-group",
         "quality-severity",
@@ -3233,6 +3288,7 @@ function bindStatic() {
         field = id.slice("quality-".length);
       qualityView[field] =
         field === "expansion" ? e.target.checked : e.target.value;
+      if (qualityView.scope === "project") qualityView.widthMode = "preview";
       qualityView.visible = 30;
       renderRight();
       $(id)?.focus({ preventScroll: true });
@@ -3601,6 +3657,15 @@ function bindStatic() {
     if (issue) {
       if (issue.dataset.qualityRule && !qualityCurrent()) return;
       if (
+        issue.dataset.qualityRule &&
+        qualityReport.context.widthMode === "matrix"
+      ) {
+        previewWidths.set(
+          issue.dataset.auditboard,
+          Number(issue.dataset.qualityWidth),
+        );
+        focusBoard(issue.dataset.auditboard);
+      } else if (
         issue.dataset.qualityRule &&
         activeBoardId !== issue.dataset.auditboard
       )

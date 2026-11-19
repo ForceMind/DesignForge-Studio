@@ -556,7 +556,13 @@ export function expandTextByGraphemes(text, factor = 1.3) {
  */
 export function auditTextExpansion(
   mainElement,
-  { scale = 1, factor = 1.3, maxNodes = 2000, maxFindings = 200 } = {},
+  {
+    scale = 1,
+    factor = 1.3,
+    maxNodes = 2000,
+    maxFindings = 200,
+    quality = false,
+  } = {},
 ) {
   expansionFactor(factor);
   if (
@@ -699,9 +705,10 @@ export function auditTextExpansion(
         );
     }
     stage.appendChild(clone);
-    doc.body.appendChild(stage);
+    const root = mainElement.getRootNode();
+    (root.nodeType === 11 ? root : doc.body).appendChild(stage);
     return scenario(
-      auditRenderedBoard(clone, { scale: 1, maxNodes, maxFindings }),
+      auditRenderedBoard(clone, { scale: 1, maxNodes, maxFindings, quality }),
     );
   } finally {
     stage.remove();

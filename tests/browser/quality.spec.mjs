@@ -288,3 +288,44 @@ test("selection, actual breakpoint width, forced state, text stress and project 
     "true",
   );
 });
+
+test("isolated size comparison triggers the actual breakpoint and leaves the editable canvas untouched", async ({
+  page,
+}, info) => {
+  await open(page);
+  const before = await stored(page);
+  await page.locator('[data-node="responsive"]').click();
+  const live = page.locator(
+    '[data-artboard="first"] [data-node-id="responsive"]',
+  );
+  await expect(live).toHaveCSS("width", "80px");
+  await page.locator("#quality-scope").selectOption("selection");
+  await page.locator("#quality-widthMode").selectOption("matrix");
+  await run(page);
+  const report = await download(page);
+  expect(report.context.widthMode).toBe("matrix");
+  expect(
+    report.coverage.map((c) => [c.width, c.measuredWidth, c.status]),
+  ).toEqual([
+    [390, 390, "measured"],
+    [768, 768, "measured"],
+    [1440, 1440, "measured"],
+  ]);
+  expect(
+    report.findings
+      .filter((f) => f.ruleId === "QI01")
+      .map((f) => [f.width, f.evidence.rect.w]),
+  ).toEqual([[390, 36]]);
+  await expect(live).toHaveCSS("width", "80px");
+  await expect(page.locator("[data-quality-stage]")).toHaveCount(0);
+  await expect(page.locator("#preview-width")).toHaveValue("");
+  expect(await stored(page)).toBe(before);
+  await page.screenshot({ path: info.outputPath("quality-size-matrix.png") });
+  await page
+    .locator('[data-quality-rule="QI01"][data-quality-width="390"]')
+    .click();
+  await expect(page.locator("#preview-width")).toHaveValue("390");
+  await expect(live).toHaveCSS("width", "36px");
+  await expect(page.locator('[data-prop="name"]')).toHaveValue("responsive");
+  expect(await stored(page)).toBe(before);
+});

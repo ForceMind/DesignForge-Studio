@@ -3,6 +3,9 @@ import { flattenNodes } from "./tree.mjs";
 
 export const QUALITY_FORMAT = "designforge.quality-report";
 export const QUALITY_LIMIT = 240;
+export const QUALITY_SAMPLE_WIDTHS = Object.freeze([390, 768, 1440]);
+export const qualitySampleKey = (view) =>
+  JSON.stringify([view.boardId, view.width]);
 export const QUALITY_SCOPES = Object.freeze(["selection", "board", "project"]);
 
 // Two dimensions: what was observed, and how strongly it should be interpreted.
@@ -77,7 +80,7 @@ const CODE_TO_RULE = {
   LOCAL_CONTRAST: "QC02",
 };
 export const QUALITY_LIMITATIONS = Object.freeze([
-  "仅检查当前画板宽度与项目主题；未覆盖其他断点、真机和完整键盘流程。",
+  "仅检查列出的画板宽度与当前项目主题；未覆盖全部断点、真机和完整键盘流程。",
   "控件预览覆盖仅记录强制状态；默认以外的原生交互状态没有逐项测试。",
   "不判断遮挡、透明叠色、真实字形回退、语义层级和完整 WCAG；建议不代表设计错误。",
 ]);
@@ -191,9 +194,15 @@ export function qualityContext(
     stateFor = () => null,
     locale = null,
     expansion = false,
+    widthMode = "preview",
   },
 ) {
   if (!QUALITY_SCOPES.includes(scope)) throw Error("Unknown quality scope");
+  if (
+    !["preview", "matrix"].includes(widthMode) ||
+    (widthMode === "matrix" && scope === "project")
+  )
+    throw Error("Size comparison requires a board or a selection");
   const boards =
     scope === "project"
       ? project.boards
@@ -207,15 +216,20 @@ export function qualityContext(
   }
   return {
     scope,
+    widthMode,
     nodeIds: roots,
     theme: project.activeTheme || null,
     locale,
     scenario: expansion ? "normal-and-text-expansion" : "normal",
-    boards: boards.map((b) => ({
-      boardId: b.id,
-      width: widthFor(b),
-      forcedState: stateFor(b),
-    })),
+    boards: boards.flatMap((b) =>
+      (widthMode === "matrix" ? QUALITY_SAMPLE_WIDTHS : [widthFor(b)]).map(
+        (width) => ({
+          boardId: b.id,
+          width,
+          forcedState: widthMode === "matrix" ? null : stateFor(b),
+        }),
+      ),
+    ),
   };
 }
 export function qualityReportIsCurrent(report, project, context) {
@@ -257,7 +271,7 @@ export function buildQualityReport(
     const board = project.boards.find((b) => b.id === view.boardId);
     if (!board) throw Error("Unknown quality report board");
     const ids = targets(board, context.nodeIds),
-      measured = measurements.get(board.id);
+      measured = measurements.get(qualitySampleKey(view));
     const incomplete =
       measured?.findings.some((f) => f.code === "AUDIT_LIMIT") ?? false;
     const scenarioIncomplete =
@@ -266,6 +280,7 @@ export function buildQualityReport(
         measured.expanded.some((f) => f.code === "AUDIT_LIMIT"));
     coverage.push({
       boardId: board.id,
+      width: view.width,
       status: !measured
         ? "unavailable"
         : incomplete || scenarioIncomplete
@@ -306,6 +321,7 @@ export function buildQualityReport(
         : null;
       const key = JSON.stringify([
         board.id,
+        view.width,
         ruleId,
         scenario,
         pair ?? [f.nodeId, f.sourceId || null],
@@ -322,6 +338,7 @@ export function buildQualityReport(
         severity: rule.severity,
         basis: rule.basis,
         boardId: board.id,
+        width: view.width,
         nodeId: f.nodeId,
         sourceId: f.sourceId || null,
         relatedNodeId: f.relatedNodeId || null,
